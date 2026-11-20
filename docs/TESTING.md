@@ -19,15 +19,15 @@ Hay tres niveles de validación, y cumplir uno no implica los siguientes: **comp
 | Sin referencias a otros dispositivos | PASS | ídem |
 | Cabeceras de licencia | PASS | ídem |
 | Flags `AERA_*` existentes en el upstream | PASS (63/63) | contrastadas con `bootable/recovery`, `vendor/twrp` y `vendor/recovery` en `aera-16.0` |
-| Blobs presentes | BLOCKED (0/26) | falta extraerlos |
-| Kernel prebuilt presente | BLOCKED | falta el `boot.img` stock |
+| Blobs presentes | PASS (33/33) | `tools/blobs.sha256`, sacados del vendor de EvolutionX (hash del payload verificado) |
+| Kernel prebuilt presente | PASS | `prebuilt/kernel.info` (4.19.325 Cherry, SHA-256 `34ebc3ee…`) |
 | Parseo de Make/Soong por el propio build (`lunch`) | NOT TESTED | requiere el sync completo y el kernel |
 
 ## Pruebas de compilación
 
 | Prueba | Resultado | Evidencia |
 |---|---|---|
-| Build limpio `mka bootimage` | BLOCKED | kernel y blobs |
+| Build limpio `mka bootimage` | NOT TESTED | espera al fin de `repo sync` |
 | Build incremental | NOT TESTED | |
 | Cabecera v3 / kernel idéntico / tamaño ≤ partición | NOT TESTED | |
 | Contenido del ramdisk sin restos de builds anteriores | NOT TESTED | |
@@ -60,10 +60,11 @@ Procedimiento: siempre con `fastboot boot` (arranque temporal, ver `RECOVERY_PLA
 | PC Connection (USB) | NOT TESTED | NOT TESTED | |
 | Wi-Fi | NOT TESTED (no implementado) | | |
 | Vibración | NOT TESTED (desactivada) | | |
-| Volver a Android con normalidad | NOT TESTED | NOT TESTED | arranque completo de MIUI/HyperOS |
+| Volver a Android con normalidad | NOT TESTED | NOT TESTED | arranque completo del firmware instalado (EvolutionX) |
 | Variante detectada por SKU | NOT TESTED | NOT TESTED | `getprop ro.product.device` |
 
 ## Registro de ejecuciones
 
 - 2026-11-20: `validate-tree.sh` → 0 fallos y 3 avisos (blobs, kernel y sin `boot.img`).
 - 2026-11-20: `repo sync` iniciado dentro del contenedor `aera-spes` (imagen ext4).
+- 2026-11-20: firmware instalado identificado (EvolutionX 16.0 11.10). Kernel y 33 blobs extraídos; `validate-tree.sh` da 0 fallos y 1 aviso (aún no hay `boot.img`).

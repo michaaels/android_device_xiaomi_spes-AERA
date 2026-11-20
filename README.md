@@ -3,7 +3,7 @@
 Device tree de [AERA Recovery](https://github.com/AERA-Recovery) (`aera-16.0`) para el Redmi Note 11 (SM6225 / Snapdragon 680).
 
 > **Estado: EXPERIMENTAL. Todavía no compila, no arranca y no está validado en hardware.**
-> Bloqueos actuales: falta el kernel del `boot.img` stock y falta extraer los blobs (ver [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)).
+> Kernel y blobs ya incluidos, de **EvolutionX 16.0 11.10**, el firmware de referencia instalado. La imagen solo debe usarse con ese firmware (ver [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)).
 
 | | |
 |---|---|
@@ -11,6 +11,7 @@ Device tree de [AERA Recovery](https://github.com/AERA-Recovery) (`aera-16.0`) p
 | Pantalla | AMOLED 1080×2400, 90 Hz |
 | Arranque | A/B con Virtual A/B, boot header v3 + `vendor_boot`; **recovery dentro de `boot`** (sin partición recovery) |
 | Cifrado | FBE v2 + metadata, wrapped keys; Keymaster 4.1 / Gatekeeper 1.0 QTI |
+| Kernel | 4.19.325-cip132-st16-Cherry (prebuilt de EvolutionX) |
 | Variantes | una sola imagen; spes o spesn se detecta por `ro.boot.product.hardware.sku` |
 
 ## Compilación (resumen)

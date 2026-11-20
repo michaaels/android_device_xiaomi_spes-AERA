@@ -1,0 +1,74 @@
+# EvolutionX-16.0-20260807-spes-11.10-Official (installed firmware)
+## Package
+ota-type=AB
+post-build=google/mustang_beta/mustang:CANARY/ZP11.260618.005/15760424:user/release-keys
+post-build-incremental=2355
+post-sdk-level=36
+post-security-patch-level=2026-08-01
+pre-device=spes,spesn
+
+## SHA-256
+278a6333982138f2e1a0a60e4cf31767c9be4f8dd3cf82405474f4a2dd046455  boot.img
+48569e3245d94263c666ac960a569ea8877deff2f6aa1b51c07fb7c51f7a2982  vendor_boot.img
+
+## boot.img (unpack_bootimg.py)
+boot magic: ANDROID!
+kernel_size: 18121368
+ramdisk size: 18238302
+os version: 16.0.0
+os patch level: 2026-08
+boot image header version: 3
+command line args: 
+
+## vendor_boot.img
+boot magic: VNDRBOOT
+vendor boot image header version: 3
+page size: 0x00001000
+kernel load address: 0x00008000
+ramdisk load address: 0x01000000
+vendor ramdisk size: 2697
+vendor command line args: androidboot.console=ttyMSM0 androidboot.hardware=qcom androidboot.memcg=1 androidboot.usbcontroller=4e00000.dwc3 console=ttyMSM0,115200n8 earlycon=msm_geni_serial,0x4a90000 loop.max_part=7 lpm_levels.sleep_disabled=1 msm_rtb.filter=0x237 service_locator.enable=1 swiotlb=2048 kpti=off kasan=off
+kernel tags load address: 0x00000100
+product name: 
+vendor boot image header size: 2112
+dtb size: 3858030
+dtb address: 0x0000000001f00000
+
+## kernel
+kernel_sha256=34ebc3ee7351f89a4a933ac8ef3634df2741063ef19601040d624ca32c6919b0
+kernel_format=gzip compressed data, max compression, from Unix, original size modulo 2^32 37796352
+kernel_version=Linux version 4.19.325-cip132-st16-Cherry-gcfe9fb687feb (build-user@build-host)
+header: kernel_size: 18121368
+boot ramdisk: LZ4 compressed data (v0.1-v0.9)
+
+## payload partitions (name, size) and super group
+boot 134217728 / dtbo 25165824 / vendor_boot 100663296 / vbmeta 8192 / vbmeta_system 4096
+system 1229864960 / system_ext 1851719680 / product 3280211968 / vendor 1022705664
+group qti_dynamic_partitions 9122611200: system system_ext product vendor; VABC enabled (gz)
+vendor.img sha256 matches payload manifest: True
+
+## vendor
+ro.vendor.build.version.release=16
+ro.vendor.build.security_patch=2026-05-01
+modules.load: (empty)
+security HALs: android.hardware.keymaster@4.1-service-qti, android.hardware.gatekeeper@1.0-service-qti, qseecomd, boot@1.2-service, health-service.qti (AIDL)
+
+## first-stage fstab.qcom (vendor_boot ramdisk)
+system                                                  /system                ext4    ro,barrier=1,discard                                 wait,slotselect,avb=vbmeta_system,logical,first_stage_mount,avb_keys=/avb/q-gsi.avbpubkey:/avb/r-gsi.avbpubkey:/avb/s-gsi.avbpubkey
+system_ext                                              /system_ext            ext4    ro,barrier=1,discard                                 wait,slotselect,avb=vbmeta_system,logical,first_stage_mount
+vendor                                                  /vendor                ext4    ro,barrier=1,discard                                 wait,slotselect,avb,logical,first_stage_mount
+product                                                 /product               ext4    ro,barrier=1,discard                                 wait,slotselect,avb=vbmeta_system,logical,first_stage_mount
+/dev/block/by-name/metadata                             /metadata              ext4    noatime,nosuid,nodev,discard                         wait,check,formattable,first_stage_mount
+/dev/block/bootdevice/by-name/userdata                  /data                  f2fs    noatime,nosuid,nodev,discard,reserve_root=32768,resgid=1065,fsync_mode=nobarrier,inlinecrypt  latemount,wait,check,formattable,quota,reservedsize=128M,fileencryption=aes-256-xts:aes-256-cts:v2+inlinecrypt_optimized+wrappedkey_v0,metadata_encryption=aes-256-xts:wrappedkey_v0,keydirectory=/metadata/vold/metadata_encryption,checkpoint=fs
+/dev/block/bootdevice/by-name/persist                   /mnt/vendor/persist    ext4    noatime,nosuid,nodev,barrier=1                       wait,check
+/dev/block/bootdevice/by-name/misc                      /misc                  emmc    defaults                                             defaults
+/devices/platform/soc/4784000.sdhci/mmc_host*           /storage/sdcard1       vfat    nosuid,nodev                                         wait,voldmanaged=sdcard1:auto,encryptable=footer
+/devices/platform/soc/1da4000.ufshc_card/host*          /storage/sdcard1       vfat    nosuid,nodev                                         wait,voldmanaged=sdcard1:auto,encryptable=footer
+/devices/platform/soc/*.ssusb/*.dwc3/xhci-hcd.*.auto*   /storage/usbotg        vfat    nosuid,nodev    wait,voldmanaged=usbotg:auto
+/dev/block/bootdevice/by-name/modem                     /vendor/firmware_mnt   vfat    ro,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337,context=u:object_r:firmware_file:s0 wait,slotselect
+/dev/block/mmcblk0p1                                    /sdcard                vfat    nosuid,nodev                                         wait,recoveryonly
+/dev/block/bootdevice/by-name/dsp                       /vendor/dsp            ext4    ro,nosuid,nodev,barrier=1                            wait,slotselect
+/dev/block/bootdevice/by-name/bluetooth                 /vendor/bt_firmware    vfat    ro,shortname=lower,uid=1002,gid=3002,dmask=227,fmask=337,context=u:object_r:bt_firmware_file:s0 wait,slotselect
+/dev/block/bootdevice/by-name/boot                      /boot                    emmc    defaults                                             defaults
+/dev/block/bootdevice/by-name/recovery                  /recovery                emmc    defaults                                             defaults
+/dev/block/mmcblk1p1                                    /sdcard                  vfat    nosuid,nodev                                         wait,recoveryonly

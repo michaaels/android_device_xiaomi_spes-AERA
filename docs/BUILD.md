@@ -39,7 +39,7 @@ repo sync -c --force-sync --no-clone-bundle --no-tags --optimized-fetch -j16
    ```bash
    device/xiaomi/spes/tools/extract-stock-kernel.sh /ruta/boot.img /src
    ```
-   El `boot.img` tiene que ser el del firmware instalado en el teléfono. El script comprueba que la cabecera sea v3 y guarda el SHA-256 en `prebuilt/kernel.info`.
+   El `boot.img` tiene que ser el del firmware instalado en el teléfono. En el dispositivo de pruebas es `boot.img` de EvolutionX 16.0 11.10 (SHA-256 `278a6333…`). El script comprueba que la cabecera sea v3 y guarda el SHA-256 en `prebuilt/kernel.info`.
 2. **Blobs de cifrado y boot control**:
    ```bash
    device/xiaomi/spes/tools/extract-files.sh --adb            # desde el teléfono, con adb pull de /vendor (solo lectura)
@@ -81,4 +81,5 @@ Hay que comprobar:
 |---|---|
 | Manifest y acceso a las fuentes | Verificado (todo público) |
 | `repo sync` | En curso (ver `docs/TESTING.md`) |
-| `lunch` / `bootimage` | **No ejecutado**: bloqueado por la falta del kernel stock y de los blobs |
+| Kernel y blobs | Listos (EvolutionX 11.10) |
+| `lunch` / `bootimage` | **No ejecutado**: espera al fin de `repo sync` |
