@@ -18,7 +18,6 @@
 ## Pendientes
 
 1. Escenarios de descifrado sin probar: sin bloqueo, patrón, credencial incorrecta y cancelar. Tampoco MTP con transferencia, sideload, backup/restore desde AERA ni la variante spesn (ver `TESTING.md`).
-2. Confirmar que Android sigue desbloqueándose con normalidad después de descifrar en AERA.
 3. **Límite de ramdisk**: queda ~1,9 MB de margen hasta lo comprobado (41,5 MB). Añadir funciones (Wi-Fi, vibración, idiomas extra) obliga a volver a medir; `validate-tree.sh` falla si se superan los 40 MB.
 4. **Funciones de AERA retiradas** por tamaño: flasheo directo de payloads (necesita `aera-otaripper`), `lpdump` y `bootctl` (`lptools` sí está), fuentes CJK/árabe/hebreo/índicas/tailandés (los nombres de fichero en esas escrituras no se ven) y bash/nano GNU.
 5. **Memoria de build**: `soong_build` necesita ~20 GB de RAM. Con aplicaciones pesadas abiertas, el sistema lo mata (OOM).

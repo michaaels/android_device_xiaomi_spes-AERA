@@ -62,7 +62,7 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 | Descifrado con patrón | NOT TESTED | NOT TESTED | |
 | Credencial incorrecta | NOT TESTED | NOT TESTED | |
 | Cancelar el desbloqueo | NOT TESTED | NOT TESTED | |
-| Claves de Android intactas tras descifrar en AERA | PENDIENTE (falta que el usuario desbloquee Android) | | por código: las claves actualizadas se escriben solo en `/tmp` |
+| Claves de Android intactas tras descifrar en AERA | PASS | | el usuario desbloqueó Android con su PIN tras la sesión de AERA y confirmó que apps y fotos están bien (2026-11-20); por código, las claves actualizadas se escriben solo en `/tmp` |
 | MTP (enumeración) | PASS | NOT TESTED | el PC ve `18d1:4ee2 (MTP + debug)` con `mtp,adb` |
 | MTP (transferencia de ficheros) | NOT TESTED | | |
 | ADB sideload | NOT TESTED | | |
