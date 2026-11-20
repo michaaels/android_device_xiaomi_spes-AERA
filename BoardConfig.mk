@@ -102,6 +102,11 @@ TARGET_USES_MKE2FS := true
 TARGET_COPY_OUT_VENDOR := vendor
 TARGET_COPY_OUT_PRODUCT := product
 TARGET_COPY_OUT_SYSTEM_EXT := system_ext
+# Logical partitions are ext4 (first-stage fstab.qcom); never built here
+BOARD_SYSTEMIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_SYSTEM_EXTIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_PRODUCTIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_ROOT_EXTRA_FOLDERS := firmware persist
 
 # Verified boot (bootloader must be unlocked to boot/flash a custom image)
@@ -140,6 +145,9 @@ BOOT_SECURITY_PATCH := $(PLATFORM_SECURITY_PATCH)
 AERA_THEME := portrait_hdpi
 AERA_FRAMERATE := 90
 AERA_BRIGHTNESS_PATH := "/sys/class/backlight/panel0-backlight/brightness"
+# Both spes panels in the installed dtbo (k7_38_0c_0a / k7_38_0c_0b) declare
+# qcom,mdss-dsi-bl-max-level = qcom,mdss-brightness-max-level = 2047
+AERA_MAX_BRIGHTNESS := 2047
 AERA_DEFAULT_BRIGHTNESS := 1200
 AERA_NO_SCREEN_BLANK := true
 AERA_INPUT_BLACKLIST := "hbtp_vm"
