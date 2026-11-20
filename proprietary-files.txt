@@ -1,6 +1,9 @@
-# Proprietary blobs for spes / spesn recovery, taken ONLY from the stock
-# spes vendor image (reference: MIUI 14 V816.0.8.0.TGCMIXM, vendor build
-# 2024-09-29, ro.vendor.build.security_patch=2024-10-01).
+# Proprietary blobs for spes / spesn recovery, taken ONLY from the vendor
+# partition of the firmware installed on the device.
+# Reference firmware: EvolutionX 16.0 (11.10, 2026-08-07) for spes,
+# vendor security patch 2026-05-01 (QTI Keymaster 4.1 / Gatekeeper 1.0).
+# The same file set exists in stock MIUI 14 V816.0.8.0.TGCMIXM, except that
+# MIUI ships boot control 1.1 instead of 1.2.
 #
 # Format: <source path in vendor partition>[:<destination under recovery/root>]
 # Extract with: tools/extract-files.sh [--adb | --dump <dir>]
@@ -34,6 +37,14 @@ lib64/libStDrvInt.so:vendor/lib64/libStDrvInt.so
 lib64/libsecureui.so:vendor/lib64/libsecureui.so
 lib64/libSecureUILib.so:vendor/lib64/libSecureUILib.so
 lib64/libsecureui_svcsock.so:vendor/lib64/libsecureui_svcsock.so
+lib64/vendor.qti.hardware.tui_comm@1.0.so:vendor/lib64/vendor.qti.hardware.tui_comm@1.0.so
+lib64/libdisplayconfig.qti.so:vendor/lib64/libdisplayconfig.qti.so
+lib64/libdisplaydebug.so:vendor/lib64/libdisplaydebug.so
+lib64/vendor.display.config@1.0.so:vendor/lib64/vendor.display.config@1.0.so
+lib64/vendor.display.config@2.0.so:vendor/lib64/vendor.display.config@2.0.so
+# vendor (VNDK) builds; only reached through LD_LIBRARY_PATH=/vendor/lib64
+lib64/libion.so:vendor/lib64/libion.so
+lib64/libdrm.so:vendor/lib64/libdrm.so
 
-# --- Boot control (stock HAL is android.hardware.boot@1.1, QTI passthrough impl)
-lib64/hw/android.hardware.boot@1.0-impl-1.1-qti.so:vendor/lib64/hw/android.hardware.boot@1.0-impl-1.1-qti.so
+# --- Boot control: android.hardware.boot@1.2 with the QTI passthrough impl
+lib64/hw/android.hardware.boot@1.0-impl-1.2-qti.so:vendor/lib64/hw/android.hardware.boot@1.0-impl-1.2-qti.so

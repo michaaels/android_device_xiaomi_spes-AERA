@@ -33,8 +33,9 @@ cp "$WORK/kernel" "$TREE/prebuilt/kernel"
     echo "source_image_sha256=$(sha256sum "$IMG" | cut -d' ' -f1)"
     echo "kernel_sha256=$(sha256sum "$TREE/prebuilt/kernel" | cut -d' ' -f1)"
     echo "kernel_format=$(file -b "$TREE/prebuilt/kernel")"
-    grep -aoE 'Linux version [^ ]+ [^)]+\)' "$WORK/kernel" 2>/dev/null | head -1 \
-        || (gzip -dc "$WORK/kernel" 2>/dev/null | grep -aoE 'Linux version [^ ]+' | head -1) || true
+    # The image is usually gzip; skip the "Linux version %s" format string
+    { gzip -dc "$WORK/kernel" 2>/dev/null || cat "$WORK/kernel"; } \
+        | grep -aoE 'Linux version [0-9][^ ]* \([^)]*\)' | head -1 | sed 's/^/kernel_version=/' || true
     sed 's/^/header: /' "$WORK/info.txt"
 } > "$TREE/prebuilt/kernel.info"
 echo "installed prebuilt/kernel; details in prebuilt/kernel.info"

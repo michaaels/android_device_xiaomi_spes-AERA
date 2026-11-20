@@ -21,8 +21,8 @@ on fs
     mkdir /mnt/vendor/persist 0775 shell system
 
 on post-fs
-    # Stock HAL is android.hardware.boot@1.1 (QTI impl bundled under /vendor/lib64/hw)
-    start boot-hal-1-1
+    # Installed vendor ships android.hardware.boot@1.2 (QTI impl bundled under /vendor/lib64/hw)
+    start boot-hal-1-2
 
 on boot
     start health-hal-2-1
