@@ -21,7 +21,8 @@ AERA_FORCE_PREBUILT_KERNEL := 1
 AERA_NO_TREBLE_COMPATIBILITY_CHECK := 1
 AERA_DYNAMIC_FULL_SIZE := 9126805504
 AERA_QUICK_BACKUP_LIST := /boot;/data;
-AERA_USE_LZ4_COMPRESSION := 1
+# The ramdisk is LZ4 (BOARD_RAMDISK_USE_LZ4 in BoardConfig.mk, which also
+# sets AERA's internal LZ4 option); see BoardConfig.mk for the constraints.
 
 # Data handling (stock userdata is f2fs)
 AERA_FORCE_DATA_FORMAT_F2FS := 1
@@ -30,7 +31,9 @@ AERA_BIND_MOUNT_SDCARD_ON_FORMAT := 1
 AERA_UNMOUNT_SDCARDS_BEFORE_REBOOT := 1
 
 # Partition tooling
-AERA_ENABLE_ALL_PARTITION_TOOLS := 1
+# Not AERA_ENABLE_ALL_PARTITION_TOOLS: it forces lpdump + libprotobuf-cpp-full
+# (and lpmake/lpadd/lpflash/lpunpack/bootctl), which does not fit the
+# bootloader ramdisk limit. lptools covers logical partition management.
 AERA_ENABLE_LPTOOLS := 1
 AERA_USE_DMCTL := 1
 AERA_LOOP_DEVICE_ERRORS_TO_LOG := 1

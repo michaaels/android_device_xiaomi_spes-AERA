@@ -66,7 +66,15 @@ BOARD_MKBOOTIMG_ARGS += --pagesize $(BOARD_KERNEL_PAGESIZE)
 # AERA's repack of the installed boot keeps the stock (empty) cmdline.
 BOARD_MKBOOTIMG_ARGS += --cmdline "twrpfastboot=1"
 
-# The installed boot and vendor_boot ramdisks are LZ4 and boot with this kernel
+# Ramdisk constraints, both measured on hardware (docs/evidence/hw-abl-ramdisk-limit.txt):
+# 1. LZ4 is mandatory: the bootloader concatenates the installed vendor_boot
+#    ramdisk (LZ4 legacy) with this one, and the kernel's LZ4 legacy decoder
+#    has no end marker, so a gzip boot ramdisk fails with "rootfs image is not
+#    initramfs (Decoding failed)" and init never runs.
+# 2. Size: the bootloader accepts `fastboot boot` but never starts the kernel
+#    when the ramdisk is >= 42.4 MB; 41.5 MB boots with either kernel, so the
+#    limit is on the ramdisk alone (consistent with 40 MiB). Keep it <= 40 MB;
+#    tools/validate-tree.sh enforces this.
 BOARD_RAMDISK_USE_LZ4 := true
 
 ifeq ($(wildcard $(TARGET_PREBUILT_KERNEL)),)
@@ -172,13 +180,26 @@ AERA_EXCLUDE_DEFAULT_USB_INIT := true
 AERA_INCLUDE_REPACKTOOLS := true
 AERA_INCLUDE_RESETPROP := true
 AERA_INCLUDE_LIBRESETPROP := true
-AERA_INCLUDE_LPDUMP := true
+# lpdump is left out for the ramdisk limit: with lpdumpd it pulls the 2.1 MB
+# libprotobuf-cpp-full. The lptools (AERA_INCLUDE_LPTOOLS) remain.
+AERA_EXCLUDE_LPDUMP := true
 AERA_INCLUDE_LPTOOLS := true
 AERA_INCLUDE_NTFS_3G := true
 AERA_INCLUDE_FASTBOOTD := true
 AERA_USE_TOOLBOX := true
 AERA_EXCLUDE_APEX := true
-AERA_EXTRA_LANGUAGES := true
+# AERA_EXTRA_LANGUAGES is left unset (ramdisk size limit above): only the
+# general-script font is loaded, so the CJK/Arabic/Hebrew/Indic/Thai fallback
+# fonts that aeraui copies unconditionally are dropped from the ramdisk.
+SPES_UNUSED_FONTS := wqy-microhei.ttf NotoSansCJKjp-Regular.ttf \
+    NotoSansDevanagariUI-VF.ttf NotoSansBengaliUI-VF.ttf \
+    NotoNaskhArabicUI-Regular.ttf NotoSansHebrew-Regular.ttf NotoSansThaiUI-Regular.ttf
+# Also dropped for the ramdisk limit: aera-otaripper (payload extraction falls
+# back to AERA's native extractor; only AERA's direct payload flashing needs
+# it) and htop (from vendor/twrp packages).
+SPES_DROPPED_BINS := system/bin/aera-otaripper system/bin/htop
+# No trailing ';': bootable/recovery appends its own "; rm -f ..." entry.
+BOARD_RECOVERY_IMAGE_PREPARE += rm -f $(addprefix $(TARGET_RECOVERY_ROOT_OUT)/twres/fonts/,$(SPES_UNUSED_FONTS)) $(addprefix $(TARGET_RECOVERY_ROOT_OUT)/,$(SPES_DROPPED_BINS))
 AERA_DEFAULT_LANGUAGE := en
 
 # Debug

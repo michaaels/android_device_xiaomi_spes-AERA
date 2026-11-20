@@ -94,10 +94,23 @@ if [ -n "$SRC" ] && [ -f "$SRC/bootable/recovery/aera_config.mk" ]; then
         fi
     done
     # 12. Built image vs partition size
-    img="$SRC/out/target/product/spes/boot.img"
+    img="${AERA_BOOT_IMG:-$SRC/${OUT_DIR_NAME:-out}/target/product/spes/boot.img}"
     if [ -f "$img" ]; then
         sz=$(stat -c %s "$img"); lim=$(awk -F':= ' '/^BOARD_BOOTIMAGE_PARTITION_SIZE/ {print $2}' BoardConfig.mk)
         [ "$sz" -le "$lim" ] && ok "boot.img $sz <= $lim bytes" || bad "boot.img $sz exceeds partition $lim"
+        # 13. Bootloader ramdisk limit measured on hardware: >= 42.4 MB never
+        # starts the kernel, 41.5 MB boots (any kernel). Require <= 40 MB.
+        ud="$(mktemp -d)"
+        rd=$(python3 -I "$SRC/system/tools/mkbootimg/unpack_bootimg.py" --boot_img "$img" --out "$ud" 2>/dev/null | awk -F': ' '/^ramdisk size/ {print $2}')
+        # 14. The installed vendor_boot ramdisk is LZ4 legacy; the boot ramdisk
+        # appended after it must be LZ4 legacy too (magic 02 21 4c 18).
+        if [ -f "$ud/ramdisk" ]; then
+            [ "$(head -c4 "$ud/ramdisk" | od -An -tx1 | tr -d ' ')" = "02214c18" ] \
+                && ok "ramdisk is LZ4 legacy (matches vendor_boot)" || bad "ramdisk is not LZ4 legacy: kernel will fail to unpack it after vendor_boot's"
+        fi
+        if [ -n "$rd" ]; then
+            [ "$rd" -le 40000000 ] && ok "ramdisk $rd <= 40000000 bytes (ABL limit margin)" || bad "ramdisk $rd > 40000000 bytes: spes bootloader will not start it"
+        else note "could not read ramdisk size"; fi
     else note "no built boot.img yet"; fi
 else
     note "no source root given: AERA flag and image checks skipped"

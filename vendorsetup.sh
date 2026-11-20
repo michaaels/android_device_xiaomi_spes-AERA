@@ -30,14 +30,14 @@ if [ "$1" = "$FDEVICE" ] || [ "$AERA_BUILD_DEVICE" = "$FDEVICE" ]; then
 	export AERA_RECOVERY_SYSTEM_PARTITION="/dev/block/mapper/system"
 	export AERA_RECOVERY_VENDOR_PARTITION="/dev/block/mapper/vendor"
 
-	export AERA_USE_BASH_SHELL=1
-	export AERA_USE_TAR_BINARY=1
-	export AERA_USE_SED_BINARY=1
+	# Archive tools needed for backups/restores. The optional GNU bash, tar,
+	# sed, grep and nano are not added: the bootloader limits the ramdisk
+	# size (see BoardConfig.mk); toybox/mksh provide the basic versions.
 	export AERA_USE_LZ4_BINARY=1
 	export AERA_USE_ZSTD_BINARY=1
-	export AERA_USE_GREP_BINARY=1
 	export AERA_USE_XZ_UTILS=1
-	export AERA_USE_NANO_EDITOR=1
+	# vendor/twrp always packages GNU bash; drop it (mksh stays as /system/bin/sh)
+	export AERA_REMOVE_BASH=1
 
 	# Both variants share one image
 	export TARGET_DEVICE_ALT="spesn"
