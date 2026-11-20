@@ -1,0 +1,14 @@
+# Recovery fstab for Redmi Note 11 / 11 NFC (spes / spesn).
+# Derived from the stock vendor/etc/fstab.default (MIUI 14 V816.0.8.0.TGCMIXM).
+# Only partitions present in the stock fstab are listed here; extra
+# backup/flash targets live in recovery/root/system/etc/twrp.flags.
+#
+#<src>                                  <mnt_point>  <type> <mnt_flags and options>                                                                  <fs_mgr_flags>
+system                                  /system      ext4   ro,barrier=1,discard                                                                     wait,slotselect,avb=vbmeta_system,logical,first_stage_mount
+system_ext                              /system_ext  ext4   ro,barrier=1,discard                                                                     wait,slotselect,avb=vbmeta_system,logical,first_stage_mount
+product                                 /product     ext4   ro,barrier=1,discard                                                                     wait,slotselect,avb=vbmeta_system,logical,first_stage_mount
+vendor                                  /vendor      ext4   ro,barrier=1,discard                                                                     wait,slotselect,avb,logical,first_stage_mount
+mi_ext                                  /mi_ext      ext4   ro,barrier=1,discard                                                                     wait,slotselect,avb=vbmeta,logical,first_stage_mount,nofail
+/dev/block/by-name/metadata             /metadata    ext4   noatime,nosuid,nodev,discard                                                             wait,check,formattable,first_stage_mount
+/dev/block/bootdevice/by-name/userdata  /data        f2fs   noatime,nosuid,nodev,discard,reserve_root=32768,resgid=1065,fsync_mode=nobarrier,inlinecrypt latemount,wait,check,formattable,quota,reservedsize=128M,fileencryption=aes-256-xts:aes-256-cts:v2+inlinecrypt_optimized+wrappedkey_v0,metadata_encryption=aes-256-xts:wrappedkey_v0,keydirectory=/metadata/vold/metadata_encryption,checkpoint=fs
+/dev/block/bootdevice/by-name/misc      /misc        emmc   defaults                                                                                 defaults
