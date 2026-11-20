@@ -1,7 +1,8 @@
 # Recovery fstab for Redmi Note 11 / 11 NFC (spes / spesn).
-# Derived from the stock vendor/etc/fstab.default (MIUI 14 V816.0.8.0.TGCMIXM).
-# Only partitions present in the stock fstab are listed here; extra
-# backup/flash targets live in recovery/root/system/etc/twrp.flags.
+# Derived from the first-stage fstab.qcom of EvolutionX 16.0 (11.10) and the
+# stock MIUI 14 fstab.default; both carry the same userdata/metadata crypto.
+# mi_ext only exists on MIUI/HyperOS, hence nofail. Extra backup/flash
+# targets live in recovery/root/system/etc/twrp.flags.
 #
 #<src>                                  <mnt_point>  <type> <mnt_flags and options>                                                                  <fs_mgr_flags>
 system                                  /system      ext4   ro,barrier=1,discard                                                                     wait,slotselect,avb=vbmeta_system,logical,first_stage_mount

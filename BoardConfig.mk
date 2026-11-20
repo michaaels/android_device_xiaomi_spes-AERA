@@ -41,10 +41,11 @@ QCOM_BOARD_PLATFORMS += bengal
 # DTB and vendor ramdisk). There is no recovery partition: the recovery ramdisk
 # lives in boot.img (BOARD_USES_RECOVERY_AS_BOOT).
 #
-# The kernel MUST come from the stock boot.img of the firmware installed on the
+# The kernel MUST come from the boot.img of the firmware installed on the
 # device (tools/extract-stock-kernel.sh). A kernel built from another source
 # would not match the vendor modules / vendor_boot and could break Android boot
-# once the image is installed.
+# once the image is installed. Current prebuilt: EvolutionX 16.0 11.10
+# (Linux 4.19.325-cip132-st16-Cherry), see prebuilt/kernel.info.
 # ---------------------------------------------------------------------------
 BOARD_BOOT_HEADER_VERSION := 3
 BOARD_KERNEL_PAGESIZE := 4096
@@ -55,6 +56,9 @@ TARGET_KERNEL_HEADER_ARCH := arm64
 TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilt/kernel
 BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOT_HEADER_VERSION)
 BOARD_MKBOOTIMG_ARGS += --pagesize $(BOARD_KERNEL_PAGESIZE)
+
+# The installed boot and vendor_boot ramdisks are LZ4 and boot with this kernel
+BOARD_RAMDISK_USE_LZ4 := true
 
 ifeq ($(wildcard $(TARGET_PREBUILT_KERNEL)),)
   $(error spes: $(TARGET_PREBUILT_KERNEL) is missing. Extract it from the stock boot.img of the installed firmware with tools/extract-stock-kernel.sh (see docs/BUILD.md))
@@ -86,7 +90,8 @@ BOARD_FLASH_BLOCK_SIZE := 262144
 BOARD_SUPER_PARTITION_SIZE := 9126805504
 BOARD_SUPER_PARTITION_GROUPS := qti_dynamic_partitions
 BOARD_QTI_DYNAMIC_PARTITIONS_SIZE := 9122611200
-BOARD_QTI_DYNAMIC_PARTITIONS_PARTITION_LIST := system system_ext product vendor mi_ext
+# From the EvolutionX payload manifest (MIUI additionally carries mi_ext)
+BOARD_QTI_DYNAMIC_PARTITIONS_PARTITION_LIST := system system_ext product vendor
 
 # File systems
 BOARD_USES_METADATA_PARTITION := true

@@ -1,0 +1,11 @@
+source_image_sha256=278a6333982138f2e1a0a60e4cf31767c9be4f8dd3cf82405474f4a2dd046455
+kernel_sha256=34ebc3ee7351f89a4a933ac8ef3634df2741063ef19601040d624ca32c6919b0
+kernel_format=gzip compressed data, max compression, from Unix, original size modulo 2^32 37796352
+kernel_version=Linux version 4.19.325-cip132-st16-Cherry-gcfe9fb687feb (build-user@build-host)
+header: boot magic: ANDROID!
+header: kernel_size: 18121368
+header: ramdisk size: 18238302
+header: os version: 16.0.0
+header: os patch level: 2026-08
+header: boot image header version: 3
+header: command line args: 
