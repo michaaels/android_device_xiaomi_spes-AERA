@@ -1,0 +1,28 @@
+<!--
+    Copyright (C) 2026 AERA Recovery Project contributors
+    SPDX-License-Identifier: Apache-2.0
+
+    Minimal device manifest for the spes recovery: only the HIDL HALs that the
+    recovery actually runs. The instances match the installed vendor's VINTF
+    (EvolutionX 16.0 11.10: etc/vintf/manifest.xml and
+    manifest/android.hardware.{keymaster@4.1-service-default-qti,boot@1.2}.xml).
+    target-level 5 = launched with Android 11 (ro.board.first_api_level=30).
+    android.hardware.health@2.1 is declared by bootable/recovery's own fragment.
+-->
+<manifest version="2.0" type="device" target-level="5">
+    <hal format="hidl">
+        <name>android.hardware.keymaster</name>
+        <transport>hwbinder</transport>
+        <fqname>@4.1::IKeymasterDevice/default</fqname>
+    </hal>
+    <hal format="hidl">
+        <name>android.hardware.gatekeeper</name>
+        <transport>hwbinder</transport>
+        <fqname>@1.0::IGatekeeper/default</fqname>
+    </hal>
+    <hal format="hidl">
+        <name>android.hardware.boot</name>
+        <transport>hwbinder</transport>
+        <fqname>@1.2::IBootControl/default</fqname>
+    </hal>
+</manifest>

@@ -1,0 +1,27 @@
+<!--
+    Copyright (C) 2026 AERA Recovery Project contributors
+    SPDX-License-Identifier: Apache-2.0
+
+    Minimal framework manifest for the spes recovery. Without any framework or
+    device manifest hwservicemanager logs "HIDL is not supported on this
+    device", disables itself, and every HIDL HAL (Keymaster 4.1, Gatekeeper
+    1.0, boot 1.2, health 2.1) fails to register, so keystore2 aborts and
+    decryption cannot start (observed on hardware).
+-->
+<manifest version="2.0" type="framework">
+    <hal format="hidl">
+        <name>android.hidl.manager</name>
+        <transport>hwbinder</transport>
+        <fqname>@1.2::IServiceManager/default</fqname>
+    </hal>
+    <hal format="hidl">
+        <name>android.hidl.token</name>
+        <transport>hwbinder</transport>
+        <fqname>@1.0::ITokenManager/default</fqname>
+    </hal>
+    <hal format="hidl">
+        <name>android.hidl.memory</name>
+        <transport arch="64">passthrough</transport>
+        <fqname>@1.0::IMapper/ashmem</fqname>
+    </hal>
+</manifest>
