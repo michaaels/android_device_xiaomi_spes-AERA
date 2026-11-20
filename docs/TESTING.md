@@ -39,7 +39,8 @@ Hay tres niveles de validación, y cumplir uno no implica los siguientes: **comp
 | Librerías AOSP que necesitan los blobs | PASS | keymaster@4.0/4.1, gatekeeper@1.0, boot@1.0–1.2, hidl, binder, xml2, crypto… todas presentes |
 | SHA-256 del artefacto | PASS | probado en hardware: `d69b491b1c0439a19ae007adcc98688de58821284530d37b7d6c1f665bba3ba3` (incremental). Los anteriores (`7fa53ef7…`, `0b6dcea3…`) no arrancan |
 | Build limpio de la configuración a fecha de `b14656b` | PASS | `EXIT 0`, 13 min 50 s; mismos 3777 ficheros, configuración y blobs idénticos a la imagen probada, y arranca en hardware (`8982622e…`) |
-| Build limpio con la resolución adaptativa y el parche de backup | NOT TESTED | pendiente (la imagen `build13`, `6d374afe…`, es incremental) |
+| **Build limpio final** (commit `5b75963` y parche `0001` aplicado) | PASS | `EXIT 0`, 14 min 40 s, 0 FAILED; ramdisk LZ4 de 39 576 537 B; kernel idéntico; 33/33 blobs. **Artefacto de referencia `d11af8397be8ea7f55015c0047ad81ee39e3615cebf8a68e1ce14fd8afe08da5`** |
+| Artefacto de referencia en hardware | PASS | `fastboot boot`: R1.0, 0 aborts, todos los servicios en marcha, UDC enlazado; backup por ADB de `/boot` en 16 s, idéntico a la copia `dd` |
 
 ## Pruebas en hardware
 

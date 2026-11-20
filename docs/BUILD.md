@@ -93,4 +93,4 @@ Hay que comprobar:
 | `lunch` | PASS |
 | `bootimage` | PASS: build limpio (13 min 40 s) e incremental |
 | Artefacto probado en hardware | `boot.img`, SHA-256 `d69b491b1c0439a19ae007adcc98688de58821284530d37b7d6c1f665bba3ba3` (build incremental sobre `out_clean`, configuración del commit `d2ff8ce`) |
-| Build limpio con la configuración final | **pendiente** (el limpio verificado, `7fa53ef7…`, es anterior a las correcciones de hardware y no arranca) |
+| **Build limpio final** | PASS: 14 min 40 s; `boot.img` = `AERA-R1.0-Beta-Unofficial-spes.img`, SHA-256 `d11af8397be8ea7f55015c0047ad81ee39e3615cebf8a68e1ce14fd8afe08da5`, verificado en hardware (commit `5b75963` y parche `0001` aplicado) |
