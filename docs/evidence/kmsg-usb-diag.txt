@@ -1,0 +1,161 @@
+# Excerpt: USB diagnostic run (init + USBDIAG), duplicate USB handlers loop
+[    8.503927] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[    8.619451] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[    8.730124] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[    8.840985] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[    8.949687] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[    9.060553] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[    9.169666] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[    9.280907] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[    9.389995] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[    9.500550] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   12.904838] init: Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/system/etc/init/hw/init.rc:260) took 106ms and succeeded
+[   12.905395] init: processing action (sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1) from (/init.recovery.usb.rc:87)
+[   12.906370] init: Command 'rm /config/usb_gadget/g1/configs/b.1/f2' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.recovery.usb.rc:90) took 0ms and failed: unlink() failed: No such file or directory
+[   13.017358] init: Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.recovery.usb.rc:94) took 109ms and succeeded
+[   13.017806] init: processing action (sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1) from (/system/etc/init/hw/init.rc:256)
+[   13.124851] init: Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/system/etc/init/hw/init.rc:260) took 105ms and succeeded
+[   13.125275] init: processing action (sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1) from (/init.recovery.usb.rc:87)
+[   13.126286] init: Command 'rm /config/usb_gadget/g1/configs/b.1/f2' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.recovery.usb.rc:90) took 0ms and failed: unlink() failed: No such file or directory
+[   13.568619] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   13.680936] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   13.791300] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   13.900605] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   14.009736] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   14.120825] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   14.229769] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   14.341194] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   14.450037] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   14.560942] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   17.976527] init: Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/system/etc/init/hw/init.rc:260) took 105ms and succeeded
+[   17.976982] init: processing action (sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1) from (/init.recovery.usb.rc:87)
+[   17.977934] init: Command 'rm /config/usb_gadget/g1/configs/b.1/f2' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.recovery.usb.rc:90) took 0ms and failed: unlink() failed: No such file or directory
+[   18.088883] init: Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.recovery.usb.rc:94) took 109ms and succeeded
+[   18.089452] init: processing action (sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1) from (/system/etc/init/hw/init.rc:256)
+[   18.197002] init: Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/system/etc/init/hw/init.rc:260) took 106ms and succeeded
+[   18.197425] init: processing action (sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1) from (/init.recovery.usb.rc:87)
+[   18.198410] init: Command 'rm /config/usb_gadget/g1/configs/b.1/f2' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.recovery.usb.rc:90) took 0ms and failed: unlink() failed: No such file or directory
+[   18.308854] init: Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.recovery.usb.rc:94) took 109ms and succeeded
+[   18.424898] USBDIAG: ==== t+15
+[   18.472253] USBDIAG: [init.svc.adbd]: [running]
+[   18.472351] USBDIAG: [init.svc.recovery]: [running]
+[   18.472432] USBDIAG: [init.svc.spes-usbdiag]: [running]
+[   18.472511] USBDIAG: [init.svc_debug_pid.adbd]: [553]
+[   18.476117] USBDIAG: [init.svc_debug_pid.spes-usbdiag]: [464]
+[   18.476204] USBDIAG: [persist.sys.isUsbOtgEnabled]: [true]
+[   18.476283] USBDIAG: [persist.sys.usb.config]: [adb]
+[   18.483777] USBDIAG: [ro.boot.usbcontroller]: [4e00000.dwc3]
+[   18.485680] USBDIAG: [ro.bootmode]: [unknown]
+[   18.485829] USBDIAG: [ro.boottime.adbd]: [3412546768]
+[   18.486730] USBDIAG: [ro.boottime.init.selinux]: [62893750]
+[   18.487352] USBDIAG: [ro.boottime.spes-usbdiag]: [3403148175]
+[   18.489650] USBDIAG: [ro.build.selinux]: [1]
+[   18.501305] USBDIAG: [ro.recovery.usb.adb.pid]: [D001]
+[   18.501480] USBDIAG: [ro.recovery.usb.fastboot.pid]: [4EE0]
+[   18.501648] USBDIAG: [ro.recovery.usb.vid]: [18D1]
+[   18.506559] USBDIAG: [service.adb.root]: [1]
+[   18.506753] USBDIAG: [sys.usb.config]: [adb]
+[   18.506902] USBDIAG: [sys.usb.config.aera_fastbootd]: [0]
+[   18.507068] USBDIAG: [sys.usb.config.aera_soft_switch]: [0]
+[   18.507232] USBDIAG: [sys.usb.configfs]: [1]
+[   18.507366] USBDIAG: [sys.usb.controller]: [4e00000.dwc3]
+[   18.507525] USBDIAG: [sys.usb.ffs.ready]: [1]
+[   18.507658] USBDIAG: [sys.usb.mtp.device_type]: [3]
+[   18.507802] USBDIAG: [sys.usb.state]: [adb]
+[   18.547822] USBDIAG: UDC=[] udc_list=[4e00000.dwc3]
+[   18.563180] USBDIAG: total 0
+[   18.563283] USBDIAG: drwxrwx--- 3 shell shell    0 2026-11-20 20:29 .
+[   18.563413] USBDIAG: drwxr-xr-x 3 root  root     0 1972-12-20 17:59 ..
+[   18.563514] USBDIAG: -rw-r--r-- 1 root  root  4096 1972-12-20 17:59 MaxPower
+[   18.563630] USBDIAG: -rw-r--r-- 1 root  root  4096 2026-11-20 20:29 bmAttributes
+[   18.563810] USBDIAG: lrwxrwxrwx 1 root  root     0 2026-11-20 20:29 f1 -> ../../../../usb_gadget/g1/functions/ffs.adb
+[   18.563912] USBDIAG: drwxr-xr-x 3 root  root     0 1972-12-20 17:59 strings
+[   18.576488] USBDIAG: ffs.adb
+[   18.576570] USBDIAG: ffs.fastboot
+[   18.576625] USBDIAG: ffs.mtp
+[   18.589049] USBDIAG: 0x18d1
+[   18.589214] USBDIAG: 0xd001
+[   18.602516] USBDIAG: none /config configfs rw,relatime 0 0
+[   18.602628] USBDIAG: mtp /dev/usb-ffs/mtp functionfs rw,relatime 0 0
+[   18.602721] USBDIAG: adb /dev/usb-ffs/adb functionfs rw,relatime 0 0
+[   18.602833] USBDIAG: fastboot /dev/usb-ffs/fastboot functionfs rw,relatime 0 0
+[   18.614748] USBDIAG: /dev/usb-ffs/adb:
+[   18.614817] USBDIAG: total 0
+[   18.614912] USBDIAG: dr-xr-x--- 1 shell system   0 1972-12-20 17:59 .
+[   18.615006] USBDIAG: drwxrwxr-x 5 shell system 100 1972-12-20 17:59 ..
+[   18.615101] USBDIAG: -rw-rw---- 1 shell system   0 1972-12-20 17:59 ep0
+[   18.615195] USBDIAG: -rw-rw---- 1 shell system   0 2026-11-20 20:29 ep1
+[   18.615290] USBDIAG: -rw-rw---- 1 shell system   0 2026-11-20 20:29 ep2
+[   18.615358] USBDIAG: 
+[   18.615421] USBDIAG: /dev/usb-ffs/mtp:
+[   18.615473] USBDIAG: total 0
+[   18.615567] USBDIAG: dr-xr-x--- 1 mtp   mtp      0 1972-12-20 17:59 .
+[   18.615662] USBDIAG: drwxrwxr-x 5 shell system 100 1972-12-20 17:59 ..
+[   18.615763] USBDIAG: -rw-rw---- 1 mtp   mtp      0 1972-12-20 17:59 ep0
+[   18.646065] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   18.669141] USBDIAG: root           303     2          0      0 rescuer_thread      0 I [ufs_recovery_wq]
+[   18.669206] USBDIAG: root           463     1   11182080  43536 futex_wait_queue_me 0 S recovery
+[   18.669258] USBDIAG: root           553     1   11009140   6032 __arm64_sys_io_destroy 0 D adbd
+[   18.704559] USBDIAG: /sys/class/udc/4e00000.dwc3 state=not attached speed=UNKNOWN
+[   18.716244] USBDIAG: dwc3_mode=peripheral
+[   18.734128] USBDIAG: I:Processing '/usb_otg'
+[   18.734219] USBDIAG: I:Created '/usb_otg' folder.
+[   18.756970] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   18.865854] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   18.976543] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   19.085913] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   19.196539] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   19.305913] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   19.416546] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   19.525960] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   19.640601] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   23.052827] init: Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/system/etc/init/hw/init.rc:260) took 105ms and succeeded
+[   23.053265] init: processing action (sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1) from (/init.recovery.usb.rc:87)
+[   23.054277] init: Command 'rm /config/usb_gadget/g1/configs/b.1/f2' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.recovery.usb.rc:90) took 0ms and failed: unlink() failed: No such file or directory
+[   23.165049] init: Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.recovery.usb.rc:94) took 109ms and succeeded
+[   23.165958] init: processing action (sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1) from (/system/etc/init/hw/init.rc:256)
+[   23.272884] init: Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/system/etc/init/hw/init.rc:260) took 105ms and succeeded
+[   23.273322] init: processing action (sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1) from (/init.recovery.usb.rc:87)
+[   23.274357] init: Command 'rm /config/usb_gadget/g1/configs/b.1/f2' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.recovery.usb.rc:90) took 0ms and failed: unlink() failed: No such file or directory
+[   23.385053] init: Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.recovery.usb.rc:94) took 109ms and succeeded
+[   23.716560] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   23.828899] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   23.937638] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   24.048547] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   24.158114] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   24.268930] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   24.383095] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   24.496914] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   24.606199] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   24.717161] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   28.124476] init: Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/system/etc/init/hw/init.rc:260) took 105ms and succeeded
+[   28.124908] init: processing action (sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1) from (/init.recovery.usb.rc:87)
+[   28.125800] init: Command 'rm /config/usb_gadget/g1/configs/b.1/f2' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.recovery.usb.rc:90) took 0ms and failed: unlink() failed: No such file or directory
+[   28.236841] init: Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.recovery.usb.rc:94) took 109ms and succeeded
+[   28.237865] init: processing action (sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1) from (/system/etc/init/hw/init.rc:256)
+[   28.344763] init: Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/system/etc/init/hw/init.rc:260) took 105ms and succeeded
+[   28.345199] init: processing action (sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1) from (/init.recovery.usb.rc:87)
+[   28.346127] init: Command 'rm /config/usb_gadget/g1/configs/b.1/f2' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.recovery.usb.rc:90) took 0ms and failed: unlink() failed: No such file or directory
+[   28.456848] init: Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.recovery.usb.rc:94) took 109ms and succeeded
+[   28.796579] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   28.908891] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   29.018044] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   29.128964] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   29.238073] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   29.348947] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   29.458223] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   29.568930] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   29.678255] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   29.788932] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   33.196994] init: Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/system/etc/init/hw/init.rc:260) took 105ms and succeeded
+[   33.197417] init: processing action (sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1) from (/init.recovery.usb.rc:87)
+[   33.198380] init: Command 'rm /config/usb_gadget/g1/configs/b.1/f2' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.recovery.usb.rc:90) took 0ms and failed: unlink() failed: No such file or directory
+[   33.309451] init: Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.recovery.usb.rc:94) took 109ms and succeeded
+[   33.309906] init: processing action (sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1) from (/system/etc/init/hw/init.rc:256)
+[   33.416990] init: Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/system/etc/init/hw/init.rc:260) took 105ms and succeeded
+[   33.417404] init: processing action (sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1) from (/init.recovery.usb.rc:87)
+[   33.418362] init: Command 'rm /config/usb_gadget/g1/configs/b.1/f2' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.recovery.usb.rc:90) took 0ms and failed: unlink() failed: No such file or directory
+[   33.529329] init: Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.recovery.usb.rc:94) took 109ms and succeeded
+[   33.860791] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   33.972909] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out
+[   34.085664] dwc3 4e00000.dwc3: request 0000000000000000 was not queued to ep0out

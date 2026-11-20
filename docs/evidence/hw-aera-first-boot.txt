@@ -1,0 +1,72 @@
+== id
+uid=0(root) gid=0(root) groups=0(root),1004(input),1007(log),1011(adb),1015(sdcard_rw),1028(sdcard_r),1078(ext_data_rw),1079(ext_obb_rw),3001(net_bt_admin),3002(net_bt),3003(inet),3006(net_bw_stats),3009(readproc),3011(uhid),3012(readtracefs) context=u:r:su:s0
+== props
+[crypto.ready]: [1]
+[init.svc.adbd]: [running]
+[init.svc.boot-hal-1-2]: [restarting]
+[init.svc.health-hal-2-1]: [restarting]
+[init.svc.prepdecrypt]: [stopped]
+[init.svc.recovery]: [running]
+[init.svc.variant-script]: [stopped]
+[keymaster_ver]: [4.1]
+[persist.sys.usb.config]: [adb]
+[ro.aera.boot]: [1]
+[ro.aera.boot.header.version]: [3]
+[ro.aera.build]: [aera]
+[ro.aera.build.status]: [Unofficial]
+[ro.aera.crypto_enabled]: [1]
+[ro.aera.release.channel]: [Beta]
+[ro.aera.release.version]: [R1.0]
+[ro.aera.root_manager.enabled]: [0]
+[ro.aera.status]: [Unofficial]
+[ro.aera.substitute_permissions]: [1]
+[ro.aera.type]: [Unofficial]
+[ro.aera.vanilla]: [1]
+[ro.aera.variant]: [default]
+[ro.aera.virtual_ab]: [1]
+[ro.boot.product.hardware.sku]: [k7t]
+[ro.boot.slot_suffix]: [_a]
+[ro.build.version.release]: [99.87.36]
+[ro.build.version.release_or_codename]: [99.87.36]
+[ro.build.version.release_or_preview_display]: [16]
+[ro.crypto.state]: [encrypted]
+[ro.crypto.type]: [file]
+[ro.product.device]: [spes]
+[ro.product.model]: [2201117TG]
+[ro.product.name]: [spes_global]
+[ro.product.vendor.device]: [spes]
+[ro.twrp.target.devices]: [spes,spesn]
+[sys.usb.config]: [adb]
+[sys.usb.state]: [adb]
+== uname
+Linux localhost 4.19.325-cip132-st16-Cherry-gcfe9fb687feb #1 SMP PREEMPT Fri Aug 7 19:55:05 UTC 2026 aarch64 Toybox
+== uptime
+128.67 883.23
+== UDC
+4e00000.dwc3
+lrwxrwxrwx 1 root  root     0 2026-11-20 20:36 f1 -> ../../../../usb_gadget/g1/functions/ffs.adb
+== selinux
+1== mem
+MemTotal:        5787456 kB
+MemFree:         5477888 kB
+MemAvailable:    5466348 kB
+== fb/drm
+ls: /dev/graphics: No such file or directory
+card0
+renderD128
+== input
+add device 1: /dev/input/event3
+  name:     "uinput-goodix"
+add device 2: /dev/input/event0
+  name:     "qpnp_pon"
+add device 3: /dev/input/event5
+  name:     "gpio-keys"
+add device 4: /dev/input/event2
+  name:     "ant_div_check-input"
+add device 5: /dev/input/event4
+  name:     "fts_ts"
+add device 6: /dev/input/event1
+  name:     "ant_check-input"
+== backlight
+2047
+1200

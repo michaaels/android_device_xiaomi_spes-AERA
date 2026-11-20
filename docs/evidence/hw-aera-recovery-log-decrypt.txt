@@ -1,0 +1,222 @@
+Starting AERA Recovery R1.0 [default, core: R1.0] (built on Fri Nov 20 20:55:06 2026 for spes [dev_ver: 2026-11-15 (1cabc50) (branch: broken repo)]; pid 461)
+TW_INCLUDE_CRYPTO := true
+I:FBE contents 'aes-256-xts', filenames 'aes-256-cts:v2+inlinecrypt_optimized+wrappedkey_v0'
+I:Setting 'ro.crypto.dm_default_key.options_format.version' to '2' from /vendor/build.prop
+I:Setting 'ro.crypto.volume.metadata.method' to 'dm-default-key' from /vendor/build.prop
+I:FBE contents 'aes-256-xts', filenames 'aes-256-cts:v2+inlinecrypt_optimized+wrappedkey_v0'
+I:Keymaster_Ver::Force Keymaster_Ver flag found.
+I:Keymaster_Ver::Using keymaster version '4.1' for decryption
+I:Backup folder set to '/data/media/AERA/BACKUPS/<serial>'
+Using additional fstab for decryption /etc/additional.fstab 
+I:prepdecrypt::File Based Encryption (FBE) is present.
+I:prepdecrypt::SETPATCH=false
+I:prepdecrypt::crypto.ready=1
+I:prepdecrypt::Script complete. Device ready for decryption.
+I:Successfully decrypted metadata encrypted data partition with new block device: '/dev/block/mapper/userdata'
+password type: PIN
+password type: PIN
+password type: password
+password type: password
+I:User 0 is not decrypted.
+ro.boot.keymaster=1
+ro.boottime.adbd=3396300675
+ro.boottime.prepdecrypt=3772953434
+ro.boottime.keymaster-4-1-qti=5003319215
+ro.boottime.gatekeeper-1-0-qti=5006846038
+ro.odm.build.fingerprint=Redmi/aera_spes/spes:99.87.36/BP2A.250605.031.A2/eng.builde:eng/test-keys
+ro.product.odm.name=aera_spes
+ro.build.flavor=aera_spes-eng
+ro.build.display.id=aera_spes-eng 99.87.36 BP2A.250605.031.A2 eng.builde test-keys
+ro.build.description=aera_spes-eng 99.87.36 BP2A.250605.031.A2 eng.builde test-keys
+ro.system.build.fingerprint=Redmi/aera_spes/spes:99.87.36/BP2A.250605.031.A2/eng.builde:eng/test-keys
+ro.product.build.fingerprint=Redmi/aera_spes/spes:99.87.36/BP2A.250605.031.A2/eng.builde:eng/test-keys
+ro.product.system.name=aera_spes
+ro.product.product.name=aera_spes
+ro.product.system_ext.name=aera_spes
+ro.system_ext.build.fingerprint=Redmi/aera_spes/spes:99.87.36/BP2A.250605.031.A2/eng.builde:eng/test-keys
+ro.product.vendor.name=aera_spes
+ro.aera.boot=1
+ro.aera.boot.header.version=3
+ro.aera.type=Unofficial
+ro.aera.build=aera
+ro.aera.build.status=Unofficial
+ro.aera.status=Unofficial
+ro.aera.release.channel=Beta
+ro.aera.release.version=R1.0
+ro.aera.vanilla=1
+ro.aera.variant=default
+ro.aera.virtual_ab=1
+ro.aera.root_manager.enabled=0
+ro.aera.crypto_enabled=1
+ro.aera.substitute_permissions=1
+ro.build.date.utc_aera=1795208106
+ro.build.aera_id=cd729319-f3e3-4d67-9000-3b560fbd1c9f
+ro.build.aera_codebase=2026-11-15 (1cabc50)
+ro.kernel.android.checkjni=1
+ro.kernel.version=4.19
+ro.bootimage.build.date.utc_aera=1795208106
+fbe.contents=aes-256-xts
+fbe.metadata.wrappedkey=true
+fbe.filenames=aes-256-cts:v2+inlinecrypt_optimized+wrappedkey_v0
+aera.super.partition=true
+aera.crash_counter=0
+twrp.user.0.decrypt=0
+twrp.user.10.decrypt=0
+twrp.user.11.decrypt=0
+crypto.ready=1
+keymaster_ver=4.1
+ro.boot.slot_suffix=_a
+ro.build.fingerprint=Redmi/aera_spes/spes:99.87.36/BP2A.250605.031.A2/eng.builde:eng/test-keys
+init.svc.prepdecrypt=stopped
+init.svc.keymaster-4-1-qti=running
+init.svc.gatekeeper-1-0-qti=running
+init.svc.adbd=running
+init.svc_debug_pid.adbd=583
+init.svc_debug_pid.prepdecrypt=
+init.svc_debug_pid.keymaster-4-1-qti=549
+init.svc_debug_pid.gatekeeper-1-0-qti=550
+ro.logd.kernel=true
+ro.recovery.usb.adb.pid=D001
+service.adb.root=1
+persist.sys.usb.config=adb
+sys.usb.mtp.device_type=3
+sys.usb.state=adb
+sys.usb.config=adb
+sys.usb.config.aera_fastbootd=0
+sys.usb.config.aera_soft_switch=0
+vendor.gatekeeper.disable_spu=true
+ro.crypto.volume.metadata.method=dm-default-key
+ro.crypto.volume.filenames_mode=aes-256-cts
+ro.crypto.dm_default_key.options_format.version=2
+ro.crypto.allow_encrypt_override=true
+ro.crypto.metadata.enabled=true
+ro.crypto.fs_crypto_blkdev=/dev/block/mapper/userdata
+ro.crypto.type=file
+ro.crypto.state=encrypted
+I:DEBUG: AERA: running the startup script...
+AERA_BUILD_DATE=Fri Nov 20 20:55:06 2026
+DEBUG: AERA: AERA_DEVICE=spes
+DEBUG: AERA: AERA_KERNEL=4.19.325-cip132-st16-Cherry-gcfe9fb687feb
+DEBUG: AERA: SYSTEM_ROOT=1
+DEBUG: AERA: PROPER_SAR=1
+DEBUG: AERA: AERA_SCRIPT_DATE=20251120
+DEBUG: AERA: ANDROID_SDK=36
+DEBUG: AERA: INCREMENTAL_VERSION=2355
+DEBUG: AERA: RELEASE_VERSION=16
+DEBUG: AERA: BUILD_FLAVOR=spes-user
+DEBUG: AERA: ROM_FINGERPRINT=google/mustang_beta/mustang:CANARY/ZP11.260618.005/15760424:user/release-keys
+DEBUG: AERA: Fox properties:
+[aera.crash_counter]: [0]
+[aera.postinit.status]: [1]
+[aera.product.block_device]: [/dev/block/dm-2]
+[aera.product.mount_point]: [/product]
+[aera.product.partition]: [1]
+[aera.rom.sdk]: [36]
+[aera.super.block_device]: [/dev/block/by-name/super]
+[aera.super.mount_point]: [/super]
+[aera.super.partition]: [true]
+[aera.system.block_device]: [/dev/block/dm-0]
+[aera.system.fingerprint]: [google/mustang_beta/mustang:CANARY/ZP11.260618.005/15760424:user/release-keys]
+[aera.system.incremental]: [2355]
+[aera.system.mount_point]: [/system_root]
+[aera.system.release]: [16]
+[aera.vendor.block_device]: [/dev/block/dm-3]
+[aera.vendor.mount_point]: [/vendor]
+[ro.aera.boot]: [1]
+[ro.aera.boot.header.version]: [3]
+[ro.aera.build]: [aera]
+[ro.aera.build.status]: [Unofficial]
+[ro.aera.crypto_enabled]: [1]
+[ro.aera.home]: [/sdcard/AERA]
+[ro.aera.kernel]: [4.19.325-cip132-st16-Cherry-gcfe9fb687feb]
+[ro.aera.release.channel]: [Beta]
+[ro.aera.release.version]: [R1.0]
+[ro.aera.root_manager.enabled]: [0]
+[ro.aera.sar]: [1]
+[ro.aera.settings]: [/sdcard/AERA]
+[ro.aera.status]: [Unofficial]
+[ro.aera.substitute_permissions]: [1]
+[ro.aera.type]: [Unofficial]
+[ro.aera.vanilla]: [1]
+[ro.aera.variant]: [default]
+[ro.aera.virtual_ab]: [1]
+[ro.bootimage.build.date.utc_aera]: [1795208106]
+[ro.build.aera_codebase]: [2026-11-15 (1cabc50)]
+[ro.build.aera_id]: [cd729319-f3e3-4d67-9000-3b560fbd1c9f]
+[ro.build.date.utc_aera]: [1795208106]
+[ro.build.description]: [aera_spes-eng 99.87.36 BP2A.250605.031.A2 eng.builde test-keys]
+[ro.build.display.id]: [aera_spes-eng 99.87.36 BP2A.250605.031.A2 eng.builde test-keys]
+[ro.build.flavor]: [aera_spes-eng]
+[ro.odm.build.fingerprint]: [Redmi/aera_spes/spes:99.87.36/BP2A.250605.031.A2/eng.builde:eng/test-keys]
+[ro.product.build.fingerprint]: [Redmi/aera_spes/spes:99.87.36/BP2A.250605.031.A2/eng.builde:eng/test-keys]
+[ro.product.odm.name]: [aera_spes]
+[ro.product.product.name]: [aera_spes]
+[ro.product.system.name]: [aera_spes]
+[ro.product.system_ext.name]: [aera_spes]
+[ro.product.vendor.name]: [aera_spes]
+[ro.system.build.fingerprint]: [Redmi/aera_spes/spes:99.87.36/BP2A.250605.031.A2/eng.builde:eng/test-keys]
+[ro.system_ext.build.fingerprint]: [Redmi/aera_spes/spes:99.87.36/BP2A.250605.031.A2/eng.builde:eng/test-keys]
+[sys.usb.config.aera_fastbootd]: [0]
+[sys.usb.config.aera_soft_switch]: [0]
+I:Is encrypted, do decrypt page first
+Attempting to decrypt FBE for user 0...
+Attempting to decrypt user
+password type: PIN
+Using synthetic password method
+Attempting to decrypt user's synthetic password
+using secdis to decrypt spblob
+GateKeeper status ok
+Attempting to unwrap synthetic password blob
+Attempting to unlock user storage
+User 0 Decrypted Successfully!
+User 0 Decrypted Successfully
+I:User 10 is not decrypted.
+Data successfully decrypted
+I:Backup folder set to '/data/media/0/AERA/BACKUPS/<serial>'
+I:New storage path after decryption: /data/media/0
+   Flags: Can_Be_Mounted Can_Be_Wiped Can_Be_Backed_Up Wipe_During_Factory_Reset Wipe_Available_in_GUI IsPresent Can_Be_Encrypted Is_Encrypted Is_Decrypted Has_Data_Media Can_Encrypt_Backup Use_Userdata_Encryption Is_Storage Is_Settings_Storage 
+   Decrypted_Block_Device: /dev/block/mapper/userdata
+   MTP_Storage_ID: 65539
+tw_get_context failed to get selinux context, file /sdcard/AERA
+I:Decrypt adopted storage starting
+   Flags: Can_Be_Mounted IsPresent SlotSelect Mount_Read_Only Is_Super 
+   Flags: Can_Be_Mounted IsPresent SlotSelect Mount_Read_Only Is_Super 
+   Flags: Can_Be_Mounted IsPresent SlotSelect Mount_Read_Only Is_Super 
+   Flags: Can_Be_Mounted IsPresent SlotSelect Mount_Read_Only Is_Super 
+   Flags: Can_Be_Backed_Up Is_SubPartition IsPresent SlotSelect 
+   Flags: Can_Be_Backed_Up IsPresent Can_Flash_Img SlotSelect 
+   Flags: Can_Be_Backed_Up Is_SubPartition IsPresent SlotSelect 
+   Flags: Can_Be_Backed_Up IsPresent Can_Flash_Img SlotSelect 
+   MTP_Storage_ID: 65537
+   Flags: Can_Be_Mounted Can_Be_Wiped IsPresent SlotSelect Mount_Read_Only 
+   Flags: Can_Be_Backed_Up Has_SubPartition IsPresent SlotSelect 
+   MTP_Storage_ID: 65538
+   Flags: Can_Be_Backed_Up IsPresent Can_Flash_Img SlotSelect 
+   Flags: Can_Be_Backed_Up IsPresent Can_Flash_Img SlotSelect 
+   Flags: Can_Be_Backed_Up IsPresent Can_Flash_Img SlotSelect 
+   Flags: Can_Be_Mounted Can_Be_Wiped Can_Be_Backed_Up Wipe_During_Factory_Reset Wipe_Available_in_GUI IsPresent Can_Be_Encrypted Is_Encrypted Is_Decrypted Has_Data_Media Can_Encrypt_Backup Use_Userdata_Encryption Is_Storage Is_Settings_Storage 
+   Decrypted_Block_Device: /dev/block/mapper/userdata
+   MTP_Storage_ID: 65539
+I:InfoManager file '/sdcard/AERA/.aera' not found.
+I:Backup folder set to '/data/media/0/AERA/BACKUPS/<serial>'
+Welcome to AERA Recovery!
+[Release]   : R1.0
+AERA websites:
+[Downloads] : https://aera-recovery.com/#downloads
+[Guides/FAQ]: https://t.me/aera_recovery_project
+I:DEBUG: AERA: the startup script has been executed.
+* Boot slot:  _a
+* Kernel:     4.19.325-cip132-st16-Cherry-gcfe9fb687feb
+I:InfoManager saving '/persist/.aera'
+I:Saved settings file values to /persist/.aera
+I:InfoManager saving '/sdcard/AERA/.aera'
+I:Saved settings file values to '/sdcard/AERA/.aera'
+I:Starting MTP
+I:[MTP] Starting MTP
+MTP Enabled
+I:InfoManager loading from '/sdcard/AERA/.aera'.
+I:Backup folder set to '/data/media/0/AERA/BACKUPS/<serial>'
+I:Starting Adb Backup FIFO
+I:[MTP] created new mtpserver object
+I:[MTP] mtppipe add storage 65537 '/external_sd'
+I:[MTP] mtppipe add storage 65539 '/data/media/0'

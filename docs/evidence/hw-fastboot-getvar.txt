@@ -1,0 +1,13 @@
+# fastboot getvar on the test device (2026-11-20T19:19:57Z) - serial redacted
+product: spes
+unlocked: yes
+current-slot: a
+slot-count: 2
+is-userspace: no
+secure: yes
+partition-size:boot_a:  0x8000000
+partition-size:boot_b:  0x8000000
+partition-size:vendor_boot_a:  0x6000000
+partition-size:dtbo_a:  0x1800000
+getvar:partition-size:recovery_a                   FAILED (remote: 'GetVar Variable Not found')
+getvar:partition-size:init_boot_a                  FAILED (remote: 'GetVar Variable Not found')

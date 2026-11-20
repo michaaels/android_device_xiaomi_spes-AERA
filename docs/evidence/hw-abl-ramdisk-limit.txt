@@ -1,0 +1,39 @@
+# spes bootloader (ABL) ramdisk constraints - measured 2026-11-20 on the test device
+# Method: `fastboot boot` only (nothing written). Success = kernel starts
+# (USB disconnects from the bootloader) and the image reaches adb.
+# Diagnostic images: the user's OrangeFox R12.0 boot image (kernel 4.19.325
+# Murali, 17,685,031 B; LZ4 ramdisk 34,368,020 B) with the ramdisk zero-padded
+# (content unchanged; the kernel skips trailing zeros in an initramfs).
+
+| image                                      | kernel        | ramdisk (B) | result                          |
+|--------------------------------------------|---------------|-------------|---------------------------------|
+| EvolutionX 11.10 boot.img                  | Cherry 18.1MB |  18,238,302 | boots                           |
+| OrangeFox R12.0 (original)                 | Murali 17.7MB |  34,368,020 | boots                           |
+| OrangeFox, ramdisk padded                  | Murali        |  38,000,000 | boots                           |
+| OrangeFox, ramdisk padded                  | Murali        |  40,000,000 | boots                           |
+| OrangeFox, ramdisk padded                  | Murali        |  41,500,000 | boots                           |
+| OrangeFox ramdisk padded + EvolutionX kernel | Cherry      |  41,500,000 | boots (uname: Cherry)           |
+| OrangeFox, ramdisk padded                  | Murali        |  42,438,476 | "Booting OKAY", kernel never starts, ABL stays in fastboot |
+| OrangeFox, ramdisk padded                  | Murali        |  48,976,037 | same: kernel never starts       |
+| AERA build (LZ4, unreduced)                | Cherry        |  48,976,037 | same: kernel never starts       |
+
+Conclusion: the limit applies to the ramdisk alone (kernel size does not
+matter between 17.7 and 18.1 MB) and lies between 41.5 MB and 42.4 MB,
+consistent with 40 MiB (41,943,040 B). The tree keeps the ramdisk <= 40,000,000 B
+(tools/validate-tree.sh check 13).
+
+# Compression
+AERA build with a gzip ramdisk (37,173,728 B): kernel starts, but
+  "Trying to unpack rootfs image as initramfs..."
+  "rootfs image is not initramfs (Decoding failed); looks like an initrd"
+(kmsg-build5-gzip-initramfs.txt). With header v3 the bootloader appends the boot
+ramdisk after the installed vendor_boot ramdisk, which is LZ4 legacy; the kernel's
+LZ4 legacy decoder has no end marker and fails on the following gzip stream.
+The boot ramdisk must therefore be LZ4 legacy (check 14). The kernel has
+CONFIG_DECOMPRESS_LZ4=y and CONFIG_DECOMPRESS_GZIP=y (ikconfig).
+
+# Final AERA image
+LZ4 ramdisk 39,576,597 B after removing: CJK/Arabic/Hebrew/Indic/Thai fallback
+fonts (unused without AERA_EXTRA_LANGUAGES), GNU bash (AERA_REMOVE_BASH),
+optional GNU tar/sed/grep/nano, aera-otaripper, htop, and lpdump +
+libprotobuf-cpp-full (dropping AERA_ENABLE_ALL_PARTITION_TOOLS). Boots.
