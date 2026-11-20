@@ -52,7 +52,7 @@
 
 - Linterna: no configurada (`AERA_FLASHLIGHT_ENABLE` / `AERA_FL_PATH1`). Hay que comprobar si el kernel de EvolutionX expone el LED del flash en `/sys/class/leds`; el kernel de OrangeFox del usuario lleva un parche para ello.
 - Vibración (`AERA_NO_HAPTICS`): hay que incluir el servicio AIDL `vendor.qti.hardware.vibrator` de EvolutionX.
-- Wi-Fi: **implementado** (ver la sección siguiente). Pendiente: PC Connection por red (`ttyd`), NAS y la reconexión tras desactivar y activar varias veces.
+- Wi-Fi: **implementado** (ver la sección siguiente). PC Connection probada por Wi-Fi y por USB (API y aprobación). Pendiente: backup y restore hacia el PC desde el navegador, NAS (SMB/SFTP) y la reconexión tras desactivar y activar varias veces.
 - Aceleración GPU para LVGL: se usa renderizado por software.
 - Audio y redes móviles: fuera de alcance.
 - Plugins (SSH/SFTP, MCP Bridge, AI Diagnostics): etapa 2, no se implementan.

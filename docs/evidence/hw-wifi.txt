@@ -54,3 +54,16 @@ fsg cb80f25e1fea3439be6c4d721e42087ad077eff8e163b908ee7b115c4ecb6d39
 fsc fa43239bcee7b97ca62f007cc68487560a39e19f74f3dde7486db3f98df8e471
 persist 82ab63108dcbce662b824e3c20ee09040fd906f3f904ce39b87b0160807a581a
 result: identical
+
+## PC Connection (Menu > PC connection), tested from the PC
+Wi-Fi: https://192.168.100.70/ -> 200 (47,300 B workspace page); aera.local resolves via mDNS
+TLS certificate CN=aera.local, SAN: localhost, aera.local, 127.0.0.1, ::1, 192.168.100.70, aera-2201117TG-70*.local
+GET /api/hello -> {"device":"2201117TG","schema":1,"version":"R1.0","persistent_certificate":true,...}
+GET /api/status and /api/certificate without a session -> 401
+POST /api/connect (random 64-hex computer key) -> 202 pending; phone showed the request; user tapped Allow
+POST /api/connect/status -> allowed + bearer token
+Authenticated: /api/status (storages: internal 40.6 GB free, MicroSD, battery, slot, backup partitions) -> 200
+Authenticated: /api/files/list {"path":"/sdcard"} -> 20 entries; /api/log/kernel -> kernel log
+Session resume without a second approval -> yes
+USB: adb -d forward tcp:8443 tcp:443; https://localhost:8443/ -> 200; same token valid over USB -> 200
+POST /api/forget -> session revoked; status with revoked token -> 401

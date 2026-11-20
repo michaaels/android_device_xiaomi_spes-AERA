@@ -79,7 +79,9 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 | Linterna | NOT IMPLEMENTED | | |
 | microSD | PASS (detección) | | `/dev/block/mmcblk0p1` montado en `/external_sd`; visible por MTP |
 | OTG | NOT TESTED | | |
-| PC Connection | NOT TESTED | | |
+| PC Connection por Wi-Fi | PASS | NOT TESTED | `https://192.168.100.70` y `aera.local` (mDNS) → 200; certificado con la IP y `aera.local`; sin sesión → 401; aprobación física en el teléfono → token; `/api/status`, `/api/files/list` y `/api/log/kernel` correctos; sesión revocada → 401 (`evidence/hw-wifi.txt`) |
+| PC Connection por USB (`adb forward 8443:443`) | PASS | NOT TESTED | `https://localhost:8443` → 200; el mismo token funciona |
+| PC Connection: backup y restore hacia o desde el PC en el navegador | NOT TESTED | | requiere navegador Chromium con selector de carpetas; AERA lo marca como Beta |
 | Wi-Fi: arranque bajo demanda | PASS | NOT TESTED | IPA y módem arrancados, `wlan_pd` → "WLAN FW is ready" → driver → `wlan0` en ~10 s (`evidence/hw-wifi.txt`) |
 | Wi-Fi: conexión desde la interfaz de AERA | PASS | NOT TESTED | DHCP `192.168.100.70/24` y DNS configurados; ping del PC al teléfono 3/3; TCP a 1.1.1.1:443, 8.8.8.8:443 y google.com:443 |
 | Wi-Fi: sin escrituras en EFS ni persist reales | PASS | | SHA-256 de `modemst1/2`, `fsg`, `fsc` y `persist` reales idéntico antes y después de la sesión, aunque el módem escribió EFS (en las copias en RAM) |
