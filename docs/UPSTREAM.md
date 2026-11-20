@@ -25,7 +25,7 @@ No se ha tocado el Plugin SDK.
 
 ## Atribución
 
-- `init.recovery.usb.rc` sigue la plantilla BSD de The Linux Foundation que también usan los árboles AERA, y conserva su cabecera.
+- `init.recovery.usb.rc` es nuevo (Apache-2.0). La primera versión se basaba en la plantilla BSD de The Linux Foundation; se reescribió para delegar en el `init.rc` de AERA y ya no contiene ese código.
 - `BoardConfig.mk`, `device.mk`, `twrp_spes.mk` y `AndroidProducts.mk` conservan el copyright de LineageOS 2021 del árbol spes original.
 
 ## Contribución oficial
