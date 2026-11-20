@@ -1,0 +1,39 @@
+# Proprietary blobs for spes / spesn recovery, taken ONLY from the stock
+# spes vendor image (reference: MIUI 14 V816.0.8.0.TGCMIXM, vendor build
+# 2024-09-29, ro.vendor.build.security_patch=2024-10-01).
+#
+# Format: <source path in vendor partition>[:<destination under recovery/root>]
+# Extract with: tools/extract-files.sh [--adb | --dump <dir>]
+#
+# Destinations follow device/qcom/twrp-common: on Android 10+ trees the
+# decryption services are executed from /system/bin in recovery.
+
+# --- Decryption: TEE listener, Keymaster 4.1, Gatekeeper 1.0
+bin/qseecomd:system/bin/qseecomd
+bin/hw/android.hardware.keymaster@4.1-service-qti:system/bin/android.hardware.keymaster@4.1-service-qti
+bin/hw/android.hardware.gatekeeper@1.0-service-qti:system/bin/android.hardware.gatekeeper@1.0-service-qti
+lib64/hw/android.hardware.gatekeeper@1.0-impl-qti.so:vendor/lib64/hw/android.hardware.gatekeeper@1.0-impl-qti.so
+lib64/libQSEEComAPI.so:vendor/lib64/libQSEEComAPI.so
+lib64/libqtikeymaster4.so:vendor/lib64/libqtikeymaster4.so
+lib64/libkeymasterdeviceutils.so:vendor/lib64/libkeymasterdeviceutils.so
+lib64/libkeymasterprovision.so:vendor/lib64/libkeymasterprovision.so
+lib64/libkeymasterutils.so:vendor/lib64/libkeymasterutils.so
+lib64/libqisl.so:vendor/lib64/libqisl.so
+lib64/librpmb.so:vendor/lib64/librpmb.so
+lib64/libssd.so:vendor/lib64/libssd.so
+lib64/libdiag.so:vendor/lib64/libdiag.so
+lib64/libdrmfs.so:vendor/lib64/libdrmfs.so
+lib64/libdrmtime.so:vendor/lib64/libdrmtime.so
+lib64/libdrmutils.so:vendor/lib64/libdrmutils.so
+lib64/libtime_genoff.so:vendor/lib64/libtime_genoff.so
+lib64/libGPreqcancel.so:vendor/lib64/libGPreqcancel.so
+lib64/libGPreqcancel_svc.so:vendor/lib64/libGPreqcancel_svc.so
+lib64/libops.so:vendor/lib64/libops.so
+lib64/libqcbor.so:vendor/lib64/libqcbor.so
+lib64/libStDrvInt.so:vendor/lib64/libStDrvInt.so
+lib64/libsecureui.so:vendor/lib64/libsecureui.so
+lib64/libSecureUILib.so:vendor/lib64/libSecureUILib.so
+lib64/libsecureui_svcsock.so:vendor/lib64/libsecureui_svcsock.so
+
+# --- Boot control (stock HAL is android.hardware.boot@1.1, QTI passthrough impl)
+lib64/hw/android.hardware.boot@1.0-impl-1.1-qti.so:vendor/lib64/hw/android.hardware.boot@1.0-impl-1.1-qti.so

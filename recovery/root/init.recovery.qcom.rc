@@ -1,0 +1,30 @@
+# Copyright (C) 2026 AERA Recovery Project contributors
+# SPDX-License-Identifier: Apache-2.0
+#
+# Recovery init for spes / spesn (ro.hardware=qcom).
+
+import /init.recovery.qcom_decrypt.rc
+# /init.recovery.usb.rc is imported by bootable/recovery/etc/init.rc
+
+# Sets spes / spesn product props from the hardware SKU
+service variant-script /system/bin/variant-script.sh
+    user root
+    group root
+    disabled
+    oneshot
+    seclabel u:r:recovery:s0
+
+on fs
+    wait /dev/block/platform/soc/${ro.boot.bootdevice}
+    symlink /dev/block/platform/soc/${ro.boot.bootdevice} /dev/block/bootdevice
+    mkdir /mnt/vendor 0775 shell system
+    mkdir /mnt/vendor/persist 0775 shell system
+
+on post-fs
+    # Stock HAL is android.hardware.boot@1.1 (QTI impl bundled under /vendor/lib64/hw)
+    start boot-hal-1-1
+
+on boot
+    start health-hal-2-1
+    start variant-script
+    setprop sys.usb.config adb
