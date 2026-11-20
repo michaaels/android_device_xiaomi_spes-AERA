@@ -1,0 +1,17 @@
+diff --git a/partition.cpp b/partition.cpp
+index 8f4feef..f933723 100644
+--- a/partition.cpp
++++ b/partition.cpp
+@@ -3105,7 +3105,11 @@ bool TWPartition::Raw_Read_Write(PartitionSettings *part_settings) {
+ 	}
+ 	if (part_settings->progress)
+ 		part_settings->progress->UpdateDisplayDetails(true);
+-	if (fsync(dest_fd) != 0) {
++	// An ADB backup writes into the twadbbackup FIFO, where fsync() always
++	// fails with EINVAL. Flush only real files and block devices (an ADB
++	// restore still writes to, and must flush, the partition itself).
++	struct stat dest_st;
++	if (!(fstat(dest_fd, &dest_st) == 0 && S_ISFIFO(dest_st.st_mode)) && fsync(dest_fd) != 0) {
+ 		LOGERR("Unable to flush '%s': %s\n", destfn.c_str(), strerror(errno));
+ 		goto exit;
+ 	}

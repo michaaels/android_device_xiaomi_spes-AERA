@@ -33,8 +33,16 @@
 - **`overrideprops.sh` (OFox) eliminado.** OFox lo usaba para esquivar el anti-rollback de OTA. Si hiciera falta, irá como un cambio aparte y documentado.
 - **SELinux.** No se fuerza el modo permisivo. La cmdline de `vendor_boot` [EVOX] no incluye `androidboot.selinux`.
 
+## Problemas abiertos de AERA en spes
+
+- **Rotación horizontal**: con `AERA_UI_ADAPTIVE_RESOLUTION`, la imagen sale corrupta al girar a horizontal. No se guarda en los ajustes y un reinicio la quita. Sin investigar todavía.
+- **Backup por ADB**: el núcleo de AERA hace `fsync()` sobre la FIFO de ADB y marca el backup como fallido aunque los datos sean correctos. Hay un parche mínimo en `patches/bootable_recovery/0001-partition-skip-fsync-on-ADB-backup-stream.diff` (solo omite el `fsync` si el destino es una FIFO; la restauración sigue sincronizando la partición), probado en hardware y pendiente de proponer upstream. Además, AERA no atiende `adb backup` mientras muestra la pantalla de descifrado (hay que descifrar u omitir antes), y sin descifrar registra `Unable to chmod … recovery.log`, que es solo cosmético.
+- **Escrituras persistentes de AERA** (comportamiento de AERA, no del port): sus ajustes y logs en `/data/media/0/AERA/` (descifrado) o en `/data/recovery/AERA/` y `/data/recovery/.version` (sin descifrar).
+- **Lentitud de la interfaz**: mejora con la resolución adaptativa, pero el renderizado sigue siendo por software (sin GPU).
+
 ## Funciones fuera de la primera versión
 
+- Linterna: no configurada (`AERA_FLASHLIGHT_ENABLE` / `AERA_FL_PATH1`). Hay que comprobar si el kernel de EvolutionX expone el LED del flash en `/sys/class/leds`; el kernel de OrangeFox del usuario lleva un parche para ello.
 - Vibración (`AERA_NO_HAPTICS`): hay que incluir el servicio AIDL `vendor.qti.hardware.vibrator` de EvolutionX.
 - Wi-Fi: el driver está integrado en el kernel. Faltan el firmware `qca_cld`, la configuración de `wpa_supplicant` y `AERA_ENABLE_WLAN`.
 - Aceleración GPU para LVGL: se usa renderizado por software.

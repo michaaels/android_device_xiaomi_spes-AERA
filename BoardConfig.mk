@@ -161,6 +161,11 @@ BOOT_SECURITY_PATCH := $(PLATFORM_SECURITY_PATCH)
 # Display (1080x2400 AMOLED, 90 Hz)
 AERA_THEME := portrait_hdpi
 AERA_FRAMERATE := 90
+# Render at the panel's own metrics (AERA_SCREEN_H/AERA_STATUS_H in
+# aera_spes.mk, width defaults to 1080). Without it AERA uses a fixed
+# 3168-high canvas scaled to 2400 lines: on hardware the decrypt screen's
+# "Skip" control was covered by the keypad and the UI felt slow.
+AERA_UI_ADAPTIVE_RESOLUTION := true
 AERA_BRIGHTNESS_PATH := "/sys/class/backlight/panel0-backlight/brightness"
 # Both spes panels in the installed dtbo (k7_38_0c_0a / k7_38_0c_0b) declare
 # qcom,mdss-dsi-bl-max-level = qcom,mdss-brightness-max-level = 2047

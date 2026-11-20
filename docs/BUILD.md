@@ -47,6 +47,14 @@ repo sync -c --force-sync --no-clone-bundle --no-tags --optimized-fetch -j16
    ```
    Los checksums quedan en `tools/blobs.sha256`.
 
+## Parche opcional para AERA
+
+Para que `adb backup` termine bien (ver `UPSTREAM.md`), aplícalo en el árbol sincronizado antes de compilar:
+
+```bash
+cd /src/bootable/recovery && git apply /src/device/xiaomi/spes/patches/bootable_recovery/0001-partition-skip-fsync-on-ADB-backup-stream.diff
+```
+
 ## Compilación
 
 ```bash

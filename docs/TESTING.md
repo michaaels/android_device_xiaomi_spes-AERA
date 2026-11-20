@@ -38,7 +38,8 @@ Hay tres niveles de validación, y cumplir uno no implica los siguientes: **comp
 | Blobs en el ramdisk idénticos a `blobs.sha256` | PASS | 33/33 |
 | Librerías AOSP que necesitan los blobs | PASS | keymaster@4.0/4.1, gatekeeper@1.0, boot@1.0–1.2, hidl, binder, xml2, crypto… todas presentes |
 | SHA-256 del artefacto | PASS | probado en hardware: `d69b491b1c0439a19ae007adcc98688de58821284530d37b7d6c1f665bba3ba3` (incremental). Los anteriores (`7fa53ef7…`, `0b6dcea3…`) no arrancan |
-| Build limpio con la configuración final | NOT TESTED | pendiente |
+| Build limpio de la configuración a fecha de `b14656b` | PASS | `EXIT 0`, 13 min 50 s; mismos 3777 ficheros, configuración y blobs idénticos a la imagen probada, y arranca en hardware (`8982622e…`) |
+| Build limpio con la resolución adaptativa y el parche de backup | NOT TESTED | pendiente (la imagen `build13`, `6d374afe…`, es incremental) |
 
 ## Pruebas en hardware
 
@@ -59,20 +60,24 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 | Detección de particiones | PASS | NOT TESTED | todas las de `twrp.flags` y las lógicas `_a` (`recovery.log`) |
 | Descifrado con PIN | PASS | NOT TESTED | "User 0 Decrypted Successfully", `/data` en dm-default-key y `/data/media/0` legible (`hw-aera-recovery-log-decrypt.txt`) |
 | Descifrado sin contraseña | NOT TESTED | NOT TESTED | requiere un dispositivo sin bloqueo |
-| Descifrado con patrón | NOT TESTED | NOT TESTED | |
-| Credencial incorrecta | NOT TESTED | NOT TESTED | |
-| Cancelar el desbloqueo | NOT TESTED | NOT TESTED | |
+| Descifrado con patrón | NOT TESTED | NOT TESTED | el dispositivo de pruebas usa PIN |
+| Credencial incorrecta | PASS | NOT TESTED | la interfaz muestra "That credential did not unlock data. Please try again."; en el log, `GateKeeper response error` → `Failed to decrypt user 0`, y `/data/media/0` sigue con nombres cifrados |
+| Cancelar el desbloqueo (Omitir) | PASS (con `AERA_UI_ADAPTIVE_RESOLUTION`) | NOT TESTED | sin él, el teclado tapaba el botón; con él, entra al menú y los datos siguen cifrados |
 | Claves de Android intactas tras descifrar en AERA | PASS | | el usuario desbloqueó Android con su PIN tras la sesión de AERA y confirmó que apps y fotos están bien (2026-11-20); por código, las claves actualizadas se escriben solo en `/tmp` |
 | MTP (enumeración) | PASS | NOT TESTED | el PC ve `18d1:4ee2 (MTP + debug)` con `mtp,adb` |
-| MTP (transferencia de ficheros) | NOT TESTED | | |
-| ADB sideload | NOT TESTED | | |
+| MTP (transferencia de ficheros) | PASS | NOT TESTED | 1 MB aleatorio subido y bajado; SHA-256 igual en el PC, el teléfono y la copia descargada; fichero de prueba borrado. La microSD también aparece |
+| ADB sideload | PASS | NOT TESTED | zip inofensivo (`aera-sideload-test.zip`): "Installing zip file '/sideload/package.zip'", "AERA spes sideload test: OK", "Process ended with no errors" |
 | Fastbootd | PASS | NOT TESTED | `adb reboot fastboot` → `is-userspace: yes`, `super-partition-name: super`, `snapshot-update-status: none` |
 | Reinicio a bootloader (desde la interfaz y por adb) | PASS | | |
 | Volver a Android con normalidad | PASS | NOT TESTED | `fastboot reboot` desde fastbootd → `sys.boot_completed=1`, Android 16, slot `_a` |
 | Batería y temperatura | PASS (lectura) | | capacidad 100 %, cargando, 31,1 °C; CPU `pm6125-tz` 37 °C |
 | Backup de particiones (desde OrangeFox, solo lectura) | PASS | | 15 particiones verificadas con SHA-256 (fuera del repositorio) |
-| Backup y restore desde AERA | NOT TESTED | | |
-| microSD / OTG | NOT TESTED | | |
+| Backup desde AERA por ADB (`adb backup --twrp boot`) | PASS con el parche `patches/bootable_recovery/0001` | | los 128 MiB son idénticos a la copia `dd` (`9f132dc1…`) y el stream acaba en `twendadb`. Sin el parche, AERA lo da por fallido ("Unable to flush '/tmp/twadbbackup': Invalid argument"). Solo funciona fuera de la pantalla de descifrado |
+| Restore desde AERA | NOT TESTED | | escribe en particiones; queda para el final y requiere autorización |
+| Rotación de pantalla (horizontal) | FAIL | | con la resolución adaptativa, la imagen girada sale corrupta; no se guarda, y un reinicio la quita |
+| Linterna | NOT IMPLEMENTED | | |
+| microSD | PASS (detección) | | `/dev/block/mmcblk0p1` montado en `/external_sd`; visible por MTP |
+| OTG | NOT TESTED | | |
 | PC Connection | NOT TESTED | | |
 | Wi-Fi | NOT TESTED (no implementado) | | |
 | Vibración | NOT TESTED (desactivada) | | |

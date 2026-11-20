@@ -17,7 +17,11 @@
 
 ## Cambios en componentes AERA
 
-**Ninguno.** Todo lo específico del dispositivo está en este árbol. No se ha tocado el Plugin SDK.
+El device tree no modifica AERA. Hay **un parche genérico** propuesto para `bootable/recovery`, que se guarda aparte y no se aplica desde el árbol:
+
+- `patches/bootable_recovery/0001-partition-skip-fsync-on-ADB-backup-stream.diff`: en `TWPartition::Raw_Read_Write`, omite `fsync()` cuando el destino es una FIFO (el stream de `adb backup`), donde siempre falla con `EINVAL` y hacía que AERA diera por fallido un backup correcto. Las escrituras a ficheros y particiones, incluida la restauración por ADB, siguen sincronizándose. Probado en spes; candidato a PR upstream (no enviado).
+
+No se ha tocado el Plugin SDK.
 
 ## Atribución
 
