@@ -1,0 +1,87 @@
+# Copyright (C) 2026 AERA Recovery Project contributors
+# SPDX-License-Identifier: Apache-2.0
+#
+# On-demand Wi-Fi for spes. Nothing here runs at boot: AERA sets
+# sys.aera.wlan.up=1 when the user starts WLAN and then waits up to 20 s for
+# init.svc.wpa_supplicant=running and up to 60 s for its control socket.
+#
+# SM6225 WLAN firmware runs on the modem (icnss), so the stock modem daemons
+# are started from the installed vendor (see system/bin/spes-wlan-up.sh, which
+# also sandboxes every modem write into RAM).
+
+on property:sys.aera.wlan.up=1
+    mkdir /tmp/recovery 0777
+    mkdir /tmp/recovery/sockets 0777
+    start spes-wlan-prep
+    # The wrapper is "running" at once (AERA's 20 s check) and execs the real
+    # wpa_supplicant only after wlan0 exists.
+    start wpa_supplicant
+    setprop sys.aera.wlan.up 0
+
+on property:spes.wlan.prep=1
+    start spes-qrtr-ns
+    start spes-pd-mapper
+    start spes-rmt-storage
+    start spes-tftp-server
+    start spes-cnss-daemon
+    # Boots the modem (and its WLAN firmware) by holding /dev/subsys_modem.
+    # The stock pm-service cannot register with recovery's vndservicemanager
+    # (no vendor service contexts); holding the node is what it does inside.
+    start spes-modem-hold
+
+service spes-wlan-prep /system/bin/sh /system/bin/spes-wlan-up.sh
+    user root
+    group root
+    disabled
+    oneshot
+    seclabel u:r:recovery:s0
+
+service spes-qrtr-ns /mnt/vendor_stock/bin/qrtr-ns -f
+    user root
+    group root
+    disabled
+    setenv LD_LIBRARY_PATH /mnt/vendor_stock/lib64:/system/lib64
+    seclabel u:r:recovery:s0
+
+service spes-pd-mapper /mnt/vendor_stock/bin/pd-mapper
+    user root
+    group root
+    disabled
+    setenv LD_LIBRARY_PATH /mnt/vendor_stock/lib64:/system/lib64
+    seclabel u:r:recovery:s0
+
+service spes-rmt-storage /mnt/vendor_stock/bin/rmt_storage
+    user root
+    group root
+    disabled
+    setenv LD_LIBRARY_PATH /mnt/vendor_stock/lib64:/system/lib64
+    seclabel u:r:recovery:s0
+
+service spes-tftp-server /mnt/vendor_stock/bin/tftp_server
+    user root
+    group root
+    disabled
+    setenv LD_LIBRARY_PATH /mnt/vendor_stock/lib64:/system/lib64
+    seclabel u:r:recovery:s0
+
+service spes-modem-hold /system/bin/sh /system/bin/spes-modem-hold.sh
+    user root
+    group root
+    disabled
+    seclabel u:r:recovery:s0
+
+service spes-cnss-daemon /mnt/vendor_stock/bin/cnss-daemon -n -l
+    user root
+    group root
+    disabled
+    setenv LD_LIBRARY_PATH /mnt/vendor_stock/lib64:/system/lib64
+    seclabel u:r:recovery:s0
+
+service wpa_supplicant /system/bin/sh /system/bin/spes-wpa-supplicant.sh
+    user root
+    group root
+    disabled
+    # One attempt per "Start WLAN"; AERA reports the failure instead of init
+    # restarting the wrapper (and re-requesting the driver) every 5 s.
+    oneshot
+    seclabel u:r:recovery:s0

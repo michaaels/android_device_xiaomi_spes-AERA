@@ -33,6 +33,14 @@
 - **`overrideprops.sh` (OFox) eliminado.** OFox lo usaba para esquivar el anti-rollback de OTA. Si hiciera falta, irá como un cambio aparte y documentado.
 - **SELinux.** No se fuerza el modo permisivo. La cmdline de `vendor_boot` [EVOX] no incluye `androidboot.selinux`.
 
+## Wi-Fi: diseño y límites
+
+- El firmware WLAN de SM6225 corre en el módem (`icnss`). Al pulsar "Start WLAN", `spes-wlan-up.sh` monta en solo lectura el `vendor` instalado y la partición `modem`, carga la IPA (`/dev/ipa`) y arranca los daemons stock (`qrtr-ns`, `pd-mapper`, `rmt_storage`, `tftp_server` y `cnss-daemon`) desde ese vendor. `spes-modem-hold.sh` mantiene encendido el módem; el envoltorio de `wpa_supplicant` escribe `ON` en `/dev/wlan` y espera a `wlan0`.
+- **Sandbox:** EFS en loops respaldados por copias en RAM, `persist/rfs` en tmpfs y `/data/vendor/{wifi,tombstones}` en tmpfs. Verificado en hardware: las particiones reales no cambian.
+- `pm-service` del vendor no puede registrarse en el `vndservicemanager` de recovery (no hay contextos de servicio del vendor); se sustituye por mantener abierto `/dev/subsys_modem`.
+- Depende del vendor instalado: con otro firmware, las rutas o los daemons pueden cambiar.
+- Mientras el Wi-Fi está activo, los nodos `by-name` de EFS apuntan a las copias en RAM, así que un backup de EFS desde AERA en ese momento leería la copia (con lo que haya escrito el módem en la sesión). Lo recomendable es hacer los backups de EFS sin el Wi-Fi activado.
+
 ## Problemas abiertos de AERA en spes
 
 - **Rotación horizontal**: con `AERA_UI_ADAPTIVE_RESOLUTION`, la imagen sale corrupta al girar a horizontal. No se guarda en los ajustes y un reinicio la quita. Sin investigar todavía.
@@ -44,7 +52,7 @@
 
 - Linterna: no configurada (`AERA_FLASHLIGHT_ENABLE` / `AERA_FL_PATH1`). Hay que comprobar si el kernel de EvolutionX expone el LED del flash en `/sys/class/leds`; el kernel de OrangeFox del usuario lleva un parche para ello.
 - Vibración (`AERA_NO_HAPTICS`): hay que incluir el servicio AIDL `vendor.qti.hardware.vibrator` de EvolutionX.
-- Wi-Fi: el driver está integrado en el kernel. Faltan el firmware `qca_cld`, la configuración de `wpa_supplicant` y `AERA_ENABLE_WLAN`.
+- Wi-Fi: **implementado** (ver la sección siguiente). Pendiente: PC Connection por red (`ttyd`), NAS y la reconexión tras desactivar y activar varias veces.
 - Aceleración GPU para LVGL: se usa renderizado por software.
 - Audio y redes móviles: fuera de alcance.
 - Plugins (SSH/SFTP, MCP Bridge, AI Diagnostics): etapa 2, no se implementan.

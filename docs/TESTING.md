@@ -80,7 +80,10 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 | microSD | PASS (detección) | | `/dev/block/mmcblk0p1` montado en `/external_sd`; visible por MTP |
 | OTG | NOT TESTED | | |
 | PC Connection | NOT TESTED | | |
-| Wi-Fi | NOT TESTED (no implementado) | | |
+| Wi-Fi: arranque bajo demanda | PASS | NOT TESTED | IPA y módem arrancados, `wlan_pd` → "WLAN FW is ready" → driver → `wlan0` en ~10 s (`evidence/hw-wifi.txt`) |
+| Wi-Fi: conexión desde la interfaz de AERA | PASS | NOT TESTED | DHCP `192.168.100.70/24` y DNS configurados; ping del PC al teléfono 3/3; TCP a 1.1.1.1:443, 8.8.8.8:443 y google.com:443 |
+| Wi-Fi: sin escrituras en EFS ni persist reales | PASS | | SHA-256 de `modemst1/2`, `fsg`, `fsc` y `persist` reales idéntico antes y después de la sesión, aunque el módem escribió EFS (en las copias en RAM) |
+| Funciones con UPX (recovery, keystore2, adbd…) | PASS | | arranque, ADB, descifrado con PIN y Wi-Fi con los 29 binarios comprimidos |
 | Vibración | NOT TESTED (desactivada) | | |
 
 **Nivel alcanzado:** compila ✔ · arranca ✔ · funciona en lo básico (pantalla, táctil, ADB, particiones, descifrado con PIN, fastbootd, vuelta a Android) ✔. **No validado aún:** el resto de escenarios de descifrado, MTP con transferencia, sideload, backup/restore desde AERA, spesn y la instalación permanente. El port sigue siendo EXPERIMENTAL.

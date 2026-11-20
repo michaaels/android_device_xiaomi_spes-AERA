@@ -1,0 +1,56 @@
+# Wi-Fi in AERA on spes (image build17-wifi3, 1f36eb46ffb8e493...), 2026-11-20
+
+## Bring-up timeline (kernel log)
+[   19.364300] init: starting service 'spes-wlan-prep'...
+[   19.368295] init: ... started service 'spes-wlan-prep' has pid 610
+[   19.543360] spes-wlan: IPA firmware loaded
+[   19.594001] IPA FW loaded successfully
+[   19.690456] spes-wlan: modemst1 (/dev/block/sdf2) -> /dev/block/loop0 (RAM copy)
+[   19.773850] spes-wlan: modemst2 (/dev/block/sdf3) -> /dev/block/loop1 (RAM copy)
+[   19.858399] spes-wlan: fsg (/dev/block/sdf4) -> /dev/block/loop2 (RAM copy)
+[   19.936129] spes-wlan: fsc (/dev/block/sdf5) -> /dev/block/loop3 (RAM copy)
+[   20.023276] spes-wlan: persist rfs/hlos_rfs copied to RAM
+[   20.164867] spes-wlan: prepared (slot _a)
+[   20.186742] init: Service 'spes-wlan-prep' (pid 610) exited with status 0 oneshot service took 0.820000 seconds in background
+[   20.186762] init: Sending signal 9 to service 'spes-wlan-prep' (pid 610) process group...
+[   22.781139] subsys-pil-tz 6080000.qcom,mss: modem: Brought out of reset
+[   22.817373] spes-wlan: modem vote held
+[   23.673775] service-notifier: root_service_service_ind_cb: Indication received from msm/modem/wlan_pd, state: 0x1fffffff, trans-id: 1
+[   23.674079] service-notifier: send_ind_ack: Indication ACKed for transid 1, service msm/modem/wlan_pd, instance 180!
+[   23.687398] icnss_qmi: QMI Server Connected: state: 0x980
+[   28.928181] wlan: Loading driver v5.2.022.12B +PANIC_ON_BUG
+[   29.928957] icnss: WLAN FW is ready: 0xd87
+[   30.397431] spes-wlan: requested WLAN driver start (modem ONLINE after 4s)
+[   30.397772] spes-wlan: wlan0 up, starting wpa_supplicant
+
+## Interfaces / services
+bond0 bonding_masters dummy0 ip6_vti0 ip6tnl0 ip_vti0 lo p2p0 rmnet_ipa0 sit0 wifi-aware0 wlan0 
+[init.svc.spes-cnss-daemon]: [running]
+[init.svc.spes-modem-hold]: [running]
+[init.svc.spes-pd-mapper]: [running]
+[init.svc.spes-qrtr-ns]: [running]
+[init.svc.spes-rmt-storage]: [running]
+[init.svc.spes-tftp-server]: [running]
+[init.svc.spes-wlan-prep]: [stopped]
+[init.svc.wpa_supplicant]: [running]
+wlan0     Link encap:Ethernet  HWaddr <wlan-mac>  Driver icnss
+
+## Connectivity (after connecting from the AERA UI)
+PC -> phone ping 192.168.100.70: 3/3 received
+phone TCP 1.1.1.1:443 OK, 8.8.8.8:443 OK, google.com:443 OK (DNS via DHCP)
+
+## Sandbox proof: SHA-256 of the REAL partitions before and after a Wi-Fi session
+(modem performed EFS writes during the session; they went to RAM copies on loop devices)
+-- before
+modemst1 968b9bc3fe470ac59fb33d069c0f40ccb28d324f1f42b25a1a8b9ff67105f76a
+modemst2 d820179b3eca388213dba1fce7151d540146cfad1f94bc477a399d2fb054493c
+fsg cb80f25e1fea3439be6c4d721e42087ad077eff8e163b908ee7b115c4ecb6d39
+fsc fa43239bcee7b97ca62f007cc68487560a39e19f74f3dde7486db3f98df8e471
+persist 82ab63108dcbce662b824e3c20ee09040fd906f3f904ce39b87b0160807a581a
+-- after
+modemst1 968b9bc3fe470ac59fb33d069c0f40ccb28d324f1f42b25a1a8b9ff67105f76a
+modemst2 d820179b3eca388213dba1fce7151d540146cfad1f94bc477a399d2fb054493c
+fsg cb80f25e1fea3439be6c4d721e42087ad077eff8e163b908ee7b115c4ecb6d39
+fsc fa43239bcee7b97ca62f007cc68487560a39e19f74f3dde7486db3f98df8e471
+persist 82ab63108dcbce662b824e3c20ee09040fd906f3f904ce39b87b0160807a581a
+result: identical

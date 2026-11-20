@@ -66,6 +66,6 @@ Estados: **Directo** (compatible directamente) · **Adaptado** (requiere adaptac
 |---|---|---|
 | ADB / sideload / MTP / fastbootd (configfs) | Adaptado → **PASS** (ADB, MTP enumerado, fastbootd) | adb, sideload y fastboot los gestiona el `init.rc` de AERA. El rc del dispositivo solo activa configfs y añade MTP. Duplicar los manejadores dejaba el gadget sin enlazar (`evidence/kmsg-usb-diag.txt`). |
 | PC Connection de AERA (USB) | HW | Funcionalidad existente de AERA. No se tocó. |
-| Wi-Fi (`qca_cld3_wlan.ko` + firmware de modem) | Implementar | Fase 6.6. |
+| Wi-Fi | **Adaptado → PASS** | `AERA_ENABLE_WLAN`, con el módem y los daemons del vendor instalado cargados en tiempo de ejecución y sandbox en RAM (`init.recovery.wifi.rc`, `spes-wlan-up.sh`). |
 | Batería y temperatura | HW | Health 2.1. |
 | Audio | fuera de alcance | Opcional. |

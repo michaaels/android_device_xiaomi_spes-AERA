@@ -4,6 +4,7 @@
 # Recovery init for spes / spesn (ro.hardware=qcom).
 
 import /init.recovery.qcom_decrypt.rc
+import /init.recovery.wifi.rc
 # /init.recovery.usb.rc is imported by bootable/recovery/etc/init.rc
 
 # Sets spes / spesn product props from the hardware SKU

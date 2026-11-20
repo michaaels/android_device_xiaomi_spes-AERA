@@ -48,3 +48,11 @@ lib64/libdrm.so:vendor/lib64/libdrm.so
 
 # --- Boot control: android.hardware.boot@1.2 with the QTI passthrough impl
 lib64/hw/android.hardware.boot@1.0-impl-1.2-qti.so:vendor/lib64/hw/android.hardware.boot@1.0-impl-1.2-qti.so
+
+# --- Wi-Fi configuration (driver ini and supplicant config; AERA patches the
+#     ini with its stable MAC). The modem/WLAN daemons and their QMI libraries
+#     are NOT bundled: spes-wlan-up.sh runs them from the installed vendor.
+etc/wifi/WCNSS_qcom_cfg.ini:vendor/etc/wifi/WCNSS_qcom_cfg.ini
+etc/wifi/WCNSS_qcom_cfg.ini:vendor/firmware/wlan/qca_cld/WCNSS_qcom_cfg.ini
+etc/wifi/wpa_supplicant.conf:vendor/etc/wifi/wpa_supplicant.conf
+etc/wifi/wpa_supplicant_overlay.conf:vendor/etc/wifi/wpa_supplicant_overlay.conf

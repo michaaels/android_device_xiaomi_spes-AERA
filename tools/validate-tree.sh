@@ -53,10 +53,11 @@ awk '!/^#/ && NF { m[$1]++ } END { for (k in m) if (m[k] > 1) { print "FAIL  twr
     recovery/root/system/etc/twrp.flags && ok "twrp.flags unique mount points" || fail=$((fail+1))
 
 # 6. rc services point at files that exist in the tree or are provided by the build
-build_provided="android.hardware.boot@1.1-service android.hardware.health@2.1-service"
+build_provided="android.hardware.boot@1.1-service android.hardware.boot@1.2-service android.hardware.health@2.1-service sh"
 while read -r _ name path _; do
     b="$(basename "$path")"
-    if [ -f "recovery/root$path" ] || [[ " $build_provided " == *" $b "* ]]; then ok "service $name -> $path"
+    if [[ "$path" == /mnt/vendor_stock/* ]]; then ok "service $name -> $path (installed vendor, mounted read-only at runtime)"
+    elif [ -f "recovery/root$path" ] || [[ " $build_provided " == *" $b "* ]]; then ok "service $name -> $path"
     else bad "service $name: $path not in recovery/root and not build-provided"; fi
 done < <(grep -hE '^service ' recovery/root/*.rc)
 
