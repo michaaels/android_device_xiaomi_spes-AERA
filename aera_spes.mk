@@ -31,9 +31,10 @@ AERA_BIND_MOUNT_SDCARD_ON_FORMAT := 1
 AERA_UNMOUNT_SDCARDS_BEFORE_REBOOT := 1
 
 # Partition tooling
-# Not AERA_ENABLE_ALL_PARTITION_TOOLS: it forces lpdump + libprotobuf-cpp-full
-# (and lpmake/lpadd/lpflash/lpunpack/bootctl), which does not fit the
-# bootloader ramdisk limit. lptools covers logical partition management.
+AERA_ENABLE_ALL_PARTITION_TOOLS := 1
 AERA_ENABLE_LPTOOLS := 1
 AERA_USE_DMCTL := 1
 AERA_LOOP_DEVICE_ERRORS_TO_LOG := 1
+
+# Wi-Fi (on demand; the device-side bring-up is in init.recovery.wifi.rc)
+AERA_ENABLE_WLAN := 1

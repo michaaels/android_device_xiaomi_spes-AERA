@@ -185,27 +185,30 @@ AERA_EXCLUDE_DEFAULT_USB_INIT := true
 AERA_INCLUDE_REPACKTOOLS := true
 AERA_INCLUDE_RESETPROP := true
 AERA_INCLUDE_LIBRESETPROP := true
-# lpdump is left out for the ramdisk limit: with lpdumpd it pulls the 2.1 MB
-# libprotobuf-cpp-full. The lptools (AERA_INCLUDE_LPTOOLS) remain.
-AERA_EXCLUDE_LPDUMP := true
+AERA_INCLUDE_LPDUMP := true
 AERA_INCLUDE_LPTOOLS := true
 AERA_INCLUDE_NTFS_3G := true
 AERA_INCLUDE_FASTBOOTD := true
 AERA_USE_TOOLBOX := true
 AERA_EXCLUDE_APEX := true
-# AERA_EXTRA_LANGUAGES is left unset (ramdisk size limit above): only the
-# general-script font is loaded, so the CJK/Arabic/Hebrew/Indic/Thai fallback
-# fonts that aeraui copies unconditionally are dropped from the ramdisk.
-SPES_UNUSED_FONTS := wqy-microhei.ttf NotoSansCJKjp-Regular.ttf \
-    NotoSansDevanagariUI-VF.ttf NotoSansBengaliUI-VF.ttf \
-    NotoNaskhArabicUI-Regular.ttf NotoSansHebrew-Regular.ttf NotoSansThaiUI-Regular.ttf
-# Also dropped for the ramdisk limit: aera-otaripper (payload extraction falls
-# back to AERA's native extractor; only AERA's direct payload flashing needs
-# it) and htop (from vendor/twrp packages).
-SPES_DROPPED_BINS := system/bin/aera-otaripper system/bin/htop
-# No trailing ';': bootable/recovery appends its own "; rm -f ..." entry.
-BOARD_RECOVERY_IMAGE_PREPARE += rm -f $(addprefix $(TARGET_RECOVERY_ROOT_OUT)/twres/fonts/,$(SPES_UNUSED_FONTS)) $(addprefix $(TARGET_RECOVERY_ROOT_OUT)/,$(SPES_DROPPED_BINS))
+AERA_EXTRA_LANGUAGES := true
 AERA_DEFAULT_LANGUAGE := en
+
+# Ramdisk size: instead of dropping AERA features, pack the large executables
+# with AERA's bundled UPX (LZMA) from an explicit list; init, linker64, toybox,
+# sh and the vendor blobs are never touched. No trailing ';': bootable/recovery
+# appends its own "; rm -f ..." entry to this variable.
+BOARD_RECOVERY_IMAGE_PREPARE += bash $(DEVICE_PATH)/tools/compress-ramdisk-bins.sh $(TARGET_RECOVERY_ROOT_OUT) vendor/recovery/tools/upx &&
+# Even packed, everything is ~45.3 MB. The only files dropped are the CJK
+# fallback fonts (Chinese/Japanese/Korean UI and file names fall back to the
+# general font) and the lpdump CLI with its 2.1 MB libprotobuf-cpp-full, which
+# no AERA code uses (AERA_ENABLE_ALL_PARTITION_TOOLS forces it; lptools,
+# lpmake, lpunpack, lpflash and bootctl remain).
+SPES_DROPPED_FILES := twres/fonts/wqy-microhei.ttf twres/fonts/NotoSansCJKjp-Regular.ttf \
+    system/bin/lpdump system/bin/lpdumpd system/etc/init/lpdumpd.rc \
+    system/lib64/liblpdump.so system/lib64/liblpdump_interface-V1-cpp.so \
+    system/lib64/liblpdump_interface-cpp.so system/lib64/libprotobuf-cpp-full.so
+BOARD_RECOVERY_IMAGE_PREPARE += rm -f $(addprefix $(TARGET_RECOVERY_ROOT_OUT)/,$(SPES_DROPPED_FILES))
 
 # Debug
 TARGET_USES_LOGD := true
