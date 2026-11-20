@@ -29,14 +29,15 @@ Hay tres niveles de validación, y cumplir uno no implica los siguientes: **comp
 |---|---|---|
 | Build 1 (limpio) `m adbd bootimage` | FAIL → corregido | se detuvo al 55 %: `graphics_fbdev.cpp:67: expected expression` (`TW_MAX_BRIGHTNESS` vacío) |
 | Build 2 (incremental tras la corrección) | PASS | `EXIT 0`, 5 min; `/src/build2.log` |
-| Build limpio completo sin errores | en curso | `OUT_DIR=/src/out_clean`, `/src/build_clean.log` |
+| Build limpio completo sin errores | PASS | `OUT_DIR=/src/out_clean`, `EXIT 0`, 13 min 40 s, 0 `FAILED`; log en `aera_source/artifacts/build-clean/` |
+| Comparación limpio frente a incremental | PASS (estructura) | mismos 3440 ficheros y kernel idéntico; 120 ficheros difieren por la fecha de build en las props y los build-id de ELF (`fastbootd` es idéntico sin build-id). `adbd` tiene otra diferencia sin analizar. No es reproducible bit a bit |
 | Cabecera v3 | PASS | `unpack_bootimg.py`: `boot image header version: 3`, os 99.87.36 / 2099-12 |
 | Kernel idéntico al prebuilt | PASS | SHA-256 `34ebc3ee…` en los dos |
 | Tamaño ≤ partición | PASS | 134217728 = `BOARD_BOOTIMAGE_PARTITION_SIZE` (original 67108864 + footer AVB, algoritmo NONE) |
 | Ramdisk LZ4 y contenido | PASS | 3440 ficheros; rc de qcom, usb y decrypt; `twrp.flags`; fstab; boot@1.2 y health@2.1; adbd, fastbootd, minadbd, resetprop |
 | Blobs en el ramdisk idénticos a `blobs.sha256` | PASS | 33/33 |
 | Librerías AOSP que necesitan los blobs | PASS | keymaster@4.0/4.1, gatekeeper@1.0, boot@1.0–1.2, hidl, binder, xml2, crypto… todas presentes |
-| SHA-256 del artefacto | PASS | `0b6dcea3ac5ea97ef72139b8bb972f759b142076fe47636a6c2bb696bb658f69` (`boot.img` = `AERA-R1.0-Beta-Unofficial-spes.img`) |
+| SHA-256 del artefacto | PASS | **build limpio, de referencia**: `7fa53ef7ed9870d246413df0bcab909ea66fa6b4a217f73ab8fbae360f44647f`; incremental: `0b6dcea3…` (`boot.img` = `AERA-R1.0-Beta-Unofficial-spes.img` en ambos) |
 
 ## Pruebas en hardware
 

@@ -83,5 +83,5 @@ Hay que comprobar:
 | Kernel y blobs | Listos (EvolutionX 11.10) |
 | `repo sync` | Completado sin errores (77 GB con checkout) |
 | `lunch` | PASS |
-| `bootimage` | PASS (incremental); el build limpio completo está en verificación |
-| Artefacto | `out/target/product/spes/boot.img` = `AERA-R1.0-Beta-Unofficial-spes.img`, SHA-256 `0b6dcea3…`, 134217728 bytes |
+| `bootimage` | PASS: build limpio (13 min 40 s) e incremental |
+| Artefacto de referencia | build limpio, `boot.img` = `AERA-R1.0-Beta-Unofficial-spes.img`, SHA-256 `7fa53ef7ed9870d246413df0bcab909ea66fa6b4a217f73ab8fbae360f44647f`, 134217728 bytes |
