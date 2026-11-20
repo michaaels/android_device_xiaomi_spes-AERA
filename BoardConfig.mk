@@ -57,6 +57,15 @@ TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilt/kernel
 BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOT_HEADER_VERSION)
 BOARD_MKBOOTIMG_ARGS += --pagesize $(BOARD_KERNEL_PAGESIZE)
 
+# `fastboot boot` on spes passes androidboot.force_normal_boot=1, so first-stage
+# init would try a normal Android boot (and fatally reboot to the bootloader)
+# unless the image carries twrpfastboot=1. vendor/twrp only adds it to
+# GENERIC_KERNEL_CMDLINE when a vendor_boot exists, and build/make writes that
+# into boot.img only for BOARD_USES_GENERIC_KERNEL_IMAGE (GKI), which a 4.19
+# kernel is not. Put it in the boot header explicitly. An image produced by
+# AERA's repack of the installed boot keeps the stock (empty) cmdline.
+BOARD_MKBOOTIMG_ARGS += --cmdline "twrpfastboot=1"
+
 # The installed boot and vendor_boot ramdisks are LZ4 and boot with this kernel
 BOARD_RAMDISK_USE_LZ4 := true
 
