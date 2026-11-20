@@ -59,7 +59,7 @@ mka adbd bootimage
 
 - Producto: `twrp_spes` (`AndroidProducts.mk` → `twrp_spes.mk`). La release `bp2a` es la que usan los árboles oficiales AERA en `aera-16.0`. Hay que confirmar que existe en `build/release` del árbol sincronizado.
 - Objetivo: **`bootimage`**, no `recoveryimage`. spes no tiene partición recovery y el ramdisk del recovery va dentro de `boot.img` (`BOARD_USES_RECOVERY_AS_BOOT`).
-- Artefacto: `out/target/product/spes/boot.img`. AERA puede renombrarlo o empaquetarlo además mediante `vendor/recovery/AERA_A16.sh`; se documentará tras el primer build.
+- Artefactos: `out/target/product/spes/boot.img` y una copia idéntica con nombre AERA, `AERA-R1.0-Beta-Unofficial-spes.img`. Tiempos en este equipo (24 hilos, `-j16`): el build limpio se detuvo al 55 % a los 10 min; el incremental tardó 5 min.
 
 ## Verificación de artefactos
 
@@ -80,6 +80,8 @@ Hay que comprobar:
 | Paso | Estado |
 |---|---|
 | Manifest y acceso a las fuentes | Verificado (todo público) |
-| `repo sync` | En curso (ver `docs/TESTING.md`) |
 | Kernel y blobs | Listos (EvolutionX 11.10) |
-| `lunch` / `bootimage` | **No ejecutado**: espera al fin de `repo sync` |
+| `repo sync` | Completado sin errores (77 GB con checkout) |
+| `lunch` | PASS |
+| `bootimage` | PASS (incremental); el build limpio completo está en verificación |
+| Artefacto | `out/target/product/spes/boot.img` = `AERA-R1.0-Beta-Unofficial-spes.img`, SHA-256 `0b6dcea3…`, 134217728 bytes |

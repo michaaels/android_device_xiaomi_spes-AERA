@@ -44,13 +44,16 @@ sha256sum *.img > SHA256SUMS
 
 ## 4. Instalación permanente (solo cuando todo lo de TESTING.md esté en PASS)
 
-La opción recomendada es la función de AERA que instala el recovery en la ramdisk del `boot` actual (repack), porque conserva el kernel instalado. La alternativa es `fastboot flash boot_<slot> boot.img`, y solo con una imagen hecha con el kernel stock de **ese mismo** firmware.
+> ⚠️ **Nunca** hagas `fastboot flash boot` del `boot.img` de AERA para arrancar Android con él. Su cabecera declara el nivel de parche 2099-12, y el Keymaster de Android podría actualizar las claves de forma irreversible (ver KNOWN_ISSUES).
+
+Único método previsto: la función de AERA que instala el recovery en la ramdisk del `boot` actual (repack). Conserva el kernel y la cabecera del firmware instalado. Antes de usarla hay que comprobar, sobre una copia y desde el PC, que el `boot` resultante mantiene `os_version` y `os_patch_level` originales (`unpack_bootimg.py`).
 
 ## 5. Restauración
 
 | Situación | Acción |
 |---|---|
 | Android no arranca tras instalar | `fastboot flash boot_<slot> backup_spes/boot_<slot>.img` |
+| Con EvolutionX 11.10 y sin copia propia | `boot.img` / `vendor_boot.img` originales del paquete descargado (SHA-256 `278a6333…` / `48569e32…`, ver `docs/evidence/`) con `fastboot flash boot_<slot>` / `vendor_boot_<slot>` |
 | `vendor_boot` o `dtbo` alterados | restaurarlos desde la copia del paso 3 |
 | Fallo general | `flash_all_except_storage.sh` del paquete fastboot oficial (conserva los datos) |
 | Último recurso | `flash_all.sh` (**borra los datos**) |

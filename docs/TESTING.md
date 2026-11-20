@@ -3,7 +3,7 @@
 Estados: **PASS** · **FAIL** · **BLOCKED** · **NOT TESTED**. Cada resultado indica su evidencia.
 
 Hay tres niveles de validación, y cumplir uno no implica los siguientes: **compila** → **arranca** → **funciona correctamente**.
-**Estado actual: ninguno de los tres se ha alcanzado. El port es EXPERIMENTAL.**
+**Estado actual: COMPILA (2026-11-20). No se ha comprobado que arranque ni que funcione: el port sigue siendo EXPERIMENTAL.**
 
 ## Pruebas estáticas (automatizadas): `tools/validate-tree.sh`
 
@@ -21,17 +21,22 @@ Hay tres niveles de validación, y cumplir uno no implica los siguientes: **comp
 | Flags `AERA_*` existentes en el upstream | PASS (63/63) | contrastadas con `bootable/recovery`, `vendor/twrp` y `vendor/recovery` en `aera-16.0` |
 | Blobs presentes | PASS (33/33) | `tools/blobs.sha256`, sacados del vendor de EvolutionX (hash del payload verificado) |
 | Kernel prebuilt presente | PASS | `prebuilt/kernel.info` (4.19.325 Cherry, SHA-256 `34ebc3ee…`) |
-| Parseo de Make/Soong por el propio build (`lunch`) | NOT TESTED | requiere el sync completo y el kernel |
+| Parseo de Make/Soong por el propio build (`lunch`) | PASS | `lunch twrp_spes-bp2a-eng` (tras la corrección de `BOARD_*IMAGE_FILE_SYSTEM_TYPE`) |
 
 ## Pruebas de compilación
 
 | Prueba | Resultado | Evidencia |
 |---|---|---|
-| Build limpio `mka bootimage` | NOT TESTED | espera al fin de `repo sync` |
-| Build incremental | NOT TESTED | |
-| Cabecera v3 / kernel idéntico / tamaño ≤ partición | NOT TESTED | |
-| Contenido del ramdisk sin restos de builds anteriores | NOT TESTED | |
-| SHA-256 del artefacto | NOT TESTED | no hay artefacto |
+| Build 1 (limpio) `m adbd bootimage` | FAIL → corregido | se detuvo al 55 %: `graphics_fbdev.cpp:67: expected expression` (`TW_MAX_BRIGHTNESS` vacío) |
+| Build 2 (incremental tras la corrección) | PASS | `EXIT 0`, 5 min; `/src/build2.log` |
+| Build limpio completo sin errores | en curso | `OUT_DIR=/src/out_clean`, `/src/build_clean.log` |
+| Cabecera v3 | PASS | `unpack_bootimg.py`: `boot image header version: 3`, os 99.87.36 / 2099-12 |
+| Kernel idéntico al prebuilt | PASS | SHA-256 `34ebc3ee…` en los dos |
+| Tamaño ≤ partición | PASS | 134217728 = `BOARD_BOOTIMAGE_PARTITION_SIZE` (original 67108864 + footer AVB, algoritmo NONE) |
+| Ramdisk LZ4 y contenido | PASS | 3440 ficheros; rc de qcom, usb y decrypt; `twrp.flags`; fstab; boot@1.2 y health@2.1; adbd, fastbootd, minadbd, resetprop |
+| Blobs en el ramdisk idénticos a `blobs.sha256` | PASS | 33/33 |
+| Librerías AOSP que necesitan los blobs | PASS | keymaster@4.0/4.1, gatekeeper@1.0, boot@1.0–1.2, hidl, binder, xml2, crypto… todas presentes |
+| SHA-256 del artefacto | PASS | `0b6dcea3ac5ea97ef72139b8bb972f759b142076fe47636a6c2bb696bb658f69` (`boot.img` = `AERA-R1.0-Beta-Unofficial-spes.img`) |
 
 ## Pruebas en hardware
 
@@ -67,4 +72,6 @@ Procedimiento: siempre con `fastboot boot` (arranque temporal, ver `RECOVERY_PLA
 
 - 2026-11-20: `validate-tree.sh` → 0 fallos y 3 avisos (blobs, kernel y sin `boot.img`).
 - 2026-11-20: `repo sync` iniciado dentro del contenedor `aera-spes` (imagen ext4).
+- 2026-11-20: `lunch` → error en `BOARD_PRODUCTIMAGE_FILE_SYSTEM_TYPE`; corregido.
+- 2026-11-20: build 1 → FAIL (`TW_MAX_BRIGHTNESS`); valor 2047 leído del `dtbo` instalado; build 2 → PASS.
 - 2026-11-20: firmware instalado identificado (EvolutionX 16.0 11.10). Kernel y 33 blobs extraídos; `validate-tree.sh` da 0 fallos y 1 aviso (aún no hay `boot.img`).
