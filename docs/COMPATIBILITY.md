@@ -25,7 +25,7 @@ Estados: **Directo** (compatible directamente) · **Adaptado** (requiere adaptac
 | Header v3 + recovery-in-boot (`BOARD_USES_RECOVERY_AS_BOOT`) | Adaptado / HW | Confirmado que AERA lo soporta (`bootable/recovery/Android.mk`, `data.cpp`). |
 | `BOARD_INCLUDE_DTB_IN_BOOTIMG`, offsets de kernel/ramdisk/tags/DTB | eliminados | En header v3 el DTB va en `vendor_boot` y los offsets no se usan. |
 | `BOARD_KERNEL_CMDLINE` (incluido `androidboot.selinux=permissive`) | eliminado | En v3 la cmdline la aporta `vendor_boot`. No se fuerza SELinux permisivo. |
-| `BOARD_RAMDISK_USE_LZ4` | Directo | Confirmado: los ramdisks instalados son LZ4 y arrancan con este kernel [EVOX]. |
+| `BOARD_RAMDISK_USE_LZ4` | **Obligatorio** (HW) | La ramdisk de `boot` se concatena tras la LZ4 *legacy* de `vendor_boot`; con gzip falla el initramfs. Además, el ABL no arranca ramdisks ≥ 42,4 MB, así que se retiró contenido opcional hasta 39,6 MB (`evidence/hw-abl-ramdisk-limit.txt`). |
 | Kernel desde fuente `mi-sdm680/android_kernel_xiaomi_sm6225` (`spes-r-oss`) | Adaptado → kernel del firmware instalado | Se usa el prebuilt de EvolutionX 11.10 (4.19.325 Cherry). El kernel de un recovery-in-boot también arranca Android, así que tiene que coincidir con el vendor instalado. |
 | fstab | Adaptado | Hecho a partir del `fstab.qcom` de EvolutionX y del `fstab.default` de MIUI, que coinciden. Sin `odm`; `mi_ext` va con `nofail`, porque solo existe en MIUI. |
 | `twrp.flags` | Adaptado | Se añadieron `vendor_boot`, `vbmeta`, `vbmeta_system` y microSD (`mmcblk0`). Se quitó `/cust`, que no aparece en el fstab stock. |
@@ -39,7 +39,9 @@ Estados: **Directo** (compatible directamente) · **Adaptado** (requiere adaptac
 | `init.recovery.qcom.rc` | Adaptado | Enlace a bootdevice, `boot-hal-1-2` (como el vendor instalado), `health-hal-2-1` y script de variante. |
 | `overrideprops.sh` (pone a cero `ro.*.build.date.utc`) | eliminado | Servía para saltarse el anti-rollback de OTAs en OFox. Se deja fuera hasta que se demuestre que hace falta (ver KNOWN_ISSUES). |
 | `variant-script.sh` por `ro.boot.hwc` | Adaptado | Ahora por `ro.boot.product.hardware.sku`. |
-| `ueventd.qcom.rc`, manifiestos VINTF (drm, usb, power) | eliminados | No hacen falta para un recovery HIDL con `twrp-common`. Se añadirán solo si la validación en hardware lo exige. |
+| `ueventd.qcom.rc`, manifiestos VINTF de OFox | sustituidos por **manifests VINTF mínimos** propios (framework: hidl.manager/token/memory; dispositivo: keymaster 4.1, gatekeeper 1.0, boot 1.2) | Sin manifests, `hwservicemanager` se desactiva y ningún HAL HIDL se registra (HW). |
+| `task_profiles.json` | añadido (de `system/core`) | Sin él abortan logd, keystore2 y health (HW). |
+| `AERA_ENABLE_ALL_PARTITION_TOOLS`, bash/nano/tar/sed/grep GNU, `aera-otaripper`, `htop`, fuentes de escrituras extra | retirados | Por el límite de ramdisk del ABL. Quedan lptools, toybox y el extractor nativo de payloads. |
 
 ## Pantalla y entrada
 
@@ -62,7 +64,7 @@ Estados: **Directo** (compatible directamente) · **Adaptado** (requiere adaptac
 
 | Elemento | Estado | Notas |
 |---|---|---|
-| ADB / sideload / MTP / fastbootd (configfs) | Adaptado / HW | `init.recovery.usb.rc` propio. Ya no importa el rc base dos veces. |
+| ADB / sideload / MTP / fastbootd (configfs) | Adaptado → **PASS** (ADB, MTP enumerado, fastbootd) | adb, sideload y fastboot los gestiona el `init.rc` de AERA. El rc del dispositivo solo activa configfs y añade MTP. Duplicar los manejadores dejaba el gadget sin enlazar (`evidence/kmsg-usb-diag.txt`). |
 | PC Connection de AERA (USB) | HW | Funcionalidad existente de AERA. No se tocó. |
 | Wi-Fi (`qca_cld3_wlan.ko` + firmware de modem) | Implementar | Fase 6.6. |
 | Batería y temperatura | HW | Health 2.1. |

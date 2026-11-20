@@ -5,7 +5,7 @@
 - Fuentes: manifest **público** `AERA-Recovery/android_manifest` (rama `aera-16.0`, base `android-16.0.0_r1`, con capas TeamWin, LineageOS y AERA). Todos los proyectos AERA son públicos y se descargan por HTTPS. No hay dependencias privadas.
 - Sistema de ficheros: hace falta un Linux nativo (ext4/btrfs), que distinga mayúsculas y minúsculas y conserve los bits de ejecución. **NTFS no sirve**: `ntfs3` quita los permisos de ejecución (`fmask`), no distingue mayúsculas y `windows_names` rechaza algunos nombres. En la primera prueba, el checkout de `build/blueprint` y `external/kmod` falló por esto.
 - Espacio: unos 140 GB para las fuentes con `--depth=1` y `out/`. La cifra exacta se apuntará tras el primer build.
-- RAM: 30 GB en este equipo; con 16 GB o más es suficiente usando swap/zram.
+- RAM: `soong_build` llega a **~20 GB** de RSS al reanalizar (comprobado con OOM-kill en este equipo de 30 GB con un juego abierto). Recomendado: ≥ 32 GB o swap amplio, y cerrar aplicaciones pesadas durante el análisis.
 
 ## Entorno usado (Docker + imagen ext4)
 

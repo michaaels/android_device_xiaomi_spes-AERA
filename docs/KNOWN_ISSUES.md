@@ -5,10 +5,23 @@
 - **Kernel**: se extrajo del `boot.img` del firmware instalado (EvolutionX 16.0 11.10, Linux 4.19.325-cip132-st16-Cherry). La trazabilidad está en `prebuilt/kernel.info`.
 - **Blobs**: los 33 ficheros salen de la partición `vendor` de ese mismo firmware (`vendor.img` extraído de `payload.bin`, con el hash verificado). Los checksums están en `tools/blobs.sha256`.
 
+## Problemas resueltos en hardware (2026-11-20)
+
+| Síntoma | Causa | Solución |
+|---|---|---|
+| `fastboot boot` vuelve al bootloader a los 10 s | sin `twrpfastboot=1`, el init intenta un arranque normal de Android (`force_normal_boot=1`) | `--cmdline twrpfastboot=1` en `BOARD_MKBOOTIMG_ARGS` |
+| `Booting OKAY`, pero el kernel no arranca | límite del ABL para ramdisks (≥ 42,4 MB) | ramdisk recortada a 39,6 MB; validador ≤ 40 MB |
+| "rootfs image is not initramfs" | ramdisk gzip tras la LZ4 de `vendor_boot` | LZ4 obligatorio |
+| Sin USB y la interfaz lenta | manejadores USB duplicados en bucle | el `init.rc` base gestiona adb/fastboot; el rc del dispositivo, solo MTP |
+| La interfaz se queda en el logo | keystore2 abortaba, sin Keymaster ni `task_profiles.json` | `task_profiles.json` y manifests VINTF |
+
 ## Pendientes
 
-1. **Sin hardware conectado**: quedan sin confirmar los puntos [PEND] de `HARDWARE.md` y toda la matriz de pruebas en dispositivo.
-2. **El build ya funciona** (incremental, `EXIT 0`). Falta confirmar un build limpio completo sin errores.
+1. Escenarios de descifrado sin probar: sin bloqueo, patrón, credencial incorrecta y cancelar. Tampoco MTP con transferencia, sideload, backup/restore desde AERA ni la variante spesn (ver `TESTING.md`).
+2. Confirmar que Android sigue desbloqueándose con normalidad después de descifrar en AERA.
+3. **Límite de ramdisk**: queda ~1,9 MB de margen hasta lo comprobado (41,5 MB). Añadir funciones (Wi-Fi, vibración, idiomas extra) obliga a volver a medir; `validate-tree.sh` falla si se superan los 40 MB.
+4. **Funciones de AERA retiradas** por tamaño: flasheo directo de payloads (necesita `aera-otaripper`), `lpdump` y `bootctl` (`lptools` sí está), fuentes CJK/árabe/hebreo/índicas/tailandés (los nombres de fichero en esas escrituras no se ven) y bash/nano GNU.
+5. **Memoria de build**: `soong_build` necesita ~20 GB de RAM. Con aplicaciones pesadas abiertas, el sistema lo mata (OOM).
 
 ## Riesgos técnicos
 

@@ -3,7 +3,7 @@
 Estados: **PASS** · **FAIL** · **BLOCKED** · **NOT TESTED**. Cada resultado indica su evidencia.
 
 Hay tres niveles de validación, y cumplir uno no implica los siguientes: **compila** → **arranca** → **funciona correctamente**.
-**Estado actual: COMPILA (2026-11-20). No se ha comprobado que arranque ni que funcione: el port sigue siendo EXPERIMENTAL.**
+**Estado actual (2026-11-20): COMPILA y ARRANCA en hardware (spes); la funcionalidad básica está verificada y el resto sigue pendiente. EXPERIMENTAL.**
 
 ## Pruebas estáticas (automatizadas): `tools/validate-tree.sh`
 
@@ -41,33 +41,42 @@ Hay tres niveles de validación, y cumplir uno no implica los siguientes: **comp
 
 ## Pruebas en hardware
 
-Procedimiento: siempre con `fastboot boot` (arranque temporal, ver `RECOVERY_PLAN.md`). Nunca con `fastboot flash` mientras haya filas en NOT TESTED.
+Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, EvolutionX 16.0 11.10 instalado. **Procedimiento:** solo `fastboot boot` (en RAM); no se ha escrito ninguna partición. Imagen probada: `build11-vintf`, SHA-256 `d69b491b1c0439a19ae007adcc98688de58821284530d37b7d6c1f665bba3ba3`. Evidencia en `docs/evidence/`.
 
-| Prueba | spes | spesn | Evidencia esperada |
+| Prueba | spes | spesn | Evidencia |
 |---|---|---|---|
-| Arranque temporal (`fastboot boot`) | NOT TESTED | NOT TESTED | foto de pantalla + `adb shell dmesg` |
-| Reinicio a recovery / a sistema | NOT TESTED | NOT TESTED | |
-| Interfaz LVGL, renderizador y fps | NOT TESTED | NOT TESTED | `/tmp/recovery.log` (línea del renderizador) |
-| Táctil y botones (vol+/vol-/power) | NOT TESTED | NOT TESTED | `getevent -lp` |
-| Brillo | NOT TESTED | NOT TESTED | |
-| ADB shell y `adb pull /tmp/recovery.log` | NOT TESTED | NOT TESTED | |
-| Detección de particiones (lógicas y físicas) | NOT TESTED | NOT TESTED | `lpdump`, listado de particiones en la UI |
-| Descifrado sin contraseña | NOT TESTED | NOT TESTED | `/data/media/0` legible |
-| Descifrado con PIN | NOT TESTED | NOT TESTED | |
+| `fastboot boot` aceptado y kernel arrancado | PASS | NOT TESTED | `hw-abl-ramdisk-limit.txt` (antes, BLOCKED por el límite de ramdisk y por la ramdisk gzip) |
+| Arranque de AERA (init, interfaz LVGL) | PASS | NOT TESTED | logo, interfaz y menús vistos por el usuario; `ro.aera.release.version=R1.0` |
+| Pantalla y brillo | PASS | NOT TESTED | `max_brightness=2047`, brillo 1200 aplicado (`hw-aera-first-boot.txt`) |
+| Renderizador | NOT TESTED (detalle) | | DRM `card0` presente; el renderizador exacto no está verificado |
+| Táctil (`fts_ts`, FocalTech) | PASS | NOT TESTED | el usuario manejó los menús; `getevent` |
+| Botones (power, volumen) | PASS | NOT TESTED | menú de power y volumen responden (`gpio-keys`, `qpnp_pon`) |
+| Fluidez de la interfaz | PASS (tras la corrección USB) | | antes iba lenta por el bucle de `init` del USB (`kmsg-usb-diag.txt`) |
+| ADB (shell como root) | PASS | NOT TESTED | `18d1:d001`, `UDC=4e00000.dwc3` |
+| Variante detectada por SKU | PASS (`k7t` → spes 2201117TG) | NOT TESTED (`k7tn`) | `hw-aera-first-boot.txt` |
+| Servicios (logd, keystore2, qseecomd, keymaster 4.1, gatekeeper 1.0, boot 1.2, health 2.1) | PASS, 0 aborts | NOT TESTED | `hw-aera-services-decrypt.txt` |
+| Detección de particiones | PASS | NOT TESTED | todas las de `twrp.flags` y las lógicas `_a` (`recovery.log`) |
+| Descifrado con PIN | PASS | NOT TESTED | "User 0 Decrypted Successfully", `/data` en dm-default-key y `/data/media/0` legible (`hw-aera-recovery-log-decrypt.txt`) |
+| Descifrado sin contraseña | NOT TESTED | NOT TESTED | requiere un dispositivo sin bloqueo |
 | Descifrado con patrón | NOT TESTED | NOT TESTED | |
-| Credencial incorrecta (rechazada, `/data` intacto) | NOT TESTED | NOT TESTED | |
+| Credencial incorrecta | NOT TESTED | NOT TESTED | |
 | Cancelar el desbloqueo | NOT TESTED | NOT TESTED | |
-| Backup de boot, vendor_boot, dtbo, efs y persist | NOT TESTED | NOT TESTED | |
-| Restore (solo en un entorno con backup comprobado) | NOT TESTED | NOT TESTED | |
-| MTP | NOT TESTED | NOT TESTED | |
-| ADB sideload | NOT TESTED | NOT TESTED | |
-| Fastbootd (`fastboot getvar is-userspace`) | NOT TESTED | NOT TESTED | |
-| microSD / OTG | NOT TESTED | NOT TESTED | |
-| PC Connection (USB) | NOT TESTED | NOT TESTED | |
+| Claves de Android intactas tras descifrar en AERA | PENDIENTE (falta que el usuario desbloquee Android) | | por código: las claves actualizadas se escriben solo en `/tmp` |
+| MTP (enumeración) | PASS | NOT TESTED | el PC ve `18d1:4ee2 (MTP + debug)` con `mtp,adb` |
+| MTP (transferencia de ficheros) | NOT TESTED | | |
+| ADB sideload | NOT TESTED | | |
+| Fastbootd | PASS | NOT TESTED | `adb reboot fastboot` → `is-userspace: yes`, `super-partition-name: super`, `snapshot-update-status: none` |
+| Reinicio a bootloader (desde la interfaz y por adb) | PASS | | |
+| Volver a Android con normalidad | PASS | NOT TESTED | `fastboot reboot` desde fastbootd → `sys.boot_completed=1`, Android 16, slot `_a` |
+| Batería y temperatura | PASS (lectura) | | capacidad 100 %, cargando, 31,1 °C; CPU `pm6125-tz` 37 °C |
+| Backup de particiones (desde OrangeFox, solo lectura) | PASS | | 15 particiones verificadas con SHA-256 (fuera del repositorio) |
+| Backup y restore desde AERA | NOT TESTED | | |
+| microSD / OTG | NOT TESTED | | |
+| PC Connection | NOT TESTED | | |
 | Wi-Fi | NOT TESTED (no implementado) | | |
 | Vibración | NOT TESTED (desactivada) | | |
-| Volver a Android con normalidad | NOT TESTED | NOT TESTED | arranque completo del firmware instalado (EvolutionX) |
-| Variante detectada por SKU | NOT TESTED | NOT TESTED | `getprop ro.product.device` |
+
+**Nivel alcanzado:** compila ✔ · arranca ✔ · funciona en lo básico (pantalla, táctil, ADB, particiones, descifrado con PIN, fastbootd, vuelta a Android) ✔. **No validado aún:** el resto de escenarios de descifrado, MTP con transferencia, sideload, backup/restore desde AERA, spesn y la instalación permanente. El port sigue siendo EXPERIMENTAL.
 
 ## Registro de ejecuciones
 
@@ -75,4 +84,5 @@ Procedimiento: siempre con `fastboot boot` (arranque temporal, ver `RECOVERY_PLA
 - 2026-11-20: `repo sync` iniciado dentro del contenedor `aera-spes` (imagen ext4).
 - 2026-11-20: `lunch` → error en `BOARD_PRODUCTIMAGE_FILE_SYSTEM_TYPE`; corregido.
 - 2026-11-20: build 1 → FAIL (`TW_MAX_BRIGHTNESS`); valor 2047 leído del `dtbo` instalado; build 2 → PASS.
+- 2026-11-20: hardware. Iteraciones de `fastboot boot`: (1) sin `twrpfastboot` → error fatal de init y vuelta al bootloader; (2) ramdisk de 49 MB → el ABL no arranca el kernel; (3) ramdisk gzip → falla el desempaquetado del initramfs; (4) ramdisk LZ4 de 39,6 MB → AERA arranca, pero el USB entra en bucle; (5) USB corregido → ADB funciona, pero keystore2, health y boot HAL abortan; (6) `task_profiles.json` y VINTF → todos los servicios activos y descifrado con PIN correcto.
 - 2026-11-20: firmware instalado identificado (EvolutionX 16.0 11.10). Kernel y 33 blobs extraídos; `validate-tree.sh` da 0 fallos y 1 aviso (aún no hay `boot.img`).
