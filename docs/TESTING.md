@@ -37,7 +37,8 @@ Hay tres niveles de validación, y cumplir uno no implica los siguientes: **comp
 | Ramdisk LZ4 y contenido | PASS | 3440 ficheros; rc de qcom, usb y decrypt; `twrp.flags`; fstab; boot@1.2 y health@2.1; adbd, fastbootd, minadbd, resetprop |
 | Blobs en el ramdisk idénticos a `blobs.sha256` | PASS | 33/33 |
 | Librerías AOSP que necesitan los blobs | PASS | keymaster@4.0/4.1, gatekeeper@1.0, boot@1.0–1.2, hidl, binder, xml2, crypto… todas presentes |
-| SHA-256 del artefacto | PASS | **build limpio, de referencia**: `7fa53ef7ed9870d246413df0bcab909ea66fa6b4a217f73ab8fbae360f44647f`; incremental: `0b6dcea3…` (`boot.img` = `AERA-R1.0-Beta-Unofficial-spes.img` en ambos) |
+| SHA-256 del artefacto | PASS | probado en hardware: `d69b491b1c0439a19ae007adcc98688de58821284530d37b7d6c1f665bba3ba3` (incremental). Los anteriores (`7fa53ef7…`, `0b6dcea3…`) no arrancan |
+| Build limpio con la configuración final | NOT TESTED | pendiente |
 
 ## Pruebas en hardware
 
