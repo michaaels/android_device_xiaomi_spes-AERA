@@ -35,6 +35,11 @@ on post-fs
 
 on boot
     start health-hal-2-1
+    # GPU for sandboxed AERA plugins (Browser): the worker runs as UID 99090.
+    # Stock ueventd gives kgsl-3d0 0666; on this pre-DMA-heap 4.19 kernel
+    # Turnip allocates through ION, so the worker also needs it read-write.
+    chmod 0666 /dev/kgsl-3d0
+    chmod 0666 /dev/ion
     start variant-script
     start spes-torch-setup
     setprop sys.usb.config adb

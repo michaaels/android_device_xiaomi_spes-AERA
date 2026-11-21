@@ -56,3 +56,12 @@ etc/wifi/WCNSS_qcom_cfg.ini:vendor/etc/wifi/WCNSS_qcom_cfg.ini
 etc/wifi/WCNSS_qcom_cfg.ini:vendor/firmware/wlan/qca_cld/WCNSS_qcom_cfg.ini
 etc/wifi/wpa_supplicant.conf:vendor/etc/wifi/wpa_supplicant.conf
 etc/wifi/wpa_supplicant_overlay.conf:vendor/etc/wifi/wpa_supplicant_overlay.conf
+
+# --- Adreno 610 GPU firmware (KGSL loads it on first GPU open). Needed by
+# AERA Browser (WebKit -> Zink -> Turnip -> KGSL); ueventd serves /vendor/firmware.
+firmware/a630_sqe.fw:vendor/firmware/a630_sqe.fw
+firmware/a610_zap.mdt:vendor/firmware/a610_zap.mdt
+firmware/a610_zap.elf:vendor/firmware/a610_zap.elf
+firmware/a610_zap.b00:vendor/firmware/a610_zap.b00
+firmware/a610_zap.b01:vendor/firmware/a610_zap.b01
+firmware/a610_zap.b02:vendor/firmware/a610_zap.b02
