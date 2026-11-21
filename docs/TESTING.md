@@ -82,19 +82,19 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 | Linterna | PASS (b25) | NOT TESTED | GPIO85 del TLMM vía `/tmp/spes-torch/brightness`; enciende y apaga desde los ajustes rápidos |
 | microSD | PASS (detección) | | `/dev/block/mmcblk0p1` montado en `/external_sd`; visible por MTP |
 | OTG | NOT TESTED | | |
-| PC Connection por Wi-Fi | PASS | NOT TESTED | `https://192.168.100.70` y `aera.local` (mDNS) → 200; certificado con la IP y `aera.local`; sin sesión → 401; aprobación física en el teléfono → token; `/api/status`, `/api/files/list` y `/api/log/kernel` correctos; sesión revocada → 401 (`evidence/hw-wifi.txt`) |
+| PC Connection por Wi-Fi | PASS (b27) | | `https://192.168.100.71` y `aera.local` → 200; `/api/status` sin sesión → 401 |
 | PC Connection por USB (`adb forward 8443:443`) | PASS (b25) | NOT TESTED | `https://localhost:8443` → 200; el mismo token funciona |
 | PC Connection: backup y restore hacia o desde el PC en el navegador | NOT TESTED | | requiere navegador Chromium con selector de carpetas; AERA lo marca como Beta |
 | Wi-Fi: arranque bajo demanda | PASS | NOT TESTED | IPA y módem arrancados, `wlan_pd` → "WLAN FW is ready" → driver → `wlan0` en ~10 s (`evidence/hw-wifi.txt`) |
 | Wi-Fi: conexión desde la interfaz de AERA | PASS (b25: reconexión automática a la red guardada) | NOT TESTED | DHCP `192.168.100.70/24` y DNS configurados; ping del PC al teléfono 3/3; TCP a 1.1.1.1:443, 8.8.8.8:443 y google.com:443 |
 | Tienda de plugins (catálogo con internet) | PASS (b23, b25) | | `busybox wget` descarga `catalog.json` y `catalog.json.sig` a `/tmp/aera-plugin-store` |
-| Wi-Fi tras un sideload | **FAIL** (b25) | | al terminar el sideload, AERA para los servicios que usan particiones dinámicas (los daemons del Wi-Fi corren desde `vendor`); al matar `qrtr-ns`/`pd-mapper`, el módem reporta "Root PD crashed" y el firmware WLAN no vuelve. Hay que reiniciar el recovery. Ver `KNOWN_ISSUES.md` |
+| Wi-Fi tras un sideload | PASS (b27) · FAIL (b25) | | b25: AERA paraba los daemons (corrían desde `vendor`) y el módem perdía `wlan_pd`. b27: corren desde una copia en RAM; tras el sideload, mismos PID, sin "Root PD crashed" y con internet |
 | PC Connection por Wi-Fi | PASS (antes) · BLOCKED (b25) | | en esta regresión no se pudo repetir por el fallo anterior |
 | Wi-Fi: sin escrituras en EFS ni persist reales | PASS | | SHA-256 de `modemst1/2`, `fsg`, `fsc` y `persist` reales idéntico antes y después de la sesión, aunque el módem escribió EFS (en las copias en RAM) |
 | Funciones con UPX | PASS (b25) | | los 29 binarios iniciales y los 14 añadidos (busybox, grep, bc, lptools, dmctl, keystore_cli_v2, mke2fs, tune2fs, resize2fs, mkfs.ntfs, mount.ntfs, fsck.fat, pigz, nano) arrancan y responden |
 | Vibración | NOT TESTED (desactivada) | | |
 
-**Nivel alcanzado:** compila ✔ · arranca ✔ · funciona ✔ en pantalla, táctil, rotación, linterna, ADB, MTP, sideload, backup por ADB, particiones, descifrado con PIN, Wi-Fi, plugins, PC Connection, fastbootd y vuelta a Android. **Fallo abierto:** el Wi-Fi no sobrevive a un sideload. **No validado aún:** restore desde AERA, descifrado sin bloqueo o con patrón, OTG, spesn, vibración y la instalación permanente. El port sigue siendo EXPERIMENTAL.
+**Nivel alcanzado:** compila ✔ · arranca ✔ · funciona ✔ en pantalla, táctil, rotación, linterna, ADB, MTP, sideload, backup por ADB, particiones, descifrado con PIN, Wi-Fi, plugins, PC Connection, fastbootd y vuelta a Android. **No validado aún:** restore desde AERA, descifrado sin bloqueo o con patrón, OTG, spesn, vibración y la instalación permanente. El port sigue siendo EXPERIMENTAL.
 
 ## Registro de ejecuciones
 
@@ -105,3 +105,4 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 - 2026-11-20: hardware. Iteraciones de `fastboot boot`: (1) sin `twrpfastboot` → error fatal de init y vuelta al bootloader; (2) ramdisk de 49 MB → el ABL no arranca el kernel; (3) ramdisk gzip → falla el desempaquetado del initramfs; (4) ramdisk LZ4 de 39,6 MB → AERA arranca, pero el USB entra en bucle; (5) USB corregido → ADB funciona, pero keystore2, health y boot HAL abortan; (6) `task_profiles.json` y VINTF → todos los servicios activos y descifrado con PIN correcto.
 - 2026-11-20: firmware instalado identificado (EvolutionX 16.0 11.10). Kernel y 33 blobs extraídos; `validate-tree.sh` da 0 fallos y 1 aviso (aún no hay `boot.img`).
 - 2026-11-20: regresión de `build25-flashlight` → todo PASS salvo el Wi-Fi tras un sideload (FAIL) y PC Connection por Wi-Fi (BLOCKED por ese fallo).
+- 2026-11-20: `build27-wlan-ram` (SHA-256 `9f29457b98ea98a1a8ed40694a4df3075b2d56a20d33a796d6531966c1936bcf`) → Wi-Fi con daemons en RAM, Wi-Fi tras un sideload y PC Connection por Wi-Fi: PASS.

@@ -36,32 +36,32 @@ service spes-wlan-prep /system/bin/sh /system/bin/spes-wlan-up.sh
     oneshot
     seclabel u:r:recovery:s0
 
-service spes-qrtr-ns /mnt/vendor_stock/bin/qrtr-ns -f
+service spes-qrtr-ns /tmp/spes_vendor/bin/qrtr-ns -f
     user root
     group root
     disabled
-    setenv LD_LIBRARY_PATH /mnt/vendor_stock/lib64:/system/lib64
+    setenv LD_LIBRARY_PATH /tmp/spes_vendor/lib64:/system/lib64
     seclabel u:r:recovery:s0
 
-service spes-pd-mapper /mnt/vendor_stock/bin/pd-mapper
+service spes-pd-mapper /tmp/spes_vendor/bin/pd-mapper
     user root
     group root
     disabled
-    setenv LD_LIBRARY_PATH /mnt/vendor_stock/lib64:/system/lib64
+    setenv LD_LIBRARY_PATH /tmp/spes_vendor/lib64:/system/lib64
     seclabel u:r:recovery:s0
 
-service spes-rmt-storage /mnt/vendor_stock/bin/rmt_storage
+service spes-rmt-storage /tmp/spes_vendor/bin/rmt_storage
     user root
     group root
     disabled
-    setenv LD_LIBRARY_PATH /mnt/vendor_stock/lib64:/system/lib64
+    setenv LD_LIBRARY_PATH /tmp/spes_vendor/lib64:/system/lib64
     seclabel u:r:recovery:s0
 
-service spes-tftp-server /mnt/vendor_stock/bin/tftp_server
+service spes-tftp-server /tmp/spes_vendor/bin/tftp_server
     user root
     group root
     disabled
-    setenv LD_LIBRARY_PATH /mnt/vendor_stock/lib64:/system/lib64
+    setenv LD_LIBRARY_PATH /tmp/spes_vendor/lib64:/system/lib64
     seclabel u:r:recovery:s0
 
 service spes-modem-hold /system/bin/sh /system/bin/spes-modem-hold.sh
@@ -70,11 +70,11 @@ service spes-modem-hold /system/bin/sh /system/bin/spes-modem-hold.sh
     disabled
     seclabel u:r:recovery:s0
 
-service spes-cnss-daemon /mnt/vendor_stock/bin/cnss-daemon -n -l
+service spes-cnss-daemon /tmp/spes_vendor/bin/cnss-daemon -n -l
     user root
     group root
     disabled
-    setenv LD_LIBRARY_PATH /mnt/vendor_stock/lib64:/system/lib64
+    setenv LD_LIBRARY_PATH /tmp/spes_vendor/lib64:/system/lib64
     seclabel u:r:recovery:s0
 
 service wpa_supplicant /system/bin/sh /system/bin/spes-wpa-supplicant.sh

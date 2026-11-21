@@ -4,8 +4,12 @@
 #
 # On-demand Wi-Fi bring-up for spes (SM6225). The WLAN firmware runs on the
 # modem DSP (icnss), so the modem must boot, which needs the stock QMI
-# daemons. They run from the installed vendor partition (mounted read-only),
-# not from the ramdisk (bootloader ramdisk size limit).
+# daemons. They come from the installed vendor partition (mounted read-only)
+# and run from a RAM copy in $RUN (official AERA trees for devices with
+# dynamic partitions ship them in the ramdisk; spes has no ramdisk room).
+# Running them from the vendor mount is not enough: AERA stops every process
+# that uses a dynamic partition before unmapping super (sideload, flashing),
+# and killing qrtr-ns/pd-mapper crashes the modem root PD, so WLAN is lost.
 #
 # Nothing the modem writes may reach real partitions from recovery:
 #   - EFS (modemst1/modemst2/fsg/fsc) is served by rmt_storage from RAM copies
@@ -30,6 +34,32 @@ if ! grep -q " /mnt/vendor_stock " /proc/mounts; then
 fi
 [ -x /mnt/vendor_stock/bin/rmt_storage ] || fail "stock vendor has no rmt_storage"
 
+# RAM copy of the daemons and of every vendor library they map (measured in
+# /proc/<pid>/maps on EvolutionX 11.10). The services in init.recovery.wifi.rc
+# run from here, so they keep no file open on the vendor mount.
+RUN=/tmp/spes_vendor
+BINS="qrtr-ns pd-mapper rmt_storage tftp_server cnss-daemon"
+LIBS="libbase.so libbinder.so libc++.so libcld80211.so libcutils.so libidl.so
+libjson.so libmdmdetect.so libnl.so libperipheral_client.so libqmi_cci.so
+libqmi_common_so.so libqmi_csi.so libqmi_encdec.so libqmiservices.so libqrtr.so
+libqsocket.so libutils.so"
+if [ ! -x "$RUN/bin/cnss-daemon" ]; then
+    mkdir -p "$RUN/bin" "$RUN/lib64"
+    for b in $BINS; do
+        cp -p "/mnt/vendor_stock/bin/$b" "$RUN/bin/" || fail "cannot copy vendor bin/$b"
+    done
+    for l in $LIBS; do
+        cp -p "/mnt/vendor_stock/lib64/$l" "$RUN/lib64/" || fail "cannot copy vendor lib64/$l"
+    done
+    # rfs holds only symlinks into the sandboxed paths below and /vendor/firmware*
+    cp -a /mnt/vendor_stock/rfs "$RUN/" || fail "cannot copy vendor rfs"
+    # init services run with umask 077; pd-mapper (system) and tftp_server
+    # (oem_2903) drop root and must still traverse and read the copy.
+    chmod 0755 "$RUN" "$RUN/bin" "$RUN/lib64"
+    chmod 0644 "$RUN"/lib64/*
+    log "vendor daemons copied to RAM ($RUN)"
+fi
+
 # IPA firmware: the WLAN host driver registers its uC offload with IPA and
 # fails to probe (-EFAULT, "ipa3_uc_reg_rdyCB bad parm") while IPA is down.
 # Android loads it at early-boot (ipa_fws.rc: write /dev/ipa 1). ueventd serves
@@ -52,9 +82,9 @@ if ! grep -q " /firmware " /proc/mounts; then
         "$BYNAME/modem$SLOT" /firmware || fail "cannot mount modem$SLOT"
 fi
 [ -e /vendor/firmware_mnt ] || ln -s /firmware /vendor/firmware_mnt
-# tftp_server serves the modem's files through /vendor/rfs; the installed
-# vendor's tree only holds symlinks into the sandboxed paths prepared below.
-[ -e /vendor/rfs ] || ln -s /mnt/vendor_stock/rfs /vendor/rfs
+# tftp_server serves the modem's files through /vendor/rfs (RAM copy of the
+# vendor tree, which only holds symlinks into the sandboxed paths below).
+[ -e /vendor/rfs ] || ln -s "$RUN/rfs" /vendor/rfs
 
 # 3. EFS sandbox: rmt_storage gets loop devices backed by RAM copies
 mkdir -p /tmp/spes_efs

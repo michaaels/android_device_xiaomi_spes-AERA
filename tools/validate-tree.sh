@@ -56,7 +56,12 @@ awk '!/^#/ && NF { m[$1]++ } END { for (k in m) if (m[k] > 1) { print "FAIL  twr
 build_provided="android.hardware.boot@1.1-service android.hardware.boot@1.2-service android.hardware.health@2.1-service sh"
 while read -r _ name path _; do
     b="$(basename "$path")"
-    if [[ "$path" == /mnt/vendor_stock/* ]]; then ok "service $name -> $path (installed vendor, mounted read-only at runtime)"
+    if [[ "$path" == /tmp/spes_vendor/bin/* ]]; then
+        # RAM copy made by spes-wlan-up.sh from the installed vendor
+        if grep -qE "^BINS=.*[\" ]$b[\" ]" recovery/root/system/bin/spes-wlan-up.sh; then
+            ok "service $name -> $path (RAM copy of installed vendor bin/$b)"
+        else bad "service $name: $path is not copied by spes-wlan-up.sh"; fi
+    elif [[ "$path" == /mnt/vendor_stock/* ]]; then ok "service $name -> $path (installed vendor, mounted read-only at runtime)"
     elif [ -f "recovery/root$path" ] || [[ " $build_provided " == *" $b "* ]]; then ok "service $name -> $path"
     else bad "service $name: $path not in recovery/root and not build-provided"; fi
 done < <(grep -hE '^service ' recovery/root/*.rc)
