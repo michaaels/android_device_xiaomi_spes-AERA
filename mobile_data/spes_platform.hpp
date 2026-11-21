@@ -16,6 +16,7 @@
 
 #include <cutils/properties.h>
 #include <dirent.h>
+#include <fcntl.h>
 #include <net/if.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -44,6 +45,17 @@ struct DataFormat {
   uint32_t ipa_ingress;   // RMNET_IOCTL_SET_INGRESS_DATA_FORMAT: MAP|DEAGG|DEMUX|AGG_DATA
 };
 inline constexpr DataFormat kDataFormat{5, 0x00000001, 0x0e, 0x2e};
+
+// rmnet_ipa3 on this 4.19 kernel sets up the WAN pipes on the first
+// SET_EGRESS/INGRESS_DATA_FORMAT and rejects any later call with EINVAL (the
+// pipes are not torn down on disconnect). Configure them once per boot; the
+// marker lives in RAM, so it is gone after a reboot like the pipes.
+inline constexpr const char *kIpaFormatMarker = "/tmp/aera-cellular/ipa-format-configured";
+inline bool IpaFormatConfigured() { return access(kIpaFormatMarker, F_OK) == 0; }
+inline void MarkIpaFormatConfigured() {
+  const int fd = open(kIpaFormatMarker, O_WRONLY | O_CREAT | O_CLOEXEC | O_NOFOLLOW, 0600);
+  if (fd >= 0) close(fd);
+}
 
 inline std::string ReadLine(const std::string &path) {
   std::ifstream input(path);

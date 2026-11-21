@@ -7,11 +7,14 @@
 // (spes_platform.hpp) instead of remoteproc plus private RAM storage helpers, and
 // it stays shared with Wi-Fi when mobile data stops. Recovery detection does
 // not rely on ro.bootmode, which spes leaves unset (recovery lives in boot),
-// and the QMAP data format comes from spes::kDataFormat (QMAP v1, no QMAPv5).
+// the QMAP data format comes from spes::kDataFormat (QMAP v1, no QMAPv5), and
+// the IPA pipe formats are set once per boot (rmnet_ipa3 rejects a second set).
+// The operator name is decoded by plmn_name.hpp (ASCII or GSM 7-bit packed).
 #include "aera_mobile/client.hpp"
 #include "qmi.hpp"
 #include "sim.hpp"
 #include "spes_platform.hpp"
+#include "plmn_name.hpp"
 #include <openssl/sha.h>
 #include <arpa/inet.h>
 #include <dirent.h>
@@ -128,7 +131,8 @@ IpaData Ipa(IpaData data) {
   ifreq request{};strcpy(request.ifr_name,"rmnet_ipa0");
   request.ifr_data=reinterpret_cast<char *>(data.data());
   if(fd.get()<0||ioctl(fd.get(),0x89fd,&request))
-    throw std::runtime_error("The kernel IPA data interface is unsupported");
+    throw std::runtime_error("The kernel IPA data interface is unsupported (command "+
+        std::to_string(data[0])+", errno "+std::to_string(errno)+")");
   return data;
 }
 Bytes Attribute(uint16_t type,const Bytes &value) {
@@ -400,9 +404,8 @@ struct Session {
     std::lock_guard<std::mutex> lock(state_mutex);
     status["registered"]=registered;status["technology"]=registered?rat:"";
     status["signal_valid"]=valid;status["signal_dbm"]=valid?dbm:0;status["bars"]=bars;
-    const auto &operator_info=Field(serving,0x12);
-    if(operator_info.size()>=5&&operator_info[4]<=operator_info.size()-5)
-      status["operator"]=std::string(operator_info.begin()+5,operator_info.begin()+5+operator_info[4]);
+    const std::string operator_name=PlmnName(Field(serving,0x12));
+    if(!operator_name.empty())status["operator"]=operator_name;
     SaveLocked();
   }
   void Connect(const std::string &apn,int subscription) {
@@ -500,7 +503,10 @@ struct Session {
     CreateLink();link_owned=true;
     Ip({"link","set","rmnet_ipa0","up"});Ip({"link","set",kInterface,"mtu",std::to_string(mtu),"up"});
     Ip({"addr","add",address+"/"+std::to_string(Prefix(netmask)),"dev",kInterface});
-    Ipa({6,spes::kDataFormat.ipa_egress,0,0,0,0});Ipa({7,spes::kDataFormat.ipa_ingress,16384,32,0,0});
+    if(!spes::IpaFormatConfigured()) {
+      Ipa({6,spes::kDataFormat.ipa_egress,0,0,0,0});Ipa({7,spes::kDataFormat.ipa_ingress,16384,32,0,0});
+      spes::MarkIpaFormatConfigured();
+    }
     IpaData channel{};channel[0]=5;channel[1]=1;memcpy(&channel[2],kInterface,strlen(kInterface)+1);Ipa(channel);
     Ip({"route","add","default","via",gateway,"dev",kInterface,"metric","900"});
     Dns();
