@@ -49,6 +49,11 @@
 - **AERA escribe en `persist`:** heredado de OrangeFox, guarda sus ajustes en `/persist/.aera` y la copia del bloqueo por contraseña de AERA en `/persist/.fsec`, y cada vez que guarda ajustes monta `/persist` en lectura-escritura (`data.cpp` → `SaveValues`, `variables.h`). Comprobado en hardware: el superbloque registra `Last mounted on: /persist` durante una sesión de AERA, aparece `.aera` y cambia `.fsec`. No afecta a los datos de calibración, pero es una modificación persistente. **Corregido:** `/persist` se monta en solo lectura (`fsflags="ro"` en `twrp.flags`) y los ajustes van a `/data/recovery/AERA/.aera` (`AERA_SETTINGS_ROOT_DIRECTORY`). Verificado en hardware: hash de `persist` idéntico tras guardar ajustes. Consecuencias: la copia del bloqueo por contraseña de AERA ya no se guarda en `persist` (no sobrevive a un formateo de `/data`); las operaciones explícitas del usuario sobre `/persist` siguen pudiendo volver a montarla en lectura-escritura. Antes de la corrección, AERA había creado `/persist/.aera` y vaciado el `.fsec` de OrangeFox en el dispositivo de pruebas. Con autorización del usuario se borró `.aera` y se restauró `.fsec` desde el backup; la comparación completa de la partición confirma que solo cambiaron esos dos ficheros, y `e2fsck` no da errores.
 - **Lentitud de la interfaz**: mejora con la resolución adaptativa, pero el renderizado sigue siendo por software (sin GPU).
 
+## Traducciones de AERA (upstream)
+
+- Español: 2094 de 2768 cadenas traducidas (76 %); las 674 restantes aparecen en inglés. Las 6 que estaban corruptas se corrigen con el parche `0002`.
+- Otros idiomas tienen el mismo daño de codificación (`?` en lugar de letras acentuadas): ca_ES 9, cs_CZ 18, de_DE 9, fr_FR 18, hu 25, ja_JP 4, nl_NL 3, no_NO 6, pl_PL 9, pt_BR 7, pt_PT 8, ro_RO 16, sv_SE 23, tr_TR 17 y vi_VN 26 cadenas. Sin corregir; conviene reportarlo upstream.
+
 ## Funciones fuera de la primera versión
 
 - Linterna: no configurada (`AERA_FLASHLIGHT_ENABLE` / `AERA_FL_PATH1`). Hay que comprobar si el kernel de EvolutionX expone el LED del flash en `/sys/class/leds`; el kernel de OrangeFox del usuario lleva un parche para ello.

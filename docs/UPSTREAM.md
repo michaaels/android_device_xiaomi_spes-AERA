@@ -21,6 +21,8 @@ El device tree no modifica AERA. Hay **un parche genérico** propuesto para `boo
 
 - `patches/bootable_recovery/0001-partition-skip-fsync-on-ADB-backup-stream.diff`: en `TWPartition::Raw_Read_Write`, omite `fsync()` cuando el destino es una FIFO (el stream de `adb backup`), donde siempre falla con `EINVAL` y hacía que AERA diera por fallido un backup correcto. Las escrituras a ficheros y particiones, incluida la restauración por ADB, siguen sincronizándose. Probado en spes; candidato a PR upstream (no enviado).
 
+- `patches/bootable_recovery/0002-catalog-fix-corrupted-Spanish-translations.diff`: en `aeraui/localization/catalog/catalog.json`, 6 cadenas `es-ES` tenían `?` en lugar de `ó`, `ú`, `ñ` o `í` (por ejemplo "A?adir red" o "Mostrar contrase?a"). Después hay que regenerar `catalog_generated.cpp` con `generate_catalog.py`, que lo hace `tools/apply-aera-patches.sh`; se comprobó que el generador reproduce exactamente el fichero de upstream a partir del JSON original. Detectado por el usuario en la pantalla de Wi-Fi.
+
 No se ha tocado el Plugin SDK.
 
 ## Atribución
