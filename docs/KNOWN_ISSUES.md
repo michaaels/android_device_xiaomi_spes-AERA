@@ -58,7 +58,7 @@
 
 ## Funciones fuera de la primera versión
 
-- Linterna: no configurada (`AERA_FLASHLIGHT_ENABLE` / `AERA_FL_PATH1`). Hay que comprobar si el kernel de EvolutionX expone el LED del flash en `/sys/class/leds`; el kernel de OrangeFox del usuario lleva un parche para ello.
+- Linterna: **implementada**. El flash de spes es `CAM_FLASH_TYPE_GPIO`; el modo linterna es el GPIO85 del TLMM y el kernel de EvolutionX no tiene LED class. `spes-torch-setup.sh` deja el GPIO85 apagado al arrancar y enlaza `/tmp/spes-torch/brightness` a su `value` (`AERA_FL_PATH1`). No se toca el GPIO93 (flash de alta corriente). Verificado en hardware (build 25): enciende y apaga desde los ajustes rápidos.
 - Vibración (`AERA_NO_HAPTICS`): hay que incluir el servicio AIDL `vendor.qti.hardware.vibrator` de EvolutionX.
 - Wi-Fi: **implementado** (ver la sección siguiente). PC Connection probada por Wi-Fi y por USB (API y aprobación). Pendiente: backup y restore hacia el PC desde el navegador, NAS (SMB/SFTP) y la reconexión tras desactivar y activar varias veces.
 - Aceleración GPU para LVGL: se usa renderizado por software.

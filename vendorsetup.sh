@@ -47,6 +47,10 @@ if [ "$1" = "$FDEVICE" ] || [ "$AERA_BUILD_DEVICE" = "$FDEVICE" ]; then
 	export AERA_SETTINGS_ROOT_DIRECTORY=/persist
 	export AERA_ALLOW_EARLY_SETTINGS_LOAD=1
 
+	# Flashlight: the torch is TLMM GPIO85 (no LED class in the EvolutionX
+	# kernel); spes-torch-setup.sh links /tmp/spes-torch/brightness to it.
+	export AERA_FL_PATH1=/tmp/spes-torch
+
 	# Both variants share one image
 	export TARGET_DEVICE_ALT="spesn"
 	export AERA_TARGET_DEVICES="spes,spesn"

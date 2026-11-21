@@ -15,6 +15,14 @@ service variant-script /system/bin/variant-script.sh
     oneshot
     seclabel u:r:recovery:s0
 
+# Flashlight: AERA_FL_PATH1=/tmp/spes-torch -> TLMM GPIO85 (torch mode)
+service spes-torch-setup /system/bin/spes-torch-setup.sh
+    user root
+    group root
+    disabled
+    oneshot
+    seclabel u:r:recovery:s0
+
 on fs
     wait /dev/block/platform/soc/${ro.boot.bootdevice}
     symlink /dev/block/platform/soc/${ro.boot.bootdevice} /dev/block/bootdevice
@@ -28,4 +36,5 @@ on post-fs
 on boot
     start health-hal-2-1
     start variant-script
+    start spes-torch-setup
     setprop sys.usb.config adb
