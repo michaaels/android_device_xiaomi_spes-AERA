@@ -91,7 +91,7 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 | Wi-Fi tras un sideload | PASS (b27) · FAIL (b25) | | b25: AERA paraba los daemons (corrían desde `vendor`) y el módem perdía `wlan_pd`. b27: corren desde una copia en RAM; tras el sideload, mismos PID, sin "Root PD crashed" y con internet |
 | PC Connection por Wi-Fi | PASS (antes) · BLOCKED (b25) | | en esta regresión no se pudo repetir por el fallo anterior |
 | Wi-Fi: sin escrituras en EFS ni persist reales | PASS | | SHA-256 de `modemst1/2`, `fsg`, `fsc` y `persist` reales idéntico antes y después de la sesión, aunque el módem escribió EFS (en las copias en RAM) |
-| Funciones con UPX | PASS (b25) | | los 29 binarios iniciales y los 14 añadidos (busybox, grep, bc, lptools, dmctl, keystore_cli_v2, mke2fs, tune2fs, resize2fs, mkfs.ntfs, mount.ntfs, fsck.fat, pigz, nano) arrancan y responden |
+| Compresión oficial (`AERA_USE_EXTREME_COMPRESSION`) | PASS (b28) | | sustituye a UPX; ramdisk 36 148 800 B; "AERA runtime: unpacked successfully in 2630 ms"; servicios sin abortos; descifrado con PIN correcto |
 | Vibración | NOT TESTED (desactivada) | | |
 
 **Nivel alcanzado:** compila ✔ · arranca ✔ · funciona ✔ en pantalla, táctil, rotación, linterna, ADB, MTP, sideload, backup por ADB, particiones, descifrado con PIN, Wi-Fi, plugins, PC Connection, fastbootd y vuelta a Android. **No validado aún:** restore desde AERA, descifrado sin bloqueo o con patrón, OTG, spesn, vibración y la instalación permanente. El port sigue siendo EXPERIMENTAL.
@@ -106,3 +106,4 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 - 2026-11-20: firmware instalado identificado (EvolutionX 16.0 11.10). Kernel y 33 blobs extraídos; `validate-tree.sh` da 0 fallos y 1 aviso (aún no hay `boot.img`).
 - 2026-11-20: regresión de `build25-flashlight` → todo PASS salvo el Wi-Fi tras un sideload (FAIL) y PC Connection por Wi-Fi (BLOCKED por ese fallo).
 - 2026-11-20: `build27-wlan-ram` (SHA-256 `9f29457b98ea98a1a8ed40694a4df3075b2d56a20d33a796d6531966c1936bcf`) → Wi-Fi con daemons en RAM, Wi-Fi tras un sideload y PC Connection por Wi-Fi: PASS.
+- 2026-11-21: `build28-extreme-xz` (SHA-256 `9841966cf54c4ac35f0ef4a9ad03e1216fe139d4193b4b8fede572925c91ed11`) → arranca con la compresión oficial y descifra con PIN. AERA Browser sigue fallando en Zink (ver `KNOWN_ISSUES.md`).

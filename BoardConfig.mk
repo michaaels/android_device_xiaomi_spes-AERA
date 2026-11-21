@@ -174,9 +174,9 @@ AERA_DEFAULT_BRIGHTNESS := 1200
 AERA_NO_SCREEN_BLANK := true
 AERA_INPUT_BLACKLIST := "hbtp_vm"
 
-# Haptics: stock uses the AIDL vendor.qti.hardware.vibrator.service. Kept off
-# until its blobs are bundled and validated on hardware (docs/KNOWN_ISSUES.md).
-AERA_NO_HAPTICS := true
+# Haptics: the PMIC vibrator is exposed as an LED-class device
+# (/sys/class/leds/vibrator: duration + activate), which minui drives directly
+# without the AIDL vibrator HAL. Verified on hardware (2026-11-21).
 
 # USB is configured by recovery/root/init.recovery.usb.rc
 AERA_EXCLUDE_DEFAULT_USB_INIT := true
@@ -194,16 +194,16 @@ AERA_EXCLUDE_APEX := true
 AERA_EXTRA_LANGUAGES := true
 AERA_DEFAULT_LANGUAGE := en
 
-# Ramdisk size: instead of dropping AERA features, pack the large executables
-# with AERA's bundled UPX (LZMA) from an explicit list; init, linker64, toybox,
-# sh and the vendor blobs are never touched. No trailing ';': bootable/recovery
-# appends its own "; rm -f ..." entry to this variable.
-BOARD_RECOVERY_IMAGE_PREPARE += bash $(DEVICE_PATH)/tools/compress-ramdisk-bins.sh $(TARGET_RECOVERY_ROOT_OUT) vendor/recovery/tools/upx &&
-# Even packed, everything is ~45.3 MB. The only files dropped are the CJK
-# fallback fonts (Chinese/Japanese/Korean UI and file names fall back to the
-# general font) and the lpdump CLI with its 2.1 MB libprotobuf-cpp-full, which
-# no AERA code uses (AERA_ENABLE_ALL_PARTITION_TOOLS forces it; lptools,
-# lpmake, lpunpack, lpflash and bootctl remain).
+# Ramdisk size: the spes bootloader does not start a ramdisk larger than
+# ~41.5 MB (docs/evidence/hw-abl-ramdisk-limit.txt). Use AERA's own mechanism
+# (also used by official trees with 4.19 kernels): XZ-pack the recovery runtime
+# inside the ramdisk; early init unpacks it into RAM.
+AERA_USE_EXTREME_COMPRESSION := 1
+# The only files dropped are the CJK fallback fonts and the lpdump CLI with its
+# 2.1 MB libprotobuf-cpp-full, which no AERA code uses
+# (AERA_ENABLE_ALL_PARTITION_TOOLS forces it; lptools, lpmake, lpunpack,
+# lpflash and bootctl remain). No trailing ';': bootable/recovery appends its
+# own "; rm -f ..." entry to BOARD_RECOVERY_IMAGE_PREPARE.
 SPES_DROPPED_FILES := twres/fonts/wqy-microhei.ttf twres/fonts/NotoSansCJKjp-Regular.ttf \
     system/bin/lpdump system/bin/lpdumpd system/etc/init/lpdumpd.rc \
     system/lib64/liblpdump.so system/lib64/liblpdump_interface-V1-cpp.so \

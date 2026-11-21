@@ -18,7 +18,7 @@
 ## Pendientes
 
 1. Escenarios de descifrado sin probar: sin bloqueo, patrón, credencial incorrecta y cancelar. Tampoco MTP con transferencia, sideload, backup/restore desde AERA ni la variante spesn (ver `TESTING.md`).
-3. **Límite de ramdisk**: con busybox (build 23) mide 41,42 MB; quedan ~80 KB hasta lo comprobado (41,5 MB). Cualquier binario nuevo debe ir en la lista UPX de `tools/compress-ramdisk-bins.sh`; `validate-tree.sh` falla si se supera el límite.
+3. **Límite de ramdisk**: el bootloader no arranca ramdisks de ≥ 42,4 MB (41,5 MB comprobado). Desde la build 28 se usa el mecanismo oficial `AERA_USE_EXTREME_COMPRESSION` (runtime de AERA comprimido con XZ dentro de la ramdisk; el init lo descomprime en RAM en ~2,6 s) en lugar de UPX: la ramdisk mide 36,1 MB y quedan ~5,4 MB de margen. `validate-tree.sh` falla si se supera el límite.
 4. **Funciones de AERA retiradas** por tamaño: flasheo directo de payloads (necesita `aera-otaripper`), `lpdump` y `bootctl` (`lptools` sí está), fuentes CJK/árabe/hebreo/índicas/tailandés (los nombres de fichero en esas escrituras no se ven) y bash/nano GNU.
 5. **Memoria de build**: `soong_build` necesita ~20 GB de RAM. Con aplicaciones pesadas abiertas, el sistema lo mata (OOM).
 
@@ -48,7 +48,7 @@
 - **Backup por ADB**: el núcleo de AERA hace `fsync()` sobre la FIFO de ADB y marca el backup como fallido aunque los datos sean correctos. Hay un parche mínimo en `patches/bootable_recovery/0001-partition-skip-fsync-on-ADB-backup-stream.diff` (solo omite el `fsync` si el destino es una FIFO; la restauración sigue sincronizando la partición), probado en hardware y pendiente de proponer upstream. Además, AERA no atiende `adb backup` mientras muestra la pantalla de descifrado (hay que descifrar u omitir antes), y sin descifrar registra `Unable to chmod … recovery.log`, que es solo cosmético.
 - **Escrituras persistentes de AERA** (comportamiento de AERA, no del port): sus ajustes y logs en `/data/media/0/AERA/` (descifrado) o en `/data/recovery/AERA/` y `/data/recovery/.version` (sin descifrar).
 - **Ajustes de AERA en `persist` (convención oficial):** antes del PIN, `/data` no se puede montar (cifrado de metadatos), así que, como el árbol oficial de AERA para el Xiaomi 15, los ajustes van a `/persist/AERA` (`AERA_SETTINGS_ROOT_DIRECTORY=/persist` y `AERA_ALLOW_EARLY_SETTINGS_LOAD=1`). Así el idioma se aplica ya en la pantalla del PIN; `early-ui.conf` se escribe al guardar preferencias con los datos descifrados. Se probó antes `/data/recovery` con `persist` en solo lectura, pero dejaba la pantalla del PIN en inglés; el usuario eligió la convención oficial. El `/persist/.aera` y el `.fsec` vaciado de sesiones anteriores se restauraron con su autorización.
-- **Plugins y descargas**: AERA descarga el catálogo, los plugins, las fuentes y las actualizaciones con `busybox wget`, así que el busybox estático de AERA va en `/sbin/busybox` (`AERA_USE_BUSYBOX_BINARY=1`, comprimido con UPX). Sin él, con internet, la tienda de plugins no carga. El `wget` de busybox no valida certificados TLS ("TLS certificate validation not implemented"); el catálogo se acepta solo si su firma `.sig` es válida. Verificado: catálogo descargado por Wi-Fi (build 23).
+- **Plugins y descargas**: AERA descarga el catálogo, los plugins, las fuentes y las actualizaciones con `busybox wget`, así que el busybox estático de AERA va en `/sbin/busybox` (`AERA_USE_BUSYBOX_BINARY=1`). Sin él, con internet, la tienda de plugins no carga. El `wget` de busybox no valida certificados TLS ("TLS certificate validation not implemented"); el catálogo se acepta solo si su firma `.sig` es válida. Verificado: catálogo descargado por Wi-Fi (build 23).
 - **Wi-Fi con `/persist` montada**: como AERA monta `/persist` en lectura-escritura para sus ajustes, un segundo montaje en solo lectura falla. `spes-wlan-up.sh` copia `rfs`/`hlos_rfs` a la RAM desde el montaje existente (solo lee).
 - **Lentitud de la interfaz**: mejora con la resolución adaptativa, pero el renderizado sigue siendo por software (sin GPU).
 
@@ -59,8 +59,11 @@
 
 ## Funciones fuera de la primera versión
 
+- **Root Manager**: no es viable con el kernel de EvolutionX. AERA solo trae módulos KernelSU para kernels GKI 6.1, 6.6, 6.12 y 6.18; spes usa 4.19 (no GKI). Los árboles oficiales con kernels antiguos (4.19 y 4.4) lo tienen desactivado (`AERA_ENABLE_ROOT_MANAGER=0`).
+- **AERA Browser (plugin)**: bloqueado en el runtime del plugin. Se añadió lo que el árbol debe aportar: firmware de la Adreno 610 (`a630_sqe.fw`, `a610_zap.*`) y `kgsl-3d0`/`ion` en 0666 para el proceso aislado (UID 99090). Con eso la GPU arranca y Turnip la detecta ("Found compatible device '/dev/kgsl-3d0'"), pero Zink no crea la pantalla EGL ("egl: failed to create dri2 screen" → "Could not create surfaceless EGL display: EGL_NOT_INITIALIZED") y el motor WebKit aborta. Hay que reportarlo a los mantenedores del plugin con ese log.
+
 - Linterna: **implementada**. El flash de spes es `CAM_FLASH_TYPE_GPIO`; el modo linterna es el GPIO85 del TLMM y el kernel de EvolutionX no tiene LED class. `spes-torch-setup.sh` deja el GPIO85 apagado al arrancar y enlaza `/tmp/spes-torch/brightness` a su `value` (`AERA_FL_PATH1`). No se toca el GPIO93 (flash de alta corriente). Verificado en hardware (build 25): enciende y apaga desde los ajustes rápidos.
-- Vibración (`AERA_NO_HAPTICS`): hay que incluir el servicio AIDL `vendor.qti.hardware.vibrator` de EvolutionX.
+- Vibración: **activada** (build 28). El vibrador del PMIC aparece como LED (`/sys/class/leds/vibrator`, `duration` + `activate`), que minui usa directamente sin el HAL AIDL; se probó a mano en hardware. En AERA hay que activar la respuesta háptica en Ajustes (viene apagada en las preferencias).
 - Wi-Fi: **implementado** (ver la sección siguiente). PC Connection probada por Wi-Fi y por USB (API y aprobación). Pendiente: backup y restore hacia el PC desde el navegador, NAS (SMB/SFTP) y la reconexión tras desactivar y activar varias veces.
 - Aceleración GPU para LVGL: se usa renderizado por software.
 - Audio y redes móviles: fuera de alcance.
