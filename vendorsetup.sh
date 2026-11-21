@@ -38,6 +38,8 @@ if [ "$1" = "$FDEVICE" ] || [ "$AERA_BUILD_DEVICE" = "$FDEVICE" ]; then
 	export AERA_USE_GREP_BINARY=1
 	export AERA_USE_XZ_UTILS=1
 	export AERA_USE_NANO_EDITOR=1
+	# AERA downloads plugins, updates and fonts with "busybox wget"
+	export AERA_USE_BUSYBOX_BINARY=1
 
 	# Same convention as the official AERA Xiaomi 15 tree (FBE + metadata
 	# encryption): /data cannot be mounted before the decryption screen, so

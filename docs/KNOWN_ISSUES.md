@@ -18,7 +18,7 @@
 ## Pendientes
 
 1. Escenarios de descifrado sin probar: sin bloqueo, patrón, credencial incorrecta y cancelar. Tampoco MTP con transferencia, sideload, backup/restore desde AERA ni la variante spesn (ver `TESTING.md`).
-3. **Límite de ramdisk**: queda ~1,9 MB de margen hasta lo comprobado (41,5 MB). Añadir funciones (Wi-Fi, vibración, idiomas extra) obliga a volver a medir; `validate-tree.sh` falla si se superan los 40 MB.
+3. **Límite de ramdisk**: con busybox (build 23) mide 41,42 MB; quedan ~80 KB hasta lo comprobado (41,5 MB). Cualquier binario nuevo debe ir en la lista UPX de `tools/compress-ramdisk-bins.sh`; `validate-tree.sh` falla si se supera el límite.
 4. **Funciones de AERA retiradas** por tamaño: flasheo directo de payloads (necesita `aera-otaripper`), `lpdump` y `bootctl` (`lptools` sí está), fuentes CJK/árabe/hebreo/índicas/tailandés (los nombres de fichero en esas escrituras no se ven) y bash/nano GNU.
 5. **Memoria de build**: `soong_build` necesita ~20 GB de RAM. Con aplicaciones pesadas abiertas, el sistema lo mata (OOM).
 
@@ -47,6 +47,8 @@
 - **Backup por ADB**: el núcleo de AERA hace `fsync()` sobre la FIFO de ADB y marca el backup como fallido aunque los datos sean correctos. Hay un parche mínimo en `patches/bootable_recovery/0001-partition-skip-fsync-on-ADB-backup-stream.diff` (solo omite el `fsync` si el destino es una FIFO; la restauración sigue sincronizando la partición), probado en hardware y pendiente de proponer upstream. Además, AERA no atiende `adb backup` mientras muestra la pantalla de descifrado (hay que descifrar u omitir antes), y sin descifrar registra `Unable to chmod … recovery.log`, que es solo cosmético.
 - **Escrituras persistentes de AERA** (comportamiento de AERA, no del port): sus ajustes y logs en `/data/media/0/AERA/` (descifrado) o en `/data/recovery/AERA/` y `/data/recovery/.version` (sin descifrar).
 - **Ajustes de AERA en `persist` (convención oficial):** antes del PIN, `/data` no se puede montar (cifrado de metadatos), así que, como el árbol oficial de AERA para el Xiaomi 15, los ajustes van a `/persist/AERA` (`AERA_SETTINGS_ROOT_DIRECTORY=/persist` y `AERA_ALLOW_EARLY_SETTINGS_LOAD=1`). Así el idioma se aplica ya en la pantalla del PIN; `early-ui.conf` se escribe al guardar preferencias con los datos descifrados. Se probó antes `/data/recovery` con `persist` en solo lectura, pero dejaba la pantalla del PIN en inglés; el usuario eligió la convención oficial. El `/persist/.aera` y el `.fsec` vaciado de sesiones anteriores se restauraron con su autorización.
+- **Plugins y descargas**: AERA descarga el catálogo, los plugins, las fuentes y las actualizaciones con `busybox wget`, así que el busybox estático de AERA va en `/sbin/busybox` (`AERA_USE_BUSYBOX_BINARY=1`, comprimido con UPX). Sin él, con internet, la tienda de plugins no carga. El `wget` de busybox no valida certificados TLS ("TLS certificate validation not implemented"); el catálogo se acepta solo si su firma `.sig` es válida. Verificado: catálogo descargado por Wi-Fi (build 23).
+- **Wi-Fi con `/persist` montada**: como AERA monta `/persist` en lectura-escritura para sus ajustes, un segundo montaje en solo lectura falla. `spes-wlan-up.sh` copia `rfs`/`hlos_rfs` a la RAM desde el montaje existente (solo lee).
 - **Lentitud de la interfaz**: mejora con la resolución adaptativa, pero el renderizado sigue siendo por software (sin GPU).
 
 ## Traducciones de AERA (upstream)

@@ -13,7 +13,7 @@ set -u
 
 ROOT="${1:?recovery root}"
 UPX="${2:?upx binary}"
-MIN=131072
+MIN=65536
 
 LIST="
 system/bin/recovery
@@ -42,12 +42,26 @@ system/bin/wpa_cli
 system/bin/toolbox
 system/bin/awk
 system/bin/nano
+AERA/Files/nano/bin/nano.bin
 system/bin/htop
 system/bin/lpdump
 system/bin/lpdumpd
 sbin/bash
 sbin/gnutar
 sbin/gnused
+sbin/busybox
+system/bin/grep
+system/bin/bc
+system/bin/lptools
+system/bin/dmctl
+system/bin/keystore_cli_v2
+system/bin/mke2fs
+system/bin/tune2fs
+system/bin/resize2fs
+system/bin/mkfs.ntfs
+system/bin/mount.ntfs
+system/bin/fsck.fat
+system/bin/pigz
 "
 
 [ -x "$UPX" ] || { echo "compress-ramdisk-bins: $UPX not found" >&2; exit 1; }
