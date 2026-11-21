@@ -17,7 +17,7 @@
 
 ## Cambios en componentes AERA
 
-El device tree no modifica AERA. Hay **tres parches genéricos** propuestos para `bootable/recovery`, que se guardan aparte (se aplican con `tools/apply-aera-patches.sh`):
+El device tree no modifica AERA. Hay **cuatro parches genéricos** propuestos para `bootable/recovery`, que se guardan aparte (se aplican con `tools/apply-aera-patches.sh`):
 
 - `patches/bootable_recovery/0001-partition-skip-fsync-on-ADB-backup-stream.diff`: en `TWPartition::Raw_Read_Write`, omite `fsync()` cuando el destino es una FIFO (el stream de `adb backup`), donde siempre falla con `EINVAL` y hacía que AERA diera por fallido un backup correcto. Las escrituras a ficheros y particiones, incluida la restauración por ADB, siguen sincronizándose. Probado en spes; candidato a PR upstream (no enviado).
 
@@ -30,6 +30,18 @@ El device tree no modifica AERA. Hay **tres parches genéricos** propuestos para
   - **21 sin traducir a propósito**, porque se quedan en inglés: nombres de producto (`AERA Doom`, `AERA Gallery`, `AERA Recovery`, `AERA Streams`, `AERA Telegram`, `App Backup Vault`, `Doom`), términos técnicos y abreviaturas (`Swappiness`, `Firmware`, `Incremental`, `PAYLOAD`, `RAM`, `BAT`, `REC  `, `DNS 1`, `DNS 2`, `No`) y cadenas que solo son formato (`%.1f MB`, `%.1f MB / %.1f MB`, `%d %s`, `%s\n%d %s`). Sin entrada `es-ES` se usa el inglés, igual que en el resto de idiomas.
   - Criterios: español neutro y técnico, coherente con lo que ya había y con la variante mayoritaria del catálogo (tuteo en las instrucciones e infinitivo en botones y acciones). Terminología: *slot* → ranura, *flash* → flashear/flasheo, *snapshot* → instantánea, *readback* → relectura, *anti-rollback* → antirreversión (se conserva `ARB`), *plugin* → complemento, *computer* → computadora, *Enter* → Ingresa, *Swipe to* → Desliza para, *Slide to* → Deslizar para. Se dejan literales `payload`, `kernel`, `recovery`, `KMI`, `OTA`, `SHA-256`, rutas (`AERA/Extracted`, `/sdcard/AERA/Doom`), comandos y herramientas (`otaripper`, `xbl_config`, `init_boot`). Los créditos se traducen como funciones ("Fundación, desarrollo principal…") para no asignar género.
   - Validación: el JSON es válido; en cada cadena `es-ES` los marcadores printf/`{n}`, el número de saltos de línea y los espacios al inicio y al final coinciden con el inglés; no queda ningún `?` entre letras; `generate_catalog.py` regenera sin errores (2768 etiquetas); en `chinese_catalog_test.py` pasa la comprobación de que el catálogo generado está al día, y los 58 fallos de cobertura china son los mismos con y sin el parche (problema previo de upstream).
+
+- `patches/bootable_recovery/0004-wifi-localize-status-and-test-result-Spanish-respaldo.diff` (requiere `0003`): textos de Wi-Fi que seguían en inglés en el teléfono, y "respaldo" en las etiquetas cortas. Toca `aeraui/scenes/wifi_scene.cpp` y `catalog.json`.
+  - Código (`wifi_scene.cpp`, cambios genéricos):
+    - `BusyTitle()` traduce el texto base antes de añadir los puntos animados. Antes, "Turning Wi-Fi on..." no coincidía con ninguna clave y salía en inglés.
+    - Los estados en bruto del backend (`wlan_state`: `enabling`, `disabling`, `disconnecting`, `scanning`, `connecting`) se muestran como etiquetas del catálogo (`WifiStateTag()`).
+    - Las líneas que devuelve el test de red de `wlan.cpp` ("Connected: …", "IP address: …", "Internet: Failed", "Router or upstream network may be down.") se traducen al mostrarlas (`TranslateTestResult()`): se traduce la etiqueta y el estado `OK`/`Failed`, y se dejan tal cual el SSID y la IP. `wlan.cpp` no se modifica, porque esos valores se comparan literalmente en `aera_backend.cpp`.
+  - Catálogo: **9 claves nuevas** (`Enabling`, `Disabling`, `Scanning`, `Internet`, `OK` y los 4 mensajes del test de `wlan.cpp`), con `en`, `es-ES`, `zh_CN` y `zh_TW` para no añadir fallos de cobertura china. Además, **38 cadenas `es-ES` cambiadas**:
+    - "Scanning nearby" → "Buscando redes cercanas".
+    - "respaldo" en 29 etiquetas cortas, títulos, botones y contadores (`Backup` → "Respaldo", `Backups` → "Respaldos", "Crear respaldo", "Restaurar respaldo", "Respaldando %s"…). La etiqueta "Copia de seguridad" no cabía en un botón.
+    - 8 traducciones previas con el marcador pegado a una palabra (`'%zu partitions selected'` → `'Particiones%zu seleccionadas'`).
+  - Criterio: "respaldo" en etiquetas sin punto final de hasta ~30 caracteres; las frases completas mantienen "copia de seguridad".
+  - Validación: el código compila con `clang++ -fsyntax-only -Wall -Wextra` sin avisos nuevos; el JSON es válido; los marcadores, saltos de línea y espacios al inicio y al final coinciden con el inglés, y ya no queda ningún marcador pegado a una palabra; `generate_catalog.py` regenera sin errores (2777 etiquetas); `chinese_catalog_test.py` mantiene los mismos 58 fallos previos y pasa la comprobación de que el catálogo generado está al día; `0001`–`0004` se aplican en cadena sobre upstream limpio.
 
 No se ha tocado el Plugin SDK.
 
