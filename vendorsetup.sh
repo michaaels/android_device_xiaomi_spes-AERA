@@ -39,6 +39,9 @@ if [ "$1" = "$FDEVICE" ] || [ "$AERA_BUILD_DEVICE" = "$FDEVICE" ]; then
 	export AERA_USE_XZ_UTILS=1
 	export AERA_USE_NANO_EDITOR=1
 
+	# Keep AERA settings off the persist (calibration) partition
+	export AERA_SETTINGS_ROOT_DIRECTORY=/data/recovery
+
 	# Both variants share one image
 	export TARGET_DEVICE_ALT="spesn"
 	export AERA_TARGET_DEVICES="spes,spesn"
