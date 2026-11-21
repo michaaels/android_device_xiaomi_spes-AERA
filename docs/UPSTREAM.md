@@ -17,11 +17,19 @@
 
 ## Cambios en componentes AERA
 
-El device tree no modifica AERA. Hay **dos parches genéricos** propuestos para `bootable/recovery`, que se guardan aparte (se aplican con `tools/apply-aera-patches.sh`):
+El device tree no modifica AERA. Hay **tres parches genéricos** propuestos para `bootable/recovery`, que se guardan aparte (se aplican con `tools/apply-aera-patches.sh`):
 
 - `patches/bootable_recovery/0001-partition-skip-fsync-on-ADB-backup-stream.diff`: en `TWPartition::Raw_Read_Write`, omite `fsync()` cuando el destino es una FIFO (el stream de `adb backup`), donde siempre falla con `EINVAL` y hacía que AERA diera por fallido un backup correcto. Las escrituras a ficheros y particiones, incluida la restauración por ADB, siguen sincronizándose. Probado en spes; candidato a PR upstream (no enviado).
 
 - `patches/bootable_recovery/0002-catalog-fix-corrupted-Spanish-translations.diff`: en `aeraui/localization/catalog/catalog.json`, 6 cadenas `es-ES` tenían `?` en lugar de `ó`, `ú`, `ñ` o `í` (por ejemplo "A?adir red" o "Mostrar contrase?a"). Después hay que regenerar `catalog_generated.cpp` con `generate_catalog.py`, que lo hace `tools/apply-aera-patches.sh`; se comprobó que el generador reproduce exactamente el fichero de upstream a partir del JSON original. Detectado por el usuario en la pantalla de Wi-Fi.
+
+- `patches/bootable_recovery/0003-catalog-complete-Spanish-translation.diff` (requiere `0002`): completa la traducción `es-ES` del catálogo. Solo toca entradas `es-ES` de `catalog.json`, sin reformatear (el JSON se reescribe con `indent=2`, que reproduce el fichero original byte a byte). Cobertura: de 2094 a 2747 de 2768 cadenas.
+  - **653 cadenas añadidas** de las 674 que no tenían traducción.
+  - **13 corregidas** que eran idénticas al inglés sin ser nombres propios: `Backup`, `Backups`, `Wipe`, `Slot`, `Slot %s`, `Flashed %s`, `Flashing %s`, `Flashing init_boot_%s`, `Fatal:`, `Update %s?`, `Recovery Update`, `Plugin Manager`, `Theme Engine`.
+  - **14 reparadas** porque tenían los marcadores desplazados o saltos de línea de más (por ejemplo `%u downloads` → `"Descargas de%u "`, `Erased %s` → `" %sborrado"`).
+  - **21 sin traducir a propósito**, porque se quedan en inglés: nombres de producto (`AERA Doom`, `AERA Gallery`, `AERA Recovery`, `AERA Streams`, `AERA Telegram`, `App Backup Vault`, `Doom`), términos técnicos y abreviaturas (`Swappiness`, `Firmware`, `Incremental`, `PAYLOAD`, `RAM`, `BAT`, `REC  `, `DNS 1`, `DNS 2`, `No`) y cadenas que solo son formato (`%.1f MB`, `%.1f MB / %.1f MB`, `%d %s`, `%s\n%d %s`). Sin entrada `es-ES` se usa el inglés, igual que en el resto de idiomas.
+  - Criterios: español neutro y técnico, coherente con lo que ya había y con la variante mayoritaria del catálogo (tuteo en las instrucciones e infinitivo en botones y acciones). Terminología: *slot* → ranura, *flash* → flashear/flasheo, *snapshot* → instantánea, *readback* → relectura, *anti-rollback* → antirreversión (se conserva `ARB`), *plugin* → complemento, *computer* → computadora, *Enter* → Ingresa, *Swipe to* → Desliza para, *Slide to* → Deslizar para. Se dejan literales `payload`, `kernel`, `recovery`, `KMI`, `OTA`, `SHA-256`, rutas (`AERA/Extracted`, `/sdcard/AERA/Doom`), comandos y herramientas (`otaripper`, `xbl_config`, `init_boot`). Los créditos se traducen como funciones ("Fundación, desarrollo principal…") para no asignar género.
+  - Validación: el JSON es válido; en cada cadena `es-ES` los marcadores printf/`{n}`, el número de saltos de línea y los espacios al inicio y al final coinciden con el inglés; no queda ningún `?` entre letras; `generate_catalog.py` regenera sin errores (2768 etiquetas); en `chinese_catalog_test.py` pasa la comprobación de que el catálogo generado está al día, y los 58 fallos de cobertura china son los mismos con y sin el parche (problema previo de upstream).
 
 No se ha tocado el Plugin SDK.
 
