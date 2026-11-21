@@ -72,13 +72,29 @@ done
 
 # 4. persist sandbox for tftp_server
 if ! grep -q " /mnt/vendor/persist tmpfs" /proc/mounts; then
-    mkdir -p /tmp/spes_persist_ro /mnt/vendor/persist
-    mount -t ext4 -o ro "$BYNAME/persist" /tmp/spes_persist_ro || fail "cannot mount persist read-only"
+    mkdir -p /mnt/vendor/persist
+    # AERA keeps its settings in /persist (AERA_SETTINGS_ROOT_DIRECTORY), so
+    # the partition is usually mounted read-write already and a second ext4
+    # mount of it with "ro" is refused. Read the copy from that mount then;
+    # otherwise mount it read-only just for the copy.
+    PERSIST_SRC=""
+    PERSIST_TMP=""
+    real_persist="$(readlink -f "$BYNAME/persist")"
+    while read -r dev mnt fstype _; do
+        [ "$fstype" = ext4 ] || continue
+        [ "$(readlink -f "$dev")" = "$real_persist" ] && { PERSIST_SRC="$mnt"; break; }
+    done < /proc/mounts
+    if [ -z "$PERSIST_SRC" ]; then
+        PERSIST_TMP=/tmp/spes_persist_ro
+        mkdir -p "$PERSIST_TMP"
+        mount -t ext4 -o ro "$BYNAME/persist" "$PERSIST_TMP" || fail "cannot mount persist read-only"
+        PERSIST_SRC="$PERSIST_TMP"
+    fi
     mount -t tmpfs -o mode=0777 tmpfs /mnt/vendor/persist || fail "cannot mount persist tmpfs"
     for d in rfs hlos_rfs; do
-        [ -d "/tmp/spes_persist_ro/$d" ] && cp -a "/tmp/spes_persist_ro/$d" /mnt/vendor/persist/
+        [ -d "$PERSIST_SRC/$d" ] && cp -a "$PERSIST_SRC/$d" /mnt/vendor/persist/
     done
-    umount /tmp/spes_persist_ro
+    [ -n "$PERSIST_TMP" ] && umount "$PERSIST_TMP"
     log "persist rfs/hlos_rfs copied to RAM"
 fi
 
