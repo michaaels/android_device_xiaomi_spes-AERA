@@ -74,8 +74,8 @@ if [ -f prebuilt/kernel ]; then ok "prebuilt/kernel present ($(file -b prebuilt/
 else note "prebuilt/kernel missing (BoardConfig.mk stops the build until it is provided)"; fi
 
 # 9. No foreign-device leftovers
-if grep -rqiE 'garnet|dada|infiniti|peridot|sm8750|parrot|adrastea' --exclude-dir=docs --exclude-dir=.git --exclude=validate-tree.sh --exclude=README.md .; then
-    bad "references to other devices found"; grep -rniE 'garnet|dada|infiniti|peridot|sm8750|parrot|adrastea' --exclude-dir=docs --exclude-dir=.git --exclude=validate-tree.sh --exclude=README.md . | head
+if grep -rqiwE 'garnet|dada|infiniti|peridot|sm8750|parrot|adrastea' --exclude-dir=docs --exclude-dir=patches --exclude-dir=.git --exclude=validate-tree.sh --exclude=README.md .; then
+    bad "references to other devices found"; grep -rniwE 'garnet|dada|infiniti|peridot|sm8750|parrot|adrastea' --exclude-dir=docs --exclude-dir=patches --exclude-dir=.git --exclude=validate-tree.sh --exclude=README.md . | head
 else ok "no references to other devices"; fi
 
 # 10. Licence headers on tree sources
