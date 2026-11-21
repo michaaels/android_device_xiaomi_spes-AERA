@@ -15,10 +15,13 @@ fi
 mkdir -p /src
 LOOPDEV=""
 if ! mountpoint -q /src; then
-    # `mount -o loop` cannot create loop nodes inside a container's /dev;
-    # losetup goes through /dev/loop-control and prints the node it bound.
-    LOOPDEV="$(losetup -f --show "$AERA_IMAGE")"
+    # The kernel creates new loop nodes only in the host's devtmpfs, not in
+    # this container's /dev (seen after a host reboot: "losetup: failed to set
+    # up loop device: No such file or directory"). Ask for a free index, create
+    # its node here if needed, then bind it explicitly.
+    LOOPDEV="$(losetup -f)"
     [ -b "$LOOPDEV" ] || mknod "$LOOPDEV" b 7 "${LOOPDEV#/dev/loop}"
+    losetup "$LOOPDEV" "$AERA_IMAGE"
     mount -o noatime "$LOOPDEV" /src
 fi
 chown builder:builder /src
