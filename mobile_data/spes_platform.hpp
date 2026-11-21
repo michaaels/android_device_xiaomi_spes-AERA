@@ -98,12 +98,13 @@ inline bool Running() {
 }
 
 // Empty when this device can provide mobile data, otherwise the reason shown
-// in the UI.
+// in the UI. It runs when the provider starts with recovery, before the modem
+// is prepared, so it must not require rmnet_ipa0: that interface only appears
+// once spes-wlan-up.sh loads the IPA firmware (checked by Start()).
 inline std::string Capability() {
   if (SubsystemState().empty()) return "No supported Qualcomm modem control was found";
   if (access("/dev/subsys_modem", R_OK)) return "The modem control device is unavailable";
   if (access(kPrepareScript, X_OK)) return "The modem preparation script is not installed";
-  if (!if_nametoindex("rmnet_ipa0")) return "The kernel IPA data interface is unavailable";
   const int transport = socket(42 /* AF_QIPCRTR */, SOCK_DGRAM | SOCK_CLOEXEC, 0);
   if (transport < 0) return "The kernel has no QRTR modem transport";
   close(transport);
@@ -131,5 +132,7 @@ inline void Start(const std::atomic<bool> &cancel) {
       throw std::runtime_error("Modem preparation failed. See /tmp/recovery.log");
   }
   wait(Running, 60, "The modem did not come online");
+  wait([] { return if_nametoindex("rmnet_ipa0") != 0; }, 10,
+       "The kernel IPA data interface is unavailable");
 }
 }  // namespace aera::mobile::spes

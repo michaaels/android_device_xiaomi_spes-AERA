@@ -87,6 +87,7 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 | PC Connection: backup y restore hacia o desde el PC en el navegador | NOT TESTED | | requiere navegador Chromium con selector de carpetas; AERA lo marca como Beta |
 | Wi-Fi: arranque bajo demanda | PASS | NOT TESTED | IPA y módem arrancados, `wlan_pd` → "WLAN FW is ready" → driver → `wlan0` en ~10 s (`evidence/hw-wifi.txt`) |
 | Wi-Fi: conexión desde la interfaz de AERA | PASS (b25: reconexión automática a la red guardada) | NOT TESTED | DHCP `192.168.100.70/24` y DNS configurados; ping del PC al teléfono 3/3; TCP a 1.1.1.1:443, 8.8.8.8:443 y google.com:443 |
+| Datos móviles tras reiniciar y en español | PASS (b32) | | arranque limpio: disponible, conecta desde la página Red y todos los textos salen en español |
 | Datos móviles: reconexión y nombre del operador | PASS (b31) | | arranque limpio y 3 ciclos seguidos de conectar/desconectar con APN automático; "CLARO EC" y ping en cada ciclo |
 | Datos móviles (SIM 1, Claro, 4G) | PASS (b30) | NOT TESTED | conexión desde la página Red; APN `ba.amx` automático; IPv4 por `rmnet_aera`; ping 8.8.8.8 3/3 (~99 ms); DNS del operador; HTTP/HTTPS y tienda de plugins con el Wi-Fi apagado; al desconectar se limpian interfaz, ruta y DNS y el módem sigue en línea |
 | Tienda de plugins (catálogo con internet) | PASS (b23, b25) | | `busybox wget` descarga `catalog.json` y `catalog.json.sig` a `/tmp/aera-plugin-store` |
@@ -111,3 +112,4 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 - 2026-11-21: `build28-extreme-xz` (SHA-256 `9841966cf54c4ac35f0ef4a9ad03e1216fe139d4193b4b8fede572925c91ed11`) → arranca con la compresión oficial y descifra con PIN. AERA Browser sigue fallando en Zink (ver `KNOWN_ISSUES.md`).
 - 2026-11-21: `build30-mobile-data` (SHA-256 `383e371730ff6cba3a544df9f9755f30b80ea41b07a89c6cc08534c17f7d24cc`) → datos móviles por 4G: PASS.
 - 2026-11-21: `build31-mobile-data` (SHA-256 `25af3ab314fbd43b0047181063dac86cd86a460a27296cce8dce846aab7dc52b`) → reconexión repetida y nombre del operador: PASS.
+- 2026-11-21: `build32-mobile-es` (SHA-256 `8c91f44a91c372695117e671d51b46218d9781741d3c6f274fdf4aa72a583544`) → datos móviles disponibles al arrancar y en español: PASS.
