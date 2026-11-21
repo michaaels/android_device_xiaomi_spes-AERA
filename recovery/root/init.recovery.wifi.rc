@@ -18,6 +18,12 @@ on property:sys.aera.wlan.up=1
     start wpa_supplicant
     setprop sys.aera.wlan.up 0
 
+# Mobile data brings the shared modem up without starting Wi-Fi
+# (mobile_data/spes_platform.hpp).
+on property:spes.modem.up=1
+    start spes-wlan-prep
+    setprop spes.modem.up 0
+
 on property:spes.wlan.prep=1
     start spes-qrtr-ns
     start spes-pd-mapper

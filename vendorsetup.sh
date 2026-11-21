@@ -51,6 +51,10 @@ if [ "$1" = "$FDEVICE" ] || [ "$AERA_BUILD_DEVICE" = "$FDEVICE" ]; then
 	# kernel); spes-torch-setup.sh links /tmp/spes-torch/brightness to it.
 	export AERA_FL_PATH1=/tmp/spes-torch
 
+	# Mobile data (internet only): mobile_data/aera-cellular-provider reuses
+	# the modem bring-up of the Wi-Fi stack (RAM-sandboxed EFS and persist).
+	export AERA_ENABLE_MOBILE_DATA=1
+
 	# Both variants share one image
 	export TARGET_DEVICE_ALT="spesn"
 	export AERA_TARGET_DEVICES="spes,spesn"

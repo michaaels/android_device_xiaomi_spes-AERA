@@ -1,0 +1,19 @@
+// AERA mobile data for spes / spesn (AERA_ENABLE_MOBILE_DATA=1 in vendorsetup.sh).
+// qmi.hpp and sim.hpp are the shared AERA sources, kept byte-identical to the
+// official device trees; spes_platform.hpp holds the only hardware-specific part.
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+cc_binary {
+    name: "aera-cellular-provider",
+    recovery: true,
+    srcs: ["daemon.cpp"],
+    include_dirs: ["bootable/recovery"],
+    cpp_std: "c++17",
+    rtti: false,
+    cppflags: ["-fexceptions"],
+    cflags: ["-Wall", "-Wextra", "-Werror"],
+    static_libs: ["libjsoncpp"],
+    shared_libs: ["libcutils", "libcrypto"],
+}

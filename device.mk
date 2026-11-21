@@ -38,6 +38,11 @@ PRODUCT_PACKAGES += \
 # keystore2 and the health HAL abort on start ("Failed to read task profiles
 # from /etc/task_profiles.json"), observed on hardware. Use the copy from the
 # same system/core the recovery's libprocessgroup is built from.
+# Mobile data: device provider in mobile_data/ (AERA_ENABLE_MOBILE_DATA=1)
+ifeq ($(AERA_ENABLE_MOBILE_DATA),1)
+PRODUCT_PACKAGES += aera-cellular-provider
+endif
+
 PRODUCT_COPY_FILES += \
     system/core/libprocessgroup/profiles/task_profiles.json:$(TARGET_COPY_OUT_RECOVERY)/root/system/etc/task_profiles.json
 
