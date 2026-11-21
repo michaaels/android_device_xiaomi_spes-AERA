@@ -46,7 +46,7 @@ Hay tres niveles de validación, y cumplir uno no implica los siguientes: **comp
 
 ## Pruebas en hardware
 
-Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, EvolutionX 16.0 11.10 instalado. **Procedimiento:** solo `fastboot boot` (en RAM); no se ha escrito ninguna partición. Imagen probada: `build11-vintf`, SHA-256 `d69b491b1c0439a19ae007adcc98688de58821284530d37b7d6c1f665bba3ba3`. Evidencia en `docs/evidence/`.
+Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, EvolutionX 16.0 11.10 instalado. **Procedimiento:** solo `fastboot boot` (en RAM); no se ha escrito ninguna partición. Imagen de la última regresión (2026-11-20): `build25-flashlight`, SHA-256 `01fa83b1161485af46c9f1a451881c3fec90ce30b636b49eaf62d1a3d3075fc1` (parches 0001–0006, busybox, ajustes en `/persist`). Las filas marcadas **(b25)** se repitieron con ella; el resto viene de builds anteriores (primera: `build11-vintf`). Evidencia en `docs/evidence/`.
 
 | Prueba | spes | spesn | Evidencia |
 |---|---|---|---|
@@ -56,42 +56,45 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 | Renderizador | NOT TESTED (detalle) | | DRM `card0` presente; el renderizador exacto no está verificado |
 | Táctil (`fts_ts`, FocalTech) | PASS | NOT TESTED | el usuario manejó los menús; `getevent` |
 | Botones (power, volumen) | PASS | NOT TESTED | menú de power y volumen responden (`gpio-keys`, `qpnp_pon`) |
-| AERA no escribe en `persist` | PASS | | `/persist` en solo lectura; ajustes en `/data/recovery/AERA/.aera`; SHA-256 de `persist` idéntico antes y después de guardar ajustes (imagen `build18-persist-ro`) |
+| Ajustes de AERA en `/persist/AERA` (convención oficial) | PASS (b25) | | `early-ui.conf` con `language=es-ES`; la pantalla del PIN sale en español (confirmado por el usuario). Antes (`build18-persist-ro`) se probó `persist` en solo lectura, descartado |
 | Fluidez de la interfaz | PASS (tras la corrección USB) | | antes iba lenta por el bucle de `init` del USB (`kmsg-usb-diag.txt`) |
 | ADB (shell como root) | PASS | NOT TESTED | `18d1:d001`, `UDC=4e00000.dwc3` |
 | Variante detectada por SKU | PASS (`k7t` → spes 2201117TG) | NOT TESTED (`k7tn`) | `hw-aera-first-boot.txt` |
 | Servicios (logd, keystore2, qseecomd, keymaster 4.1, gatekeeper 1.0, boot 1.2, health 2.1) | PASS, 0 aborts | NOT TESTED | `hw-aera-services-decrypt.txt` |
 | Detección de particiones | PASS | NOT TESTED | todas las de `twrp.flags` y las lógicas `_a` (`recovery.log`) |
-| Descifrado con PIN | PASS | NOT TESTED | "User 0 Decrypted Successfully", `/data` en dm-default-key y `/data/media/0` legible (`hw-aera-recovery-log-decrypt.txt`) |
+| Descifrado con PIN | PASS (b25) | NOT TESTED | "User 0 Decrypted Successfully", `/data` en dm-default-key y `/data/media/0` legible (`hw-aera-recovery-log-decrypt.txt`) |
 | Descifrado sin contraseña | NOT TESTED | NOT TESTED | requiere un dispositivo sin bloqueo |
 | Descifrado con patrón | NOT TESTED | NOT TESTED | el dispositivo de pruebas usa PIN |
 | Credencial incorrecta | PASS | NOT TESTED | la interfaz muestra "That credential did not unlock data. Please try again."; en el log, `GateKeeper response error` → `Failed to decrypt user 0`, y `/data/media/0` sigue con nombres cifrados |
 | Cancelar el desbloqueo (Omitir) | PASS (con `AERA_UI_ADAPTIVE_RESOLUTION`) | NOT TESTED | sin él, el teclado tapaba el botón; con él, entra al menú y los datos siguen cifrados |
 | Claves de Android intactas tras descifrar en AERA | PASS | | el usuario desbloqueó Android con su PIN tras la sesión de AERA y confirmó que apps y fotos están bien (2026-11-20); por código, las claves actualizadas se escriben solo en `/tmp` |
 | MTP (enumeración) | PASS | NOT TESTED | el PC ve `18d1:4ee2 (MTP + debug)` con `mtp,adb` |
-| MTP (transferencia de ficheros) | PASS | NOT TESTED | 1 MB aleatorio subido y bajado; SHA-256 igual en el PC, el teléfono y la copia descargada; fichero de prueba borrado. La microSD también aparece |
-| ADB sideload | PASS | NOT TESTED | zip inofensivo (`aera-sideload-test.zip`): "Installing zip file '/sideload/package.zip'", "AERA spes sideload test: OK", "Process ended with no errors" |
-| Fastbootd | PASS | NOT TESTED | `adb reboot fastboot` → `is-userspace: yes`, `super-partition-name: super`, `snapshot-update-status: none` |
+| MTP (transferencia de ficheros) | PASS (b25) | NOT TESTED | 1 MB aleatorio subido y bajado en almacenamiento interno y microSD; SHA-256 igual en el PC, el teléfono y la copia descargada; fichero de prueba borrado. La microSD también aparece |
+| ADB sideload | PASS (b25) | NOT TESTED | zip inofensivo (`aera-sideload-test.zip`): "Installing zip file '/sideload/package.zip'", "AERA spes sideload test: OK", "Process ended with no errors" |
+| Fastbootd | PASS (b25) | NOT TESTED | `adb reboot fastboot` → `is-userspace: yes`, `super-partition-name: super`, `snapshot-update-status: none` |
 | Reinicio a bootloader (desde la interfaz y por adb) | PASS | | |
-| Volver a Android con normalidad | PASS | NOT TESTED | `fastboot reboot` desde fastbootd → `sys.boot_completed=1`, Android 16, slot `_a` |
+| Volver a Android con normalidad | PASS (b25) | NOT TESTED | `fastboot reboot` desde fastbootd → `sys.boot_completed=1`, Android 16, slot `_a` |
 | Batería y temperatura | PASS (lectura) | | capacidad 100 %, cargando, 31,1 °C; CPU `pm6125-tz` 37 °C |
 | Backup de particiones (desde OrangeFox, solo lectura) | PASS | | 15 particiones verificadas con SHA-256 (fuera del repositorio) |
-| Backup desde AERA por ADB (`adb backup --twrp boot`) | PASS con el parche `patches/bootable_recovery/0001` | | los 128 MiB son idénticos a la copia `dd` (`9f132dc1…`) y el stream acaba en `twendadb`. Sin el parche, AERA lo da por fallido ("Unable to flush '/tmp/twadbbackup': Invalid argument"). Solo funciona fuera de la pantalla de descifrado |
+| Backup desde AERA por ADB (`adb backup --twrp boot`) | PASS (b25) con el parche `patches/bootable_recovery/0001` | | los 128 MiB son idénticos a la copia `dd` (`9f132dc1…`) y el stream acaba en `twendadb`. Sin el parche, AERA lo da por fallido ("Unable to flush '/tmp/twadbbackup': Invalid argument"). Solo funciona fuera de la pantalla de descifrado |
 | Restore desde AERA | NOT TESTED | | escribe en particiones; queda para el final y requiere autorización |
-| Rotación de pantalla (horizontal) | FAIL | | con la resolución adaptativa, la imagen girada sale corrupta; no se guarda, y un reinicio la quita |
-| Linterna | NOT IMPLEMENTED | | |
+| Rotación de pantalla (horizontal) | PASS (b24, b25) | | corregido con el parche `0006`; antes, con la resolución adaptativa, la imagen girada salía corrupta |
+| Linterna | PASS (b25) | NOT TESTED | GPIO85 del TLMM vía `/tmp/spes-torch/brightness`; enciende y apaga desde los ajustes rápidos |
 | microSD | PASS (detección) | | `/dev/block/mmcblk0p1` montado en `/external_sd`; visible por MTP |
 | OTG | NOT TESTED | | |
 | PC Connection por Wi-Fi | PASS | NOT TESTED | `https://192.168.100.70` y `aera.local` (mDNS) → 200; certificado con la IP y `aera.local`; sin sesión → 401; aprobación física en el teléfono → token; `/api/status`, `/api/files/list` y `/api/log/kernel` correctos; sesión revocada → 401 (`evidence/hw-wifi.txt`) |
-| PC Connection por USB (`adb forward 8443:443`) | PASS | NOT TESTED | `https://localhost:8443` → 200; el mismo token funciona |
+| PC Connection por USB (`adb forward 8443:443`) | PASS (b25) | NOT TESTED | `https://localhost:8443` → 200; el mismo token funciona |
 | PC Connection: backup y restore hacia o desde el PC en el navegador | NOT TESTED | | requiere navegador Chromium con selector de carpetas; AERA lo marca como Beta |
 | Wi-Fi: arranque bajo demanda | PASS | NOT TESTED | IPA y módem arrancados, `wlan_pd` → "WLAN FW is ready" → driver → `wlan0` en ~10 s (`evidence/hw-wifi.txt`) |
-| Wi-Fi: conexión desde la interfaz de AERA | PASS | NOT TESTED | DHCP `192.168.100.70/24` y DNS configurados; ping del PC al teléfono 3/3; TCP a 1.1.1.1:443, 8.8.8.8:443 y google.com:443 |
+| Wi-Fi: conexión desde la interfaz de AERA | PASS (b25: reconexión automática a la red guardada) | NOT TESTED | DHCP `192.168.100.70/24` y DNS configurados; ping del PC al teléfono 3/3; TCP a 1.1.1.1:443, 8.8.8.8:443 y google.com:443 |
+| Tienda de plugins (catálogo con internet) | PASS (b23, b25) | | `busybox wget` descarga `catalog.json` y `catalog.json.sig` a `/tmp/aera-plugin-store` |
+| Wi-Fi tras un sideload | **FAIL** (b25) | | al terminar el sideload, AERA para los servicios que usan particiones dinámicas (los daemons del Wi-Fi corren desde `vendor`); al matar `qrtr-ns`/`pd-mapper`, el módem reporta "Root PD crashed" y el firmware WLAN no vuelve. Hay que reiniciar el recovery. Ver `KNOWN_ISSUES.md` |
+| PC Connection por Wi-Fi | PASS (antes) · BLOCKED (b25) | | en esta regresión no se pudo repetir por el fallo anterior |
 | Wi-Fi: sin escrituras en EFS ni persist reales | PASS | | SHA-256 de `modemst1/2`, `fsg`, `fsc` y `persist` reales idéntico antes y después de la sesión, aunque el módem escribió EFS (en las copias en RAM) |
-| Funciones con UPX (recovery, keystore2, adbd…) | PASS | | arranque, ADB, descifrado con PIN y Wi-Fi con los 29 binarios comprimidos |
+| Funciones con UPX | PASS (b25) | | los 29 binarios iniciales y los 14 añadidos (busybox, grep, bc, lptools, dmctl, keystore_cli_v2, mke2fs, tune2fs, resize2fs, mkfs.ntfs, mount.ntfs, fsck.fat, pigz, nano) arrancan y responden |
 | Vibración | NOT TESTED (desactivada) | | |
 
-**Nivel alcanzado:** compila ✔ · arranca ✔ · funciona en lo básico (pantalla, táctil, ADB, particiones, descifrado con PIN, fastbootd, vuelta a Android) ✔. **No validado aún:** el resto de escenarios de descifrado, MTP con transferencia, sideload, backup/restore desde AERA, spesn y la instalación permanente. El port sigue siendo EXPERIMENTAL.
+**Nivel alcanzado:** compila ✔ · arranca ✔ · funciona ✔ en pantalla, táctil, rotación, linterna, ADB, MTP, sideload, backup por ADB, particiones, descifrado con PIN, Wi-Fi, plugins, PC Connection, fastbootd y vuelta a Android. **Fallo abierto:** el Wi-Fi no sobrevive a un sideload. **No validado aún:** restore desde AERA, descifrado sin bloqueo o con patrón, OTG, spesn, vibración y la instalación permanente. El port sigue siendo EXPERIMENTAL.
 
 ## Registro de ejecuciones
 
@@ -101,3 +104,4 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 - 2026-11-20: build 1 → FAIL (`TW_MAX_BRIGHTNESS`); valor 2047 leído del `dtbo` instalado; build 2 → PASS.
 - 2026-11-20: hardware. Iteraciones de `fastboot boot`: (1) sin `twrpfastboot` → error fatal de init y vuelta al bootloader; (2) ramdisk de 49 MB → el ABL no arranca el kernel; (3) ramdisk gzip → falla el desempaquetado del initramfs; (4) ramdisk LZ4 de 39,6 MB → AERA arranca, pero el USB entra en bucle; (5) USB corregido → ADB funciona, pero keystore2, health y boot HAL abortan; (6) `task_profiles.json` y VINTF → todos los servicios activos y descifrado con PIN correcto.
 - 2026-11-20: firmware instalado identificado (EvolutionX 16.0 11.10). Kernel y 33 blobs extraídos; `validate-tree.sh` da 0 fallos y 1 aviso (aún no hay `boot.img`).
+- 2026-11-20: regresión de `build25-flashlight` → todo PASS salvo el Wi-Fi tras un sideload (FAIL) y PC Connection por Wi-Fi (BLOCKED por ese fallo).
