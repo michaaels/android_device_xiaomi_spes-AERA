@@ -40,7 +40,9 @@ Hay tres niveles de validación, y cumplir uno no implica los siguientes: **comp
 | SHA-256 del artefacto | PASS | probado en hardware: `d69b491b1c0439a19ae007adcc98688de58821284530d37b7d6c1f665bba3ba3` (incremental). Los anteriores (`7fa53ef7…`, `0b6dcea3…`) no arrancan |
 | Build limpio de la configuración a fecha de `b14656b` | PASS | `EXIT 0`, 13 min 50 s; mismos 3777 ficheros, configuración y blobs idénticos a la imagen probada, y arranca en hardware (`8982622e…`) |
 | **Build limpio final** (commit `5b75963` y parche `0001` aplicado) | PASS | `EXIT 0`, 14 min 40 s, 0 FAILED; ramdisk LZ4 de 39 576 537 B; kernel idéntico; 33/33 blobs. **Artefacto de referencia `d11af8397be8ea7f55015c0047ad81ee39e3615cebf8a68e1ce14fd8afe08da5`** |
-| Artefacto de referencia en hardware | PASS | `fastboot boot`: R1.0, 0 aborts, todos los servicios en marcha, UDC enlazado; backup por ADB de `/boot` en 16 s, idéntico a la copia `dd` |
+| **Build limpio final con Wi-Fi** (commit `f4b7e96`, parche `0001` aplicado) | PASS | `EXIT 0`, 15 min 58 s; 29 binarios con UPX; ramdisk LZ4 de 41 080 344 B; kernel idéntico; 37/37 blobs; **artefacto de referencia `b4964c11fea3d22348cb176c967fc42e00dae44adfe1702534933f2019335999`** |
+| Ese artefacto en hardware | PASS | R1.0, 0 aborts; Wi-Fi: `wlan0` en ~14 s, conexión desde la interfaz, ping desde el PC y TCP/DNS correctos; EFS real idéntico antes y después |
+| Artefacto de referencia anterior (sin Wi-Fi) en hardware | PASS | `fastboot boot`: R1.0, 0 aborts, todos los servicios en marcha, UDC enlazado; backup por ADB de `/boot` en 16 s, idéntico a la copia `dd` |
 
 ## Pruebas en hardware
 

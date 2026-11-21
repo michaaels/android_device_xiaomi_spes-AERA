@@ -3,7 +3,7 @@
 Device tree de [AERA Recovery](https://github.com/AERA-Recovery) (`aera-16.0`) para el Redmi Note 11 (SM6225 / Snapdragon 680).
 
 > **Estado: EXPERIMENTAL. Compila y arranca en un spes real con `fastboot boot`.** Verificado: interfaz, táctil, botones, ADB, MTP (enumeración), fastbootd, detección de particiones, **descifrado FBE con PIN** y vuelta a Android. También: PIN incorrecto rechazado, Omitir, transferencia MTP, sideload y backup por ADB (con el parche `patches/bootable_recovery/0001`). **Wi-Fi** con conexión a Internet (el módem arranca con sandbox en RAM; EFS y persist intactos). Pendiente: patrón y sin bloqueo, restore, spesn, rotación horizontal (falla), linterna, backup hacia el PC desde el navegador e instalación permanente. **PC Connection** probada por Wi-Fi (`https://aera.local`) y por USB ([docs/TESTING.md](docs/TESTING.md)).
-> Imagen de referencia (build limpio): SHA-256 `d11af8397be8ea7f55015c0047ad81ee39e3615cebf8a68e1ce14fd8afe08da5`.
+> Imagen de referencia (build limpio con Wi-Fi): SHA-256 `b4964c11fea3d22348cb176c967fc42e00dae44adfe1702534933f2019335999`.
 > ⚠️ Solo para `fastboot boot`. No lo flashees como `boot` (ver [docs/RECOVERY_PLAN.md](docs/RECOVERY_PLAN.md)).
 > Kernel y blobs ya incluidos, de **EvolutionX 16.0 11.10**, el firmware de referencia instalado. La imagen solo debe usarse con ese firmware (ver [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)).
 
