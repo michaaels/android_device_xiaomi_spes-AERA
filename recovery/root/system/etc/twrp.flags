@@ -11,12 +11,9 @@
 /vbmeta           emmc    /dev/block/bootdevice/by-name/vbmeta                             flags=display="VBMeta";backup=1;flashimg=1;slotselect
 /vbmeta_system    emmc    /dev/block/bootdevice/by-name/vbmeta_system                      flags=display="VBMeta System";backup=1;flashimg=1;slotselect
 
-# Persist (calibration data). Mounted read-only: AERA (from OrangeFox) would
-# otherwise save /persist/.aera and /persist/.fsec on every settings save,
-# mounting it read-write (observed on hardware). Settings live in
-# /data/recovery instead (AERA_SETTINGS_ROOT_DIRECTORY in vendorsetup.sh).
-# Raw backup/restore of the partition uses /persist_image and is unaffected.
-/persist          ext4    /dev/block/bootdevice/by-name/persist                            flags=display="Persist";fsflags="ro"
+# Persist (calibration data). AERA keeps its settings here, as the official
+# official AERA Xiaomi 15 tree does (AERA_SETTINGS_ROOT_DIRECTORY=/persist in vendorsetup.sh).
+/persist          ext4    /dev/block/bootdevice/by-name/persist                            flags=display="Persist"
 /persist_image    emmc    /dev/block/bootdevice/by-name/persist                            flags=display="Persist Image";backup=1;flashimg=1
 
 # Firmware (read-only mounts as in the stock fstab)

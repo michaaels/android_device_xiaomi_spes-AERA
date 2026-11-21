@@ -1,0 +1,33 @@
+diff --git a/aeraui/localization/catalog/catalog.json b/aeraui/localization/catalog/catalog.json
+index a4a8f11..c73fd7a 100644
+--- a/aeraui/localization/catalog/catalog.json
++++ b/aeraui/localization/catalog/catalog.json
+@@ -1059,6 +1059,12 @@
+       "zh_CN": "已启用",
+       "zh_TW": "已啟用"
+     },
++    "Error": {
++      "en": "Error",
++      "es-ES": "Error",
++      "zh_CN": "错误",
++      "zh_TW": "錯誤"
++    },
+     "Accept incoming only": {
+       "en": "Accept incoming only",
+       "de_DE": "Nur eingehend akzeptieren",
+diff --git a/aeraui/scenes/wifi_scene.cpp b/aeraui/scenes/wifi_scene.cpp
+index c5b11d9..50fdfd0 100644
+--- a/aeraui/scenes/wifi_scene.cpp
++++ b/aeraui/scenes/wifi_scene.cpp
+@@ -670,6 +670,11 @@ const char *WifiStateTag(const std::string &state) {
+   if (state == "disconnecting") return "Disconnecting";
+   if (state == "scanning") return "Scanning";
+   if (state == "connecting") return "Connecting";
++  // Transient states published right after a toggle or a failed operation.
++  if (state == "enabled") return "Enabled";
++  if (state == "disabled") return "Disabled";
++  if (state == "connected") return "Connected";
++  if (state == "error") return "Error";
+   return state.c_str();
+ }
+ 
