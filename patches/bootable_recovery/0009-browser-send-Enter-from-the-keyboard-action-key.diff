@@ -1,0 +1,22 @@
+diff --git a/aeraui/features/browser/web_scene.cpp b/aeraui/features/browser/web_scene.cpp
+index d7e5353..bfc1330 100644
+--- a/aeraui/features/browser/web_scene.cpp
++++ b/aeraui/features/browser/web_scene.cpp
+@@ -947,8 +947,16 @@ void BuildWebScene(lv_obj_t *screen, ActionCallback callback, void *context,
+     if (lv_event_get_code(e) == LV_EVENT_READY && !s->web_keyboard)
+       OpenAddressBar(s);
+     else if (lv_event_get_code(e) == LV_EVENT_READY ||
+-             lv_event_get_code(e) == LV_EVENT_CANCEL)
++             lv_event_get_code(e) == LV_EVENT_CANCEL) {
++      // The action key of a page keyboard is the page's Enter (submit a
++      // search or form). LVGL reports it only as READY, before the
++      // VALUE_CHANGED branch below can see it, and HideKeyboard() clears
++      // web_keyboard, so send it here.
++      if (lv_event_get_code(e) == LV_EVENT_READY && s->web_keyboard &&
++          s->session.Connected())
++        s->session.Send(web::Kind::kKey, 0, 0, 13);
+       HideKeyboard(s);
++    }
+     else if (lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED && s->web_keyboard && s->session.Connected()) {
+       const char *key = phone_keyboard::ActivatedKey(s->keyboard);
+       if (!key) return;

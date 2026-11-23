@@ -17,7 +17,7 @@
 
 ## Cambios en componentes AERA
 
-El device tree no modifica AERA. Hay **ocho parches genéricos** propuestos para `bootable/recovery`, que se guardan aparte (se aplican con `tools/apply-aera-patches.sh`):
+El device tree no modifica AERA. Hay **nueve parches genéricos** propuestos para `bootable/recovery`, que se guardan aparte (se aplican con `tools/apply-aera-patches.sh`):
 
 - `patches/bootable_recovery/0001-partition-skip-fsync-on-ADB-backup-stream.diff`: en `TWPartition::Raw_Read_Write`, omite `fsync()` cuando el destino es una FIFO (el stream de `adb backup`), donde siempre falla con `EINVAL` y hacía que AERA diera por fallido un backup correcto. Las escrituras a ficheros y particiones, incluida la restauración por ADB, siguen sincronizándose. Probado en spes; candidato a PR upstream (no enviado).
 
@@ -54,6 +54,8 @@ El device tree no modifica AERA. Hay **ocho parches genéricos** propuestos para
   - Efecto: en Turnip, `TU_DEBUG_NOCONFORM` solo se usa en `tu_has_multiview()`. En esas GPU expone multiview (no conforme con el CTS) y con ello Vulkan 1.1 y `maintenance5`; en las demás GPU no cambia nada, porque ya tienen multiview por hardware.
   - Medido en spes con una sonda Vulkan dentro del runtime del plugin: sin la variable, "Adreno (TM) 610 api 1.0.354", sin `VK_KHR_multiview` ni `VK_KHR_maintenance5`; con ella, "api 1.3.354" con las dos extensiones, y `vkCreateDevice` correcto en ambos casos. Con el jail parcheado en RAM, AERA Browser carga google.com (algo lento).
   - Alternativa sin tocar `bootable/recovery`: el mismo cambio dentro del runtime firmado del plugin (parche de Mesa para A610/A702, como los de A722/A825 de `AERA-Plugins/browser`). Se propone en el jail porque es una línea, no exige recompilar Mesa y es inocua en el resto de GPU. Ninguna de las dos opciones se ha enviado.
+
+- `patches/bootable_recovery/0009-browser-send-Enter-from-the-keyboard-action-key.diff`: en `aeraui/features/browser/web_scene.cpp`, la tecla de acción (✓) del teclado de una página solo cerraba el teclado, así que no se podía enviar una búsqueda de Google ni un formulario con Enter. LVGL notifica esa tecla solo como `LV_EVENT_READY`, antes de la rama `VALUE_CHANGED` que inyecta las teclas, y `HideKeyboard()` borra `web_keyboard`; ahora la rama `READY` envía Enter (13) a la página y después cierra el teclado. Probado en spes (build 35).
 
 No se ha tocado el Plugin SDK.
 
