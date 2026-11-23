@@ -3,7 +3,7 @@
 Estados: **PASS** · **FAIL** · **BLOCKED** · **NOT TESTED**. Cada resultado indica su evidencia.
 
 Hay tres niveles de validación, y cumplir uno no implica los siguientes: **compila** → **arranca** → **funciona correctamente**.
-**Estado actual (2026-11-20): COMPILA y ARRANCA en hardware (spes); la funcionalidad básica está verificada y el resto sigue pendiente. EXPERIMENTAL.**
+**Estado actual (2026-11-23): COMPILA y ARRANCA en hardware (spes), y FUNCIONA en todo lo marcado PASS abajo. Falta lo marcado NOT TESTED, la variante spesn y la instalación permanente. EXPERIMENTAL.**
 
 ## Pruebas estáticas (automatizadas): `tools/validate-tree.sh`
 
@@ -46,7 +46,7 @@ Hay tres niveles de validación, y cumplir uno no implica los siguientes: **comp
 
 ## Pruebas en hardware
 
-Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, EvolutionX 16.0 11.10 instalado. **Procedimiento:** solo `fastboot boot` (en RAM); no se ha escrito ninguna partición. Imagen de la última regresión (2026-11-20): `build25-flashlight`, SHA-256 `01fa83b1161485af46c9f1a451881c3fec90ce30b636b49eaf62d1a3d3075fc1` (parches 0001–0006, busybox, ajustes en `/persist`). Las filas marcadas **(b25)** se repitieron con ella; el resto viene de builds anteriores (primera: `build11-vintf`). Evidencia en `docs/evidence/`.
+Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, EvolutionX 16.0 11.10 instalado. **Procedimiento:** solo `fastboot boot` (en RAM); no se ha escrito ninguna partición. Imagen de la última regresión (2026-11-20): `build25-flashlight`, SHA-256 `01fa83b1161485af46c9f1a451881c3fec90ce30b636b49eaf62d1a3d3075fc1` (parches 0001–0006, busybox, ajustes en `/persist`). Las filas marcadas **(b25)** se repitieron con ella; el resto viene de builds anteriores (primera: `build11-vintf`). Las funciones añadidas después se probaron en su build (**b27** a **b35**, ver el registro al final); la última imagen probada es `build35-enter` (SHA-256 `c753884c…`, parches 0001–0009), y aún no se ha repetido con ella la regresión completa. Evidencia en `docs/evidence/`.
 
 | Prueba | spes | spesn | Evidencia |
 |---|---|---|---|
@@ -92,12 +92,22 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 | Datos móviles (SIM 1, Claro, 4G) | PASS (b30) | NOT TESTED | conexión desde la página Red; APN `ba.amx` automático; IPv4 por `rmnet_aera`; ping 8.8.8.8 3/3 (~99 ms); DNS del operador; HTTP/HTTPS y tienda de plugins con el Wi-Fi apagado; al desconectar se limpian interfaz, ruta y DNS y el módem sigue en línea |
 | Tienda de plugins (catálogo con internet) | PASS (b23, b25) | | `busybox wget` descarga `catalog.json` y `catalog.json.sig` a `/tmp/aera-plugin-store` |
 | Wi-Fi tras un sideload | PASS (b27) · FAIL (b25) | | b25: AERA paraba los daemons (corrían desde `vendor`) y el módem perdía `wlan_pd`. b27: corren desde una copia en RAM; tras el sideload, mismos PID, sin "Root PD crashed" y con internet |
-| PC Connection por Wi-Fi | PASS (antes) · BLOCKED (b25) | | en esta regresión no se pudo repetir por el fallo anterior |
 | Wi-Fi: sin escrituras en EFS ni persist reales | PASS | | SHA-256 de `modemst1/2`, `fsg`, `fsc` y `persist` reales idéntico antes y después de la sesión, aunque el módem escribió EFS (en las copias en RAM) |
 | Compresión oficial (`AERA_USE_EXTREME_COMPRESSION`) | PASS (b28) | | sustituye a UPX; ramdisk 36 148 800 B; "AERA runtime: unpacked successfully in 2630 ms"; servicios sin abortos; descifrado con PIN correcto |
-| Vibración | NOT TESTED (desactivada) | | |
+| Vibración: motor | PASS (b28) | | `AERA_NO_HAPTICS` quitado; el vibrador del PMIC (`/sys/class/leds/vibrator`, `duration` + `activate`) vibra al activarlo a mano |
+| Vibración: respuesta háptica de la interfaz | NOT TESTED | | viene apagada en las preferencias de AERA (`haptic_*` = 0); con ella apagada, el PIN se aceptó sin vibrar, como corresponde. Falta probarla activada en Ajustes |
+| Datos móviles: activados antes que el Wi-Fi (módem en frío) | PASS (b34) · FAIL (b33) | | b33: "QMI error 52 (request 46) [service 2]"; b34 reintenta DMS *Set Operating Mode*: 4G, "CLARO EC", APN `ba.amx` |
+| Datos móviles: SIM con PIN | NOT TESTED | | la SIM de pruebas no tiene PIN |
+| Datos móviles: cambio entre SIM 1 y SIM 2 | NOT TESTED | | solo había una SIM con datos |
+| Datos móviles: conexión automática al arrancar | NOT TESTED | | siempre se conectó desde la página Red |
+| AERA Browser: navegación | PASS (b33) | | parche `0008` (Zink en Adreno 610); google.com carga, algo lento (sin medir) |
+| AERA Browser: navegación solo por datos móviles | PASS (b34) | | con el Wi-Fi apagado |
+| AERA Browser: Enter desde el teclado (búsqueda de Google) | PASS (b35) · FAIL (b34) | | parche `0009`: la tecla ✓ envía Enter a la página |
+| AERA Browser: descarga `https://` | PASS (b35) | | asset de Releases de GitHub, guardado en `AERA/Downloads` |
+| AERA Browser: descarga `blob:` (botón "Download" de un archivo en GitHub) | FAIL (b35) | | no descarga nada; el worker precompilado del plugin ignora `blob:` (`KNOWN_ISSUES.md`); aportación futura para upstream |
+| Root Manager | N/A | | no disponible con el kernel 4.19 no GKI (`KNOWN_ISSUES.md`) |
 
-**Nivel alcanzado:** compila ✔ · arranca ✔ · funciona ✔ en pantalla, táctil, rotación, linterna, ADB, MTP, sideload, backup por ADB, particiones, descifrado con PIN, Wi-Fi, plugins, PC Connection, fastbootd y vuelta a Android. **No validado aún:** restore desde AERA, descifrado sin bloqueo o con patrón, OTG, spesn, vibración y la instalación permanente. El port sigue siendo EXPERIMENTAL.
+**Nivel alcanzado:** compila ✔ · arranca ✔ · funciona ✔ en pantalla, táctil, rotación, linterna, ADB, MTP, sideload, backup por ADB, particiones, descifrado con PIN, Wi-Fi, plugins, PC Connection, fastbootd y vuelta a Android. Además: datos móviles (4G), AERA Browser y motor de vibración. **No validado aún:** restore desde AERA, descifrado sin bloqueo o con patrón, OTG, respuesta háptica de la interfaz, SIM con PIN y doble SIM, conexión automática de datos, spesn y la instalación permanente. **No funciona:** descargas `blob:` en AERA Browser (upstream). El port sigue siendo EXPERIMENTAL.
 
 ## Registro de ejecuciones
 

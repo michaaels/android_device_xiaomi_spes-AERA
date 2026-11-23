@@ -25,7 +25,7 @@ fastboot boot out/target/product/spes/boot.img
 - `fastboot boot` **no escribe en ninguna partición**: la imagen se carga en RAM junto con el `vendor_boot` instalado.
 - Para volver basta con reiniciar (`adb reboot` o mantener pulsado power): se arranca el `boot` original.
 - Si se queda en bucle o con la pantalla negra: mantener power + vol- unos 10 s para entrar en fastboot y reiniciar desde ahí. Nada ha cambiado en el almacenamiento.
-- Que `fastboot boot` funcione en este bootloader está **[PEND]**. OrangeFox lo documenta para spes, pero aquí no se ha probado.
+- `fastboot boot` funciona en este bootloader: es el método de todas las pruebas (builds 11 a 35), siempre que la ramdisk quepa en el límite del ABL (ver `KNOWN_ISSUES.md`).
 
 ## 3. Copias de seguridad desde AERA (antes de cualquier instalación)
 
@@ -43,6 +43,8 @@ sha256sum *.img > SHA256SUMS
 `persist` y `modemst*/fsg/fsc` contienen calibración e IMEI y **no se pueden regenerar**. Guárdalos fuera del PC.
 
 ## 4. Instalación permanente (solo cuando todo lo de TESTING.md esté en PASS)
+
+> Estado (2026-11-23): **no probada**. Hace falta la autorización del propietario, las copias del paso 3 verificadas y la comprobación de la cabecera descrita abajo.
 
 > ⚠️ **Nunca** hagas `fastboot flash boot` del `boot.img` de AERA para arrancar Android con él. Su cabecera declara el nivel de parche 2099-12, y el Keymaster de Android podría actualizar las claves de forma irreversible (ver KNOWN_ISSUES).
 

@@ -2,14 +2,22 @@
 
 Device tree de [AERA Recovery](https://github.com/AERA-Recovery) (`aera-16.0`) para el Redmi Note 11 (SM6225 / Snapdragon 680).
 
-> **Estado: EXPERIMENTAL. Compila y arranca en un spes real con `fastboot boot`.** Verificado: interfaz, táctil, botones, ADB, MTP (enumeración), fastbootd, detección de particiones, **descifrado FBE con PIN** y vuelta a Android. También: PIN incorrecto rechazado, Omitir, transferencia MTP, sideload y backup por ADB (con el parche `patches/bootable_recovery/0001`). **Wi-Fi** con conexión a Internet (el módem arranca con sandbox en RAM; EFS y persist intactos). Pendiente: patrón y sin bloqueo, restore, spesn, rotación horizontal (falla), linterna, backup hacia el PC desde el navegador e instalación permanente. **PC Connection** probada por Wi-Fi (`https://aera.local`) y por USB ([docs/TESTING.md](docs/TESTING.md)).
-> Imagen de referencia (build limpio con Wi-Fi): SHA-256 `b4964c11fea3d22348cb176c967fc42e00dae44adfe1702534933f2019335999`.
+> **Estado: EXPERIMENTAL. Compila, arranca y funciona en un spes real con `fastboot boot`** (nunca se ha instalado de forma permanente).
+>
+> - **Verificado:** interfaz, táctil, botones, rotación horizontal, ADB, MTP, sideload, fastbootd, detección de particiones, **descifrado FBE con PIN**, backup por ADB y vuelta a Android. También linterna, motor de vibración, **Wi-Fi**, **datos móviles 4G**, PC Connection (Wi-Fi y USB), tienda de plugins y **AERA Browser**.
+> - **Pendiente:** restore, descifrado sin bloqueo o con patrón, OTG, respuesta háptica de la interfaz, SIM con PIN y doble SIM, spesn e instalación permanente.
+> - **No disponible:** Root Manager (kernel 4.19 no GKI) y descargas `blob:` en AERA Browser (upstream).
+>
+> Detalle y evidencias en [docs/TESTING.md](docs/TESTING.md). Hay nueve parches genéricos para `bootable/recovery` (`patches/bootable_recovery/`), propuestos para upstream y aún no enviados ([docs/UPSTREAM.md](docs/UPSTREAM.md)).
+> Última imagen probada: `build35-enter`, SHA-256 `c753884c86ff65dd4ea5123cf4d1602f78b498ff16f60cc9d311061f9c4791fc` (build incremental; falta la build limpia final).
+>
 > ⚠️ Solo para `fastboot boot`. No lo flashees como `boot` (ver [docs/RECOVERY_PLAN.md](docs/RECOVERY_PLAN.md)).
 > Kernel y blobs ya incluidos, de **EvolutionX 16.0 11.10**, el firmware de referencia instalado. La imagen solo debe usarse con ese firmware (ver [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)).
 
 | | |
 |---|---|
 | SoC | Qualcomm SM6225 `bengal`, Adreno 610 |
+| Red | Wi-Fi y módem en el MPSS (icnss, QMI sobre QRTR, IPA/`rmnet_ipa0`); arranque bajo demanda con EFS y `persist` en RAM |
 | Pantalla | AMOLED 1080×2400, 90 Hz |
 | Arranque | A/B con Virtual A/B, boot header v3 + `vendor_boot`; **recovery dentro de `boot`** (sin partición recovery) |
 | Cifrado | FBE v2 + metadata, wrapped keys; Keymaster 4.1 / Gatekeeper 1.0 QTI |
@@ -39,8 +47,9 @@ Los detalles están en [docs/BUILD.md](docs/BUILD.md). Para probarlo **solo** co
 - [TESTING](docs/TESTING.md): matriz de pruebas y evidencias.
 - [KNOWN_ISSUES](docs/KNOWN_ISSUES.md): bloqueos y limitaciones.
 - [RECOVERY_PLAN](docs/RECOVERY_PLAN.md): copias de seguridad, arranque temporal y restauración.
-- [UPSTREAM](docs/UPSTREAM.md): origen del código y contribución.
+- [MOBILE_DATA](docs/MOBILE_DATA.md): cómo funcionan los datos móviles (y qué sirve para postmarketOS).
+- [UPSTREAM](docs/UPSTREAM.md): origen del código, parches genéricos y contribución.
 
 ## Créditos
 
-Valores de placa del árbol OrangeFox spes (Jashkirat, fox-12.1) y de LineageOS. Convenciones de los árboles oficiales AERA (dada, garnet). Lo demás está detallado en [docs/UPSTREAM.md](docs/UPSTREAM.md).
+Valores de placa del árbol OrangeFox spes (Jashkirat, fox-12.1) y de LineageOS. Convenciones de los árboles oficiales AERA (dada, garnet); el proveedor de datos móviles viene del árbol oficial infiniti. Lo demás está detallado en [docs/UPSTREAM.md](docs/UPSTREAM.md).

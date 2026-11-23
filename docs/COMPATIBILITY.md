@@ -15,7 +15,7 @@ Estados: **Directo** (compatible directamente) · **Adaptado** (requiere adaptac
 | `TARGET_CPU_VARIANT := cortex-a73` | `generic` + `TARGET_CPU_VARIANT_RUNTIME := cortex-a73` | Adaptado / HW de build | Igual que dada. Se confirma al compilar. |
 | `virtual_ab_ota.mk`, `updatable_apex.mk`, `developer_gsi_keys.mk`, `full_base_telephony.mk`, `phone-xhdpi-6144-dalvik-heap.mk` | `virtual_ab_ota/launch_with_vendor_ramdisk.mk` + `base.mk` | Adaptado / build | Se confirma que la ruta existe en AOSP 16 al compilar. |
 | `bootctrl/` y `gpt-utils/` (fuente qcom-caf) | `boot@1.2-service` de AOSP + blob `boot@1.0-impl-1.2-qti` del vendor instalado | Adaptado / HW | `hardware/qcom-caf/bootctrl` no está en el manifest AERA. |
-| `vendor.qti.hardware.vibrator.*` compilado desde fuente | `AERA_NO_HAPTICS` | Implementar | La fuente qcom no está en el manifest. Habrá que incluir el blob AIDL stock. |
+| `vendor.qti.hardware.vibrator.*` compilado desde fuente | vibrador LED del kernel (`/sys/class/leds/vibrator`), sin HAL | Adaptado → PASS (motor) | No hace falta la fuente qcom ni el blob AIDL: minui usa el LED directamente. Se quitó `AERA_NO_HAPTICS`. |
 | `update_engine`, `otapreopt_script`, `checkpoint_gc`, fastboot mock | eliminados del device tree | Adaptado | AERA ya aporta fastbootd y sideload (`AERA_INCLUDE_FASTBOOTD`). |
 
 ## Kernel, boot y particiones
@@ -25,7 +25,7 @@ Estados: **Directo** (compatible directamente) · **Adaptado** (requiere adaptac
 | Header v3 + recovery-in-boot (`BOARD_USES_RECOVERY_AS_BOOT`) | Adaptado / HW | Confirmado que AERA lo soporta (`bootable/recovery/Android.mk`, `data.cpp`). |
 | `BOARD_INCLUDE_DTB_IN_BOOTIMG`, offsets de kernel/ramdisk/tags/DTB | eliminados | En header v3 el DTB va en `vendor_boot` y los offsets no se usan. |
 | `BOARD_KERNEL_CMDLINE` (incluido `androidboot.selinux=permissive`) | eliminado | En v3 la cmdline la aporta `vendor_boot`. No se fuerza SELinux permisivo. |
-| `BOARD_RAMDISK_USE_LZ4` | **Obligatorio** (HW) | La ramdisk de `boot` se concatena tras la LZ4 *legacy* de `vendor_boot`; con gzip falla el initramfs. Además, el ABL no arranca ramdisks ≥ 42,4 MB, así que se retiró contenido opcional hasta 39,6 MB (`evidence/hw-abl-ramdisk-limit.txt`). |
+| `BOARD_RAMDISK_USE_LZ4` | **Obligatorio** (HW) | La ramdisk de `boot` se concatena tras la LZ4 *legacy* de `vendor_boot`; con gzip falla el initramfs. Además, el ABL no arranca ramdisks ≥ 42,4 MB, así que se retiró contenido opcional hasta 39,6 MB (`evidence/hw-abl-ramdisk-limit.txt`). Ahora se usa `AERA_USE_EXTREME_COMPRESSION`, oficial (runtime XZ que se desempaqueta al arrancar): la ramdisk ocupa ~36,2 MB. |
 | Kernel desde fuente `mi-sdm680/android_kernel_xiaomi_sm6225` (`spes-r-oss`) | Adaptado → kernel del firmware instalado | Se usa el prebuilt de EvolutionX 11.10 (4.19.325 Cherry). El kernel de un recovery-in-boot también arranca Android, así que tiene que coincidir con el vendor instalado. |
 | fstab | Adaptado | Hecho a partir del `fstab.qcom` de EvolutionX y del `fstab.default` de MIUI, que coinciden. Sin `odm`; `mi_ext` va con `nofail`, porque solo existe en MIUI. |
 | `twrp.flags` | Adaptado | Se añadieron `vendor_boot`, `vbmeta`, `vbmeta_system` y microSD (`mmcblk0`). Se quitó `/cust`, que no aparece en el fstab stock. |
@@ -47,10 +47,12 @@ Estados: **Directo** (compatible directamente) · **Adaptado** (requiere adaptac
 
 | Elemento | Estado | Notas |
 |---|---|---|
-| Ruta de brillo, brillo por defecto 1200 y 90 fps | Adaptado / HW | Valores de OFox, sin validar en hardware. |
-| Interfaz LVGL de AERA y renderizador | HW | Se espera framebuffer/DRM por software. La aceleración Adreno 610 (EGL) no está configurada: los árboles de referencia que la usan traen blobs gráficos de su propio SoC, que no sirven aquí. |
-| Táctil | HW | El driver está integrado en el kernel. Debería funcionar sin módulos. |
-| Vibración | Implementar | Ver arriba. |
+| Ruta de brillo, brillo por defecto 1200 y 90 fps | Adaptado → PASS | `max_brightness` = 2047 en hardware; brillo 1200 aplicado. |
+| Interfaz LVGL de AERA y renderizador | Adaptado → PASS | Renderizado por software sobre DRM; rotación horizontal corregida con el parche `0006`. La interfaz no usa la Adreno 610. |
+| GPU para AERA Browser (Mesa Zink → Turnip → KGSL) | Adaptado → PASS | El árbol aporta `a630_sqe.fw` y `a610_zap.*`, y `kgsl-3d0`/`ion` en 0666 para el proceso aislado; Zink necesita el parche `0008`. |
+| Linterna (`OF_FL_PATH1`) | Adaptado → PASS | `AERA_FL_PATH1=/tmp/spes-torch/brightness`, enlazado al GPIO85 del TLMM por `spes-torch-setup.sh`. |
+| Táctil | PASS | Driver `fts_ts` integrado en el kernel, sin módulos. |
+| Vibración | Adaptado → PASS (motor) | Ver arriba. Falta probar la respuesta háptica de la interfaz con la opción activada. |
 
 ## Cifrado
 
@@ -65,7 +67,8 @@ Estados: **Directo** (compatible directamente) · **Adaptado** (requiere adaptac
 | Elemento | Estado | Notas |
 |---|---|---|
 | ADB / sideload / MTP / fastbootd (configfs) | Adaptado → **PASS** (ADB, MTP enumerado, fastbootd) | adb, sideload y fastboot los gestiona el `init.rc` de AERA. El rc del dispositivo solo activa configfs y añade MTP. Duplicar los manejadores dejaba el gadget sin enlazar (`evidence/kmsg-usb-diag.txt`). |
-| PC Connection de AERA (USB) | HW | Funcionalidad existente de AERA. No se tocó. |
+| PC Connection de AERA (USB y Wi-Fi) | PASS | Funcionalidad existente de AERA. No se tocó. |
 | Wi-Fi | **Adaptado → PASS** | `AERA_ENABLE_WLAN`, con el módem y los daemons del vendor instalado cargados en tiempo de ejecución y sandbox en RAM (`init.recovery.wifi.rc`, `spes-wlan-up.sh`). |
-| Batería y temperatura | HW | Health 2.1. |
+| Batería y temperatura | PASS (lectura) | Health 2.1. |
+| Datos móviles | **Implementado → PASS** (4G) | No existe en OrangeFox. `AERA_ENABLE_MOBILE_DATA` con `aera-cellular-provider` del árbol oficial infiniti, adaptado en `mobile_data/spes_platform.hpp` (ver [MOBILE_DATA.md](MOBILE_DATA.md)). |
 | Audio | fuera de alcance | Opcional. |
