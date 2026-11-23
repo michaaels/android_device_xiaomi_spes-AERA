@@ -10,6 +10,7 @@
 // the QMAP data format comes from spes::kDataFormat (QMAP v1, no QMAPv5), and
 // the IPA pipe formats are set once per boot (rmnet_ipa3 rejects a second set).
 // The operator name is decoded by plmn_name.hpp (ASCII or GSM 7-bit packed).
+// DMS Set Operating Mode is retried while a freshly booted modem is not ready.
 #include "aera_mobile/client.hpp"
 #include "qmi.hpp"
 #include "sim.hpp"
@@ -41,6 +42,7 @@ namespace aera::mobile {
 namespace {
 constexpr const char *kDirectory="/tmp/aera-cellular";
 constexpr const char *kInterface="rmnet_aera";
+constexpr uint16_t kQmiDeviceNotReady=52;
 std::atomic<bool> cancel{false}, exiting{false}, working{false};
 std::mutex state_mutex, completion_mutex;
 std::condition_variable completion;
@@ -423,7 +425,14 @@ struct Session {
       catch(const std::exception &){Delay(300);}
     }
     if(!found)throw std::runtime_error("The modem did not expose its data services");
-    QmiClient dms(Find(endpoints,2,nase.node));Bytes online;Tlv(online,1,{0});dms.Call(0x2e,online,12,&cancel);
+    QmiClient dms(Find(endpoints,2,nase.node));Bytes online;Tlv(online,1,{0});
+    // A modem that has just booted lists DMS before it accepts Set Operating
+    // Mode, and answers QMI_ERR_DEVICE_NOT_READY (52) for a few seconds.
+    for(int attempt=0;;++attempt) {
+      try{dms.Call(0x2e,online,12,&cancel);break;}
+      catch(const QmiError &e){if(e.code!=kQmiDeviceNotReady||attempt>=40)throw;}
+      CheckModem();Delay(500);
+    }
     nas=std::make_unique<QmiClient>(nase);
     wds=std::make_unique<QmiClient>(Find(endpoints,1,nase.node));
     if(subscription) {
