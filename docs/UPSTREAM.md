@@ -57,6 +57,18 @@ El device tree no modifica AERA. Hay **nueve parches genéricos** propuestos par
 
 - `patches/bootable_recovery/0009-browser-send-Enter-from-the-keyboard-action-key.diff`: en `aeraui/features/browser/web_scene.cpp`, la tecla de acción (✓) del teclado de una página solo cerraba el teclado, así que no se podía enviar una búsqueda de Google ni un formulario con Enter. LVGL notifica esa tecla solo como `LV_EVENT_READY`, antes de la rama `VALUE_CHANGED` que inyecta las teclas, y `HideKeyboard()` borra `web_keyboard`; ahora la rama `READY` envía Enter (13) a la página y después cierra el teclado. Probado en spes (build 35).
 
+Propuesta sin parche (no se puede probar aquí): **descargas `blob:` en AERA Browser**. El botón "Download" de un archivo en GitHub, y en general cualquier `<a download href="blob:…">`, no descarga nada, porque el `decide-policy` de `aeraui/features/browser/worker.cpp` (idéntico a `aera_worker.cpp`) ignora toda navegación cuya URL no pase `Address()`, que solo acepta `http(s)://`. Las descargas `https://` sí funcionan (asset de Releases de GitHub, build 35). Cambio sugerido en la rama `NAVIGATION_ACTION`, antes del `ignore`:
+
+```cpp
+// Same-origin blob: URLs are how pages hand a generated file to the user
+// (<a download href="blob:https://...">). Never render them; save them.
+if (uri && g_str_has_prefix(uri, "blob:https://")) {
+  webkit_policy_decision_download(d); return TRUE;
+}
+```
+
+El worker va dentro de `prebuilt/runtime.xz` (se compila con `build-worker.sh` contra WPE 2.52.6), así que hay que reconstruir y volver a firmar el runtime para probarlo. No se ha comprobado qué nombre de archivo sugiere WebKit en ese caso: puede ser el atributo `download` o el UUID del blob.
+
 No se ha tocado el Plugin SDK.
 
 ## Atribución
