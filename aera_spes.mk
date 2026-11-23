@@ -4,7 +4,7 @@
 # AERA product settings for Redmi Note 11 / 11 NFC (spes / spesn).
 # Only AERA_* names are used; aera_config.mk translates them internally.
 
-AERA_MAINTAINER := spes porting (unofficial)
+AERA_MAINTAINER := Michael Xavier
 
 # Screen: 1080x2400 panel, waterdrop notch at the top centre
 AERA_SCREEN_H := 2400
