@@ -145,7 +145,10 @@ if grep -q " /data " /proc/mounts; then
 else
     mkdir -p /data/vendor/wifi /data/vendor/tombstones
 fi
-for d in /data/vendor/wifi/sockets /data/vendor/tombstones/rfs/modem /data/vendor/tombstones/rfs/wpss \
+# mkdir -p creates the intermediate rfs with the service umask (077), so it is
+# listed too: tftp_server must traverse it to write modem dumps.
+for d in /data/vendor/wifi/sockets /data/vendor/tombstones/rfs \
+         /data/vendor/tombstones/rfs/modem /data/vendor/tombstones/rfs/wpss \
          /data/vendor/tombstones/rfs/lpass /data/vendor/tombstones/rfs/cdsp; do
     mkdir -p "$d" && chmod 0777 "$d"
 done
