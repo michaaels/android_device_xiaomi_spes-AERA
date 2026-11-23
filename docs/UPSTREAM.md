@@ -17,7 +17,7 @@
 
 ## Cambios en componentes AERA
 
-El device tree no modifica AERA. Hay **cuatro parches genéricos** propuestos para `bootable/recovery`, que se guardan aparte (se aplican con `tools/apply-aera-patches.sh`):
+El device tree no modifica AERA. Hay **ocho parches genéricos** propuestos para `bootable/recovery`, que se guardan aparte (se aplican con `tools/apply-aera-patches.sh`):
 
 - `patches/bootable_recovery/0001-partition-skip-fsync-on-ADB-backup-stream.diff`: en `TWPartition::Raw_Read_Write`, omite `fsync()` cuando el destino es una FIFO (el stream de `adb backup`), donde siempre falla con `EINVAL` y hacía que AERA diera por fallido un backup correcto. Las escrituras a ficheros y particiones, incluida la restauración por ADB, siguen sincronizándose. Probado en spes; candidato a PR upstream (no enviado).
 
@@ -42,6 +42,18 @@ El device tree no modifica AERA. Hay **cuatro parches genéricos** propuestos pa
     - 8 traducciones previas con el marcador pegado a una palabra (`'%zu partitions selected'` → `'Particiones%zu seleccionadas'`).
   - Criterio: "respaldo" en etiquetas sin punto final de hasta ~30 caracteres; las frases completas mantienen "copia de seguridad".
   - Validación: el código compila con `clang++ -fsyntax-only -Wall -Wextra` sin avisos nuevos; el JSON es válido; los marcadores, saltos de línea y espacios al inicio y al final coinciden con el inglés, y ya no queda ningún marcador pegado a una palabra; `generate_catalog.py` regenera sin errores (2777 etiquetas); `chinese_catalog_test.py` mantiene los mismos 58 fallos previos y pasa la comprobación de que el catálogo generado está al día; `0001`–`0004` se aplican en cadena sobre upstream limpio.
+
+- `patches/bootable_recovery/0005-wifi-translate-remaining-state-labels.diff` (requiere `0004`): etiquetas de estado de Wi-Fi que seguían en inglés.
+
+- `patches/bootable_recovery/0006-aeraui-rotate-scaled-software-frame-in-landscape.diff`: en `aeraui/core/engine.cpp`, la copia escalada del frame por software no aplicaba el giro en horizontal (LVGL entrega un frame de `height_` × `width_` y deja el cuarto de vuelta al volcado). Usa la misma transformación que `SetPointer()`. Corrige la rotación en spes.
+
+- `patches/bootable_recovery/0007-catalog-mobile-data-strings-es-zh.diff`: 57 entradas de la pantalla y los mensajes de datos móviles en `en`, `es-ES`, `zh_CN` y `zh_TW`. `chinese_catalog_test.py` pasa de 58 a 54 fallos (los de upstream) sin añadir ninguno.
+
+- `patches/bootable_recovery/0008-browser-enable-Zink-on-Adreno-without-hw-multiview.diff`: añade `TU_DEBUG=noconform` al entorno del motor de AERA Browser en `aeraui/features/browser/jail_main.cpp`.
+  - Causa: en Mesa 26.2.2, Turnip declara Vulkan 1.1 solo si la GPU tiene multiview por hardware (`tu_is_vk_1_1()` → `tu_has_multiview()`), y `VK_KHR_maintenance5` depende de eso. La Adreno 610 (y la A702, perfil `a6xx_gen1_low` con `has_hw_multiview = False`) queda en Vulkan 1.0 sin `maintenance5`, y Zink, que lo exige, rechaza el dispositivo en silencio: "egl: failed to create dri2 screen", "EGL_NOT_INITIALIZED" y el motor WebKit aborta ("La sesión persistente WebKit se cerró inesperadamente").
+  - Efecto: en Turnip, `TU_DEBUG_NOCONFORM` solo se usa en `tu_has_multiview()`. En esas GPU expone multiview (no conforme con el CTS) y con ello Vulkan 1.1 y `maintenance5`; en las demás GPU no cambia nada, porque ya tienen multiview por hardware.
+  - Medido en spes con una sonda Vulkan dentro del runtime del plugin: sin la variable, "Adreno (TM) 610 api 1.0.354", sin `VK_KHR_multiview` ni `VK_KHR_maintenance5`; con ella, "api 1.3.354" con las dos extensiones, y `vkCreateDevice` correcto en ambos casos. Con el jail parcheado en RAM, AERA Browser carga google.com (algo lento).
+  - Alternativa sin tocar `bootable/recovery`: el mismo cambio dentro del runtime firmado del plugin (parche de Mesa para A610/A702, como los de A722/A825 de `AERA-Plugins/browser`). Se propone en el jail porque es una línea, no exige recompilar Mesa y es inocua en el resto de GPU. Ninguna de las dos opciones se ha enviado.
 
 No se ha tocado el Plugin SDK.
 

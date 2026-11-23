@@ -113,3 +113,5 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 - 2026-11-21: `build30-mobile-data` (SHA-256 `383e371730ff6cba3a544df9f9755f30b80ea41b07a89c6cc08534c17f7d24cc`) → datos móviles por 4G: PASS.
 - 2026-11-21: `build31-mobile-data` (SHA-256 `25af3ab314fbd43b0047181063dac86cd86a460a27296cce8dce846aab7dc52b`) → reconexión repetida y nombre del operador: PASS.
 - 2026-11-21: `build32-mobile-es` (SHA-256 `8c91f44a91c372695117e671d51b46218d9781741d3c6f274fdf4aa72a583544`) → datos móviles disponibles al arrancar y en español: PASS.
+- 2026-11-23: `build33-browser` (SHA-256 `59c7522fd63617f595b324a1ac1271f5b247864f5e6ba8f8828d845abb103924`) → AERA Browser con el parche `0008`: PASS (carga google.com; algo lento). Datos móviles activados antes que el Wi-Fi: FAIL, "QMI error 52 (request 46) [service 2]".
+- 2026-11-23: `build34-dms-retry` (SHA-256 `4eb21d6fc3ea324f4bf23b852a40f3fd77498ef3548d3f71494a4d789b2ebb11`) → datos móviles activados con el módem en frío (sin Wi-Fi): PASS (4G, CLARO EC, APN ba.amx); AERA Browser navegando por datos móviles: PASS.
