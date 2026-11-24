@@ -4,12 +4,12 @@ Device tree de [AERA Recovery](https://github.com/AERA-Recovery) (`aera-16.0`) p
 
 > **Estado: EXPERIMENTAL. Compila, arranca y funciona en un spes real con `fastboot boot`** (nunca se ha instalado de forma permanente).
 >
-> - **Verificado:** interfaz, táctil, botones, rotación horizontal, ADB, MTP, sideload, fastbootd, detección de particiones, **descifrado FBE con PIN**, backup por ADB y vuelta a Android. También linterna, motor de vibración, **Wi-Fi**, **datos móviles 4G**, PC Connection (Wi-Fi y USB), tienda de plugins y **AERA Browser**.
-> - **Pendiente:** restore, descifrado sin bloqueo o con patrón, OTG, respuesta háptica de la interfaz, SIM con PIN y doble SIM, spesn e instalación permanente.
+> - **Verificado:** interfaz, táctil, botones, rotación horizontal, ADB, MTP, sideload, fastbootd, detección de particiones, **descifrado FBE con PIN**, backup por ADB y vuelta a Android. También linterna, vibración (motor y respuesta háptica), OTG, **Wi-Fi**, **datos móviles 4G con doble SIM**, PC Connection (Wi-Fi y USB), tienda de plugins y **AERA Browser**.
+> - **Pendiente:** restore, descifrado sin bloqueo o con patrón, SIM con PIN, conexión automática de datos, spesn e instalación permanente.
 > - **No disponible:** Root Manager (kernel 4.19 no GKI) y descargas `blob:` en AERA Browser (upstream).
 >
-> Detalle y evidencias en [docs/TESTING.md](docs/TESTING.md). Hay nueve parches genéricos para `bootable/recovery` (`patches/bootable_recovery/`), propuestos para upstream y aún no enviados ([docs/UPSTREAM.md](docs/UPSTREAM.md)).
-> Última imagen probada: `build35-enter`, SHA-256 `c753884c86ff65dd4ea5123cf4d1602f78b498ff16f60cc9d311061f9c4791fc` (build incremental; falta la build limpia final).
+> Detalle y evidencias en [docs/TESTING.md](docs/TESTING.md). Hay diez parches genéricos para `bootable/recovery` (`patches/bootable_recovery/`), propuestos para upstream y aún no enviados ([docs/UPSTREAM.md](docs/UPSTREAM.md)).
+> Última imagen probada: `build41-private-ip`, SHA-256 `18817b760f53f118fc50bf40b163851054eebf46762f6800304b6dfce764bc67` (build incremental; falta la build limpia final).
 >
 > ⚠️ Solo para `fastboot boot`. No lo flashees como `boot` (ver [docs/RECOVERY_PLAN.md](docs/RECOVERY_PLAN.md)).
 > Kernel y blobs ya incluidos, de **EvolutionX 16.0 11.10**, el firmware de referencia instalado. La imagen solo debe usarse con ese firmware (ver [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)).

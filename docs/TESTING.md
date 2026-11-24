@@ -46,7 +46,7 @@ Hay tres niveles de validación, y cumplir uno no implica los siguientes: **comp
 
 ## Pruebas en hardware
 
-Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, EvolutionX 16.0 11.10 instalado. **Procedimiento:** solo `fastboot boot` (en RAM); no se ha escrito ninguna partición. Imagen de la última regresión (2026-11-20): `build25-flashlight`, SHA-256 `01fa83b1161485af46c9f1a451881c3fec90ce30b636b49eaf62d1a3d3075fc1` (parches 0001–0006, busybox, ajustes en `/persist`). Las filas marcadas **(b25)** se repitieron con ella; el resto viene de builds anteriores (primera: `build11-vintf`). Las funciones añadidas después se probaron en su build (**b27** a **b40**, ver el registro al final); la última imagen probada es `build40-dds-wait` (SHA-256 `bbd335c1…`, parches 0001–0009), y aún no se ha repetido con ella la regresión completa. Evidencia en `docs/evidence/`.
+Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, EvolutionX 16.0 11.10 instalado. **Procedimiento:** solo `fastboot boot` (en RAM); no se ha escrito ninguna partición. Imagen de la última regresión (2026-11-20): `build25-flashlight`, SHA-256 `01fa83b1161485af46c9f1a451881c3fec90ce30b636b49eaf62d1a3d3075fc1` (parches 0001–0006, busybox, ajustes en `/persist`). Las filas marcadas **(b25)** se repitieron con ella; el resto viene de builds anteriores (primera: `build11-vintf`). Las funciones añadidas después se probaron en su build (**b27** a **b41**, ver el registro al final); la última imagen probada es `build41-private-ip` (SHA-256 `18817b76…`, parches 0001–0010), y aún no se ha repetido con ella la regresión completa. Evidencia en `docs/evidence/`.
 
 | Prueba | spes | spesn | Evidencia |
 |---|---|---|---|
@@ -100,6 +100,7 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 | Datos móviles: SIM con PIN | NOT TESTED | | la SIM de pruebas no tiene PIN |
 | Datos móviles: SIM 2 y cambio entre SIM 1 y SIM 2 | PASS (b40) · FAIL (b36) | | dos SIM de Claro con datos. b36: la SIM 2 fallaba ("no provisioning application") y, tras forzarla a mano, los datos salían por la SIM 1. b40: SIM 2 → `100.72.198.81`, SIM 1 → `10.91.199.180`, SIM 2 → `100.72.198.81`, ping en cada cambio y la DDS del módem sigue a la SIM elegida (`MOBILE_DATA.md`, pasos 6 y 6b) |
 | Datos móviles: SIM insertada en caliente | FAIL (b36) | | al meter la segunda SIM con el recovery arrancado, las dos quedaron en `initializing`; con las dos desde el arranque funciona. No corregido |
+| Datos móviles: IPv4 privada en el detalle de conexión | PASS (b41) | | parche `0010`; la fila "IPv4 privada" cambia con cada SIM aunque la IPv4 pública sea la misma |
 | Datos móviles: conexión automática al arrancar | NOT TESTED | | siempre se conectó desde la página Red |
 | AERA Browser: navegación | PASS (b33) | | parche `0008` (Zink en Adreno 610); google.com carga, algo lento (sin medir) |
 | AERA Browser: navegación solo por datos móviles | PASS (b34) | | con el Wi-Fi apagado |
@@ -130,3 +131,4 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 - 2026-11-23: `build36-maintainer` (SHA-256 `c17ddd661ba61b92f9c7919d7b257e1c8235e8ce16c3afc41a13a32898df7bf4`) → `AERA_MAINTAINER` "Michael Xavier" visible en la UI. Respuesta háptica de la interfaz: PASS. OTG: PASS. Dual SIM: la SIM 2 no conecta (sesión de aprovisionamiento vacía) y, al forzarla con UIM 0x38 a mano, los datos salen por la SIM 1 (DDS).
 - 2026-11-23: `build37-ui-scale` → lienzo de la UI a 1280×2844 (`AERA_SCREEN_W/H` 960×2133): se ve más grande, pero varias pantallas de AERA tienen medidas fijas para 1440 de ancho. Descartado (`KNOWN_ISSUES.md`).
 - 2026-11-23: `build40-dds-wait` (SHA-256 `bbd335c1242f18b82702e3f596517d95dd3f10462a3e2f68afc614c44e926bef`) → dual SIM: el proveedor rellena las sesiones UIM vacías y mueve la DDS (DSD 0x4E) a la SIM elegida, esperando a DSD 0x4F. SIM 1 ↔ SIM 2 sin reiniciar, cada una con su IP privada y ping: PASS. (b38 y b39 fueron pasos intermedios: b39 no veía la confirmación de la DDS por un error de código, corregido en b40.)
+- 2026-11-23: `build41-private-ip` (SHA-256 `18817b760f53f118fc50bf40b163851054eebf46762f6800304b6dfce764bc67`) → parche `0010`: el detalle de conexión de datos móviles muestra la IPv4 privada; vista por el usuario al cambiar de SIM: PASS.
