@@ -63,7 +63,7 @@ Después: `adb reboot recovery` entra en AERA, y "Reiniciar → Sistema" vuelve 
 
 > ⚠️ **Nunca** hagas `fastboot flash boot` del `boot.img` de AERA para arrancar Android con él. Su cabecera declara el nivel de parche 2099-12, y el Keymaster de Android podría actualizar las claves de forma irreversible (ver KNOWN_ISSUES).
 
-Único método previsto: la función de AERA que instala el recovery en la ramdisk del `boot` actual (repack). Conserva el kernel y la cabecera del firmware instalado. Antes de usarla hay que comprobar, sobre una copia y desde el PC, que el `boot` resultante mantiene `os_version` y `os_patch_level` originales (`unpack_bootimg.py`).
+Alternativa para el usuario final: la función de AERA que instala el recovery en la ramdisk del `boot` actual (repack). También conserva el kernel y la cabecera del firmware instalado. Sin probar: antes de recomendarla hay que comprobar, sobre una copia y desde el PC, que el `boot` resultante mantiene `os_version` y `os_patch_level` originales (`unpack_bootimg.py`).
 
 ## 5. Restauración
 
