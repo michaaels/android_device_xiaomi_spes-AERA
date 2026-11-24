@@ -97,7 +97,7 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 | Vibración: motor | PASS (b28) | | `AERA_NO_HAPTICS` quitado; el vibrador del PMIC (`/sys/class/leds/vibrator`, `duration` + `activate`) vibra al activarlo a mano |
 | Vibración: respuesta háptica de la interfaz | PASS (b36) | | con la opción activada en AERA, el usuario la sintió al tocar; 88 cambios del motor registrados en 10 s (pulsos de 5 a 39 ms en `/sys/class/leds/vibrator/duration`) |
 | Datos móviles: activados antes que el Wi-Fi (módem en frío) | PASS (b34) · FAIL (b33) | | b33: "QMI error 52 (request 46) [service 2]"; b34 reintenta DMS *Set Operating Mode*: 4G, "CLARO EC", APN `ba.amx` |
-| Datos móviles: SIM con PIN | NOT TESTED | | la SIM de pruebas no tiene PIN |
+| Datos móviles: SIM con PIN | NOT TESTED | | ninguna SIM de pruebas tiene PIN; el usuario decidió no activarlo para la prueba (2026-11-23). El código es el oficial (UIM 0x26, sin reenvíos) |
 | Datos móviles: SIM 2 y cambio entre SIM 1 y SIM 2 | PASS (b40) · FAIL (b36) | | dos SIM de Claro con datos. b36: la SIM 2 fallaba ("no provisioning application") y, tras forzarla a mano, los datos salían por la SIM 1. b40: SIM 2 → `100.72.198.81`, SIM 1 → `10.91.199.180`, SIM 2 → `100.72.198.81`, ping en cada cambio y la DDS del módem sigue a la SIM elegida (`MOBILE_DATA.md`, pasos 6 y 6b) |
 | Datos móviles: SIM insertada en caliente | FAIL (b36) | | al meter la segunda SIM con el recovery arrancado, las dos quedaron en `initializing`; con las dos desde el arranque funciona. No corregido |
 | Datos móviles: IPv4 privada en el detalle de conexión | PASS (b41) | | parche `0010`; la fila "IPv4 privada" cambia con cada SIM aunque la IPv4 pública sea la misma |
