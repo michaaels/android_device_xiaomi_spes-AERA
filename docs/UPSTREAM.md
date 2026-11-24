@@ -1,67 +1,170 @@
-# Origen del código, cambios y contribución
+# Code origin, changes and contribution
 
-## Upstream y fuentes
+Spanish version: [UPSTREAM.es.md](UPSTREAM.es.md). The other documents in
+`docs/` are in Spanish.
 
-| Fuente | Uso | Licencia |
+## Upstream and sources
+
+| Source | Use | License |
 |---|---|---|
-| `AERA-Recovery/android_manifest` `aera-16.0` | manifest de build | sin fichero de licencia (componentes AOSP Apache-2.0) |
-| `AERA-Recovery/android_bootable_recovery` `aera-16.0` | **sin cambios**; solo se consulta para verificar flags y el soporte de recovery-as-boot | GPL-3.0 / Apache-2.0 según el fichero |
-| `AERA-Recovery/android_device_xiaomi_dada-AERA`, `garnet-AERA` | convenciones (estructura, nombres `AERA_*`, `vendorsetup.sh`, rc USB) | Apache-2.0 / GPL-3.0 (cabeceras) |
-| `OrangeFox/device/spes` `fox-12.1` (Jashkirat) | valores de placa (tamaños, plataforma, brillo, pantalla) | Apache-2.0 (cabeceras LineageOS) / GPL-3.0 (`vendorsetup.sh`) |
-| `spes-development/spes-vendor-dump` | fstab, props, VINTF, lista de módulos y blobs (como referencia) | firmware propietario de Xiaomi/Qualcomm |
-| `device/qcom/twrp-common` (AERA) | servicios de descifrado Qualcomm (vía `qcom_decrypt*`) | sin cambios |
+| `AERA-Recovery/android_manifest` `aera-16.0` | build manifest | no license file (AOSP components, Apache-2.0) |
+| `AERA-Recovery/android_bootable_recovery` `aera-16.0` | not modified by the tree; the generic fixes below are kept as separate patches | GPL-3.0 / Apache-2.0 per file |
+| `AERA-Recovery/android_device_xiaomi_dada-AERA`, `garnet-AERA` | conventions (layout, `AERA_*` names, `vendorsetup.sh`, USB rc) | Apache-2.0 / GPL-3.0 (headers) |
+| `AERA-Recovery/android_device_oneplus_infiniti-AERA` | mobile data provider (`mobile_data/`, from `f7fca594`) | Apache-2.0 |
+| `OrangeFox/device/spes` `fox-12.1` (Jashkirat) | board values (sizes, platform, brightness, display) | Apache-2.0 (LineageOS headers) / GPL-3.0 (`vendorsetup.sh`) |
+| `spes-development/spes-vendor-dump` | fstab, props, VINTF, module and blob lists (reference only) | Xiaomi/Qualcomm proprietary firmware |
+| `device/qcom/twrp-common` (AERA) | Qualcomm decryption services (through `qcom_decrypt*`) | unchanged |
 
-### Repositorio descartado
+The kernel and the vendor files were extracted from the EvolutionX 16.0 11.10
+build for spes; provenance in `prebuilt/kernel.info` and `tools/blobs.sha256`.
 
-`Aim-uses-Malware/android_device_spes-AERA` (2026-10-16) es un intento previo de AERA para spes. **No se ha reutilizado código**: no tiene licencia, incluye blobs de origen no documentado y valores marcados como TODO. Solo sirvió para confirmar que no existe un port oficial.
+### Repository not reused
 
-## Cambios en componentes AERA
+`Aim-uses-Malware/android_device_spes-AERA` (2026-10-16) is an earlier AERA
+attempt for spes. **No code was reused**: it has no license, ships blobs of
+undocumented origin and values marked TODO. It only confirmed that there was
+no official port.
 
-El device tree no modifica AERA. Hay **once parches genéricos** propuestos para `bootable/recovery`, que se guardan aparte (se aplican con `tools/apply-aera-patches.sh`):
+## Changes to AERA components
 
-- `patches/bootable_recovery/0001-partition-skip-fsync-on-ADB-backup-stream.diff`: en `TWPartition::Raw_Read_Write`, omite `fsync()` cuando el destino es una FIFO (el stream de `adb backup`), donde siempre falla con `EINVAL` y hacía que AERA diera por fallido un backup correcto. Las escrituras a ficheros y particiones, incluida la restauración por ADB, siguen sincronizándose. Probado en spes; candidato a PR upstream (no enviado).
+The device tree does not modify AERA. There are **eleven generic patches**
+proposed for `bootable/recovery`, kept apart in `patches/bootable_recovery/`
+and applied with `tools/apply-aera-patches.sh <source root>` (which also
+regenerates `catalog_generated.cpp` when the catalog changes). The tree builds
+without them. None has been sent upstream yet.
 
-- `patches/bootable_recovery/0002-catalog-fix-corrupted-Spanish-translations.diff`: en `aeraui/localization/catalog/catalog.json`, 6 cadenas `es-ES` tenían `?` en lugar de `ó`, `ú`, `ñ` o `í` (por ejemplo "A?adir red" o "Mostrar contrase?a"). Después hay que regenerar `catalog_generated.cpp` con `generate_catalog.py`, que lo hace `tools/apply-aera-patches.sh`; se comprobó que el generador reproduce exactamente el fichero de upstream a partir del JSON original. Detectado por el usuario en la pantalla de Wi-Fi.
+- **`0001-partition-skip-fsync-on-ADB-backup-stream.diff`**: in
+  `TWPartition::Raw_Read_Write`, skip `fsync()` when the destination is a FIFO
+  (the `adb backup` stream). There it always fails with `EINVAL`, and AERA
+  reported a correct backup as failed. Writes to files and partitions,
+  including ADB restore, are still synced. Tested on spes.
 
-- `patches/bootable_recovery/0003-catalog-complete-Spanish-translation.diff` (requiere `0002`): completa la traducción `es-ES` del catálogo. Solo toca entradas `es-ES` de `catalog.json`, sin reformatear (el JSON se reescribe con `indent=2`, que reproduce el fichero original byte a byte). Cobertura: de 2094 a 2747 de 2768 cadenas.
-  - **653 cadenas añadidas** de las 674 que no tenían traducción.
-  - **13 corregidas** que eran idénticas al inglés sin ser nombres propios: `Backup`, `Backups`, `Wipe`, `Slot`, `Slot %s`, `Flashed %s`, `Flashing %s`, `Flashing init_boot_%s`, `Fatal:`, `Update %s?`, `Recovery Update`, `Plugin Manager`, `Theme Engine`.
-  - **14 reparadas** porque tenían los marcadores desplazados o saltos de línea de más (por ejemplo `%u downloads` → `"Descargas de%u "`, `Erased %s` → `" %sborrado"`).
-  - **21 sin traducir a propósito**, porque se quedan en inglés: nombres de producto (`AERA Doom`, `AERA Gallery`, `AERA Recovery`, `AERA Streams`, `AERA Telegram`, `App Backup Vault`, `Doom`), términos técnicos y abreviaturas (`Swappiness`, `Firmware`, `Incremental`, `PAYLOAD`, `RAM`, `BAT`, `REC  `, `DNS 1`, `DNS 2`, `No`) y cadenas que solo son formato (`%.1f MB`, `%.1f MB / %.1f MB`, `%d %s`, `%s\n%d %s`). Sin entrada `es-ES` se usa el inglés, igual que en el resto de idiomas.
-  - Criterios: español neutro y técnico, coherente con lo que ya había y con la variante mayoritaria del catálogo (tuteo en las instrucciones e infinitivo en botones y acciones). Terminología: *slot* → ranura, *flash* → flashear/flasheo, *snapshot* → instantánea, *readback* → relectura, *anti-rollback* → antirreversión (se conserva `ARB`), *plugin* → complemento, *computer* → computadora, *Enter* → Ingresa, *Swipe to* → Desliza para, *Slide to* → Deslizar para. Se dejan literales `payload`, `kernel`, `recovery`, `KMI`, `OTA`, `SHA-256`, rutas (`AERA/Extracted`, `/sdcard/AERA/Doom`), comandos y herramientas (`otaripper`, `xbl_config`, `init_boot`). Los créditos se traducen como funciones ("Fundación, desarrollo principal…") para no asignar género.
-  - Validación: el JSON es válido; en cada cadena `es-ES` los marcadores printf/`{n}`, el número de saltos de línea y los espacios al inicio y al final coinciden con el inglés; no queda ningún `?` entre letras; `generate_catalog.py` regenera sin errores (2768 etiquetas); en `chinese_catalog_test.py` pasa la comprobación de que el catálogo generado está al día, y los 58 fallos de cobertura china son los mismos con y sin el parche (problema previo de upstream).
+- **`0002-catalog-fix-corrupted-Spanish-translations.diff`**: in
+  `aeraui/localization/catalog/catalog.json`, 6 `es-ES` strings had `?`
+  instead of `ó`, `ú`, `ñ` or `í` (for example "A?adir red", "Mostrar
+  contrase?a"). Checked that `generate_catalog.py` reproduces upstream's
+  `catalog_generated.cpp` exactly from the original JSON.
 
-- `patches/bootable_recovery/0004-wifi-localize-status-and-test-result-Spanish-respaldo.diff` (requiere `0003`): textos de Wi-Fi que seguían en inglés en el teléfono, y "respaldo" en las etiquetas cortas. Toca `aeraui/scenes/wifi_scene.cpp` y `catalog.json`.
-  - Código (`wifi_scene.cpp`, cambios genéricos):
-    - `BusyTitle()` traduce el texto base antes de añadir los puntos animados. Antes, "Turning Wi-Fi on..." no coincidía con ninguna clave y salía en inglés.
-    - Los estados en bruto del backend (`wlan_state`: `enabling`, `disabling`, `disconnecting`, `scanning`, `connecting`) se muestran como etiquetas del catálogo (`WifiStateTag()`).
-    - Las líneas que devuelve el test de red de `wlan.cpp` ("Connected: …", "IP address: …", "Internet: Failed", "Router or upstream network may be down.") se traducen al mostrarlas (`TranslateTestResult()`): se traduce la etiqueta y el estado `OK`/`Failed`, y se dejan tal cual el SSID y la IP. `wlan.cpp` no se modifica, porque esos valores se comparan literalmente en `aera_backend.cpp`.
-  - Catálogo: **9 claves nuevas** (`Enabling`, `Disabling`, `Scanning`, `Internet`, `OK` y los 4 mensajes del test de `wlan.cpp`), con `en`, `es-ES`, `zh_CN` y `zh_TW` para no añadir fallos de cobertura china. Además, **38 cadenas `es-ES` cambiadas**:
-    - "Scanning nearby" → "Buscando redes cercanas".
-    - "respaldo" en 29 etiquetas cortas, títulos, botones y contadores (`Backup` → "Respaldo", `Backups` → "Respaldos", "Crear respaldo", "Restaurar respaldo", "Respaldando %s"…). La etiqueta "Copia de seguridad" no cabía en un botón.
-    - 8 traducciones previas con el marcador pegado a una palabra (`'%zu partitions selected'` → `'Particiones%zu seleccionadas'`).
-  - Criterio: "respaldo" en etiquetas sin punto final de hasta ~30 caracteres; las frases completas mantienen "copia de seguridad".
-  - Validación: el código compila con `clang++ -fsyntax-only -Wall -Wextra` sin avisos nuevos; el JSON es válido; los marcadores, saltos de línea y espacios al inicio y al final coinciden con el inglés, y ya no queda ningún marcador pegado a una palabra; `generate_catalog.py` regenera sin errores (2777 etiquetas); `chinese_catalog_test.py` mantiene los mismos 58 fallos previos y pasa la comprobación de que el catálogo generado está al día; `0001`–`0004` se aplican en cadena sobre upstream limpio.
+- **`0003-catalog-complete-Spanish-translation.diff`** (needs `0002`): completes
+  the `es-ES` catalog. Only `es-ES` entries change, with no reformatting (the
+  JSON is rewritten with `indent=2`, which reproduces the original byte for
+  byte). Coverage goes from 2094 to 2747 of 2768 strings.
+  - **653 strings added**, out of the 674 without a translation.
+  - **13 fixed** that were identical to English without being proper names
+    (`Backup`, `Wipe`, `Slot %s`, `Flashing %s`, `Update %s?`...).
+  - **14 repaired** with misplaced placeholders or extra line breaks (for
+    example `%u downloads` → `"Descargas de%u "`).
+  - **21 left in English on purpose**: product names (`AERA Doom`, `AERA
+    Gallery`...), technical terms and abbreviations (`Firmware`, `RAM`,
+    `DNS 1`...) and format-only strings (`%.1f MB`, `%d %s`...).
+  - Style: neutral technical Spanish, consistent with the existing strings
+    (informal *tú* in instructions, infinitive on buttons). Fixed terminology:
+    *slot* → ranura, *flash* → flashear, *snapshot* → instantánea, *plugin* →
+    complemento. Paths, commands and tool names stay literal.
+  - Validation: valid JSON; in every `es-ES` string the printf/`{n}`
+    placeholders, the number of line breaks and the leading and trailing
+    spaces match English; `generate_catalog.py` runs clean; in
+    `chinese_catalog_test.py` the "generated catalog is up to date" check
+    passes, and the Chinese coverage failures are the same with and without
+    the patch (an upstream issue).
 
-- `patches/bootable_recovery/0005-wifi-translate-remaining-state-labels.diff` (requiere `0004`): etiquetas de estado de Wi-Fi que seguían en inglés.
+- **`0004-wifi-localize-status-and-test-result-Spanish-respaldo.diff`** (needs
+  `0003`): Wi-Fi texts that stayed in English on the phone, plus "respaldo"
+  in short Spanish labels. Touches `aeraui/scenes/wifi_scene.cpp` and the
+  catalog.
+  - Code (generic):
+    - `BusyTitle()` translates the base text before appending the animated
+      dots. Before, "Turning Wi-Fi on..." matched no key.
+    - Raw backend states (`wlan_state`: `enabling`, `disabling`,
+      `disconnecting`, `scanning`, `connecting`) are shown as catalog labels
+      (`WifiStateTag()`).
+    - The lines returned by the network test in `wlan.cpp` ("Connected: …",
+      "IP address: …", "Internet: Failed"...) are translated when shown
+      (`TranslateTestResult()`): the label and the `OK`/`Failed` status are
+      translated, and the SSID and IP stay as they are. `wlan.cpp` is not
+      changed, because `aera_backend.cpp` compares those values literally.
+  - Catalog: 9 new keys with `en`, `es-ES`, `zh_CN` and `zh_TW` (so no Chinese
+    coverage failure is added), and 38 changed `es-ES` strings.
+  - Validation: `clang++ -fsyntax-only -Wall -Wextra` with no new warnings;
+    the same placeholder checks as `0003`; `0001`–`0004` apply in sequence on
+    a clean upstream.
 
-- `patches/bootable_recovery/0006-aeraui-rotate-scaled-software-frame-in-landscape.diff`: en `aeraui/core/engine.cpp`, la copia escalada del frame por software no aplicaba el giro en horizontal (LVGL entrega un frame de `height_` × `width_` y deja el cuarto de vuelta al volcado). Usa la misma transformación que `SetPointer()`. Corrige la rotación en spes.
+- **`0005-wifi-translate-remaining-state-labels.diff`** (needs `0004`): Wi-Fi
+  state labels that were still in English.
 
-- `patches/bootable_recovery/0007-catalog-mobile-data-strings-es-zh.diff`: 57 entradas de la pantalla y los mensajes de datos móviles en `en`, `es-ES`, `zh_CN` y `zh_TW`. `chinese_catalog_test.py` pasa de 58 a 54 fallos (los de upstream) sin añadir ninguno.
+- **`0006-aeraui-rotate-scaled-software-frame-in-landscape.diff`**: in
+  `aeraui/core/engine.cpp`, the scaled software frame copy did not apply the
+  rotation in landscape. LVGL hands over a `height_` × `width_` frame and
+  leaves the quarter turn to the flush. The patch uses the same transform as
+  `SetPointer()`. Fixes landscape with software rendering and
+  `AERA_UI_ADAPTIVE_RESOLUTION` (verified on spes, build 24).
 
-- `patches/bootable_recovery/0008-browser-enable-Zink-on-Adreno-without-hw-multiview.diff`: añade `TU_DEBUG=noconform` al entorno del motor de AERA Browser en `aeraui/features/browser/jail_main.cpp`.
-  - Causa: en Mesa 26.2.2, Turnip declara Vulkan 1.1 solo si la GPU tiene multiview por hardware (`tu_is_vk_1_1()` → `tu_has_multiview()`), y `VK_KHR_maintenance5` depende de eso. La Adreno 610 (y la A702, perfil `a6xx_gen1_low` con `has_hw_multiview = False`) queda en Vulkan 1.0 sin `maintenance5`, y Zink, que lo exige, rechaza el dispositivo en silencio: "egl: failed to create dri2 screen", "EGL_NOT_INITIALIZED" y el motor WebKit aborta ("La sesión persistente WebKit se cerró inesperadamente").
-  - Efecto: en Turnip, `TU_DEBUG_NOCONFORM` solo se usa en `tu_has_multiview()`. En esas GPU expone multiview (no conforme con el CTS) y con ello Vulkan 1.1 y `maintenance5`; en las demás GPU no cambia nada, porque ya tienen multiview por hardware.
-  - Medido en spes con una sonda Vulkan dentro del runtime del plugin: sin la variable, "Adreno (TM) 610 api 1.0.354", sin `VK_KHR_multiview` ni `VK_KHR_maintenance5`; con ella, "api 1.3.354" con las dos extensiones, y `vkCreateDevice` correcto en ambos casos. Con el jail parcheado en RAM, AERA Browser carga google.com (algo lento).
-  - Alternativa sin tocar `bootable/recovery`: el mismo cambio dentro del runtime firmado del plugin (parche de Mesa para A610/A702, como los de A722/A825 de `AERA-Plugins/browser`). Se propone en el jail porque es una línea, no exige recompilar Mesa y es inocua en el resto de GPU. Ninguna de las dos opciones se ha enviado.
+- **`0007-catalog-mobile-data-strings-es-zh.diff`**: 57 entries for the mobile
+  data screen and messages in `en`, `es-ES`, `zh_CN` and `zh_TW`.
+  `chinese_catalog_test.py` goes from 58 to 54 failures (the upstream ones),
+  adding none.
 
-- `patches/bootable_recovery/0009-browser-send-Enter-from-the-keyboard-action-key.diff`: en `aeraui/features/browser/web_scene.cpp`, la tecla de acción (✓) del teclado de una página solo cerraba el teclado, así que no se podía enviar una búsqueda de Google ni un formulario con Enter. LVGL notifica esa tecla solo como `LV_EVENT_READY`, antes de la rama `VALUE_CHANGED` que inyecta las teclas, y `HideKeyboard()` borra `web_keyboard`; ahora la rama `READY` envía Enter (13) a la página y después cierra el teclado. Probado en spes (build 35).
+- **`0008-browser-enable-Zink-on-Adreno-without-hw-multiview.diff`**: adds
+  `TU_DEBUG=noconform` to the AERA Browser engine environment in
+  `aeraui/features/browser/jail_main.cpp`.
+  - Cause: in Mesa 26.2.2, Turnip reports Vulkan 1.1 only when the GPU has
+    hardware multiview (`tu_is_vk_1_1()` → `tu_has_multiview()`), and
+    `VK_KHR_maintenance5` depends on it. The Adreno 610 (and the A702, profile
+    `a6xx_gen1_low` with `has_hw_multiview = False`) stays at Vulkan 1.0
+    without `maintenance5`. Zink requires it and silently rejects the device:
+    "egl: failed to create dri2 screen", `EGL_NOT_INITIALIZED`, and the WebKit
+    engine aborts.
+  - Effect: in Turnip, `TU_DEBUG_NOCONFORM` is only read by
+    `tu_has_multiview()`. On those GPUs it exposes multiview (not
+    CTS-conformant) and with it Vulkan 1.1 and `maintenance5`. It changes
+    nothing on other GPUs, which already have hardware multiview.
+  - Measured on spes with a Vulkan probe inside the plugin runtime: without
+    the variable, "Adreno (TM) 610 api 1.0.354", no `VK_KHR_multiview` and no
+    `VK_KHR_maintenance5`; with it, "api 1.3.354" with both, and
+    `vkCreateDevice` succeeds in both cases. AERA Browser then loads pages.
+  - Alternative without touching `bootable/recovery`: the same change inside
+    the signed plugin runtime (a Mesa patch for A610/A702, like the A722/A825
+    ones in `AERA-Plugins/browser`). Proposed in the jail because it is one
+    line, needs no Mesa rebuild and is harmless on other GPUs.
 
-- `patches/bootable_recovery/0010-mobile-data-show-the-private-IPv4-address.diff`: en `aeraui/scenes/mobile_data_scene.cpp`, el detalle de conexión de datos móviles añade la fila "IPv4 privada" (el `address` que el proveedor ya publica en `status.json`) debajo de "IPv4 pública". El operador suele compartir la IP pública tras su NAT (con las dos SIM de Claro salía la misma), así que solo la privada distingue por qué SIM salen los datos. Catálogo: 1 clave nueva (`Private IPv4`) en `en`, `es-ES`, `zh_CN` y `zh_TW`; `chinese_catalog_test.py` mantiene los 54 fallos previos. Verificado en hardware (build 41). La demo web de AERA ("Interactive demo · sample data") ya muestra más filas en esa tarjeta (operador, red, SIM de datos, conexión por defecto), pero ese código **no está publicado**: el 2026-11-23, `bootable/recovery` local (`1cabc50`, 2026-11-15) era la cabeza de `aera-16.0` y no contiene esas cadenas. Si se publican, hay que rehacer el parche sobre esa versión antes de proponerlo.
+- **`0009-browser-send-Enter-from-the-keyboard-action-key.diff`**: in
+  `aeraui/features/browser/web_scene.cpp`, the action key (✓) of a page
+  keyboard only closed the keyboard, so a Google search or a form could not
+  be submitted with Enter. LVGL reports that key only as `LV_EVENT_READY`,
+  before the `VALUE_CHANGED` branch that injects keys, and `HideKeyboard()`
+  clears `web_keyboard`. The `READY` branch now sends Enter (13) to the page,
+  then closes the keyboard. Tested on spes (build 35).
 
-- `patches/bootable_recovery/0011-catalog-Spanish-review-labels.diff` (requiere `0004`): botones y hoja de confirmación de Backup, Restore y Wipe en `es-ES`. "Review" se había traducido como sustantivo, "reseña" (opinión sobre un producto): `Review backup` "Revisar respaldo" → "Crear respaldo", `Review restore` "Revisión de restauración" → "Restaurar respaldo", `Review wipe` "Borrado de reseñas" → "Borrar particiones", `Review %s` "Reseña %s" → "Detalle %s" (título de la hoja, por ejemplo "Detalle Respaldo") y `Review` "Reseña" → "Revisar". Solo cambian 5 valores `es-ES`; `chinese_catalog_test.py` mantiene los 54 fallos previos. Señalado por el usuario y verificado en hardware (build 42).
+- **`0010-mobile-data-show-the-private-IPv4-address.diff`**: in
+  `aeraui/scenes/mobile_data_scene.cpp`, the mobile data connection card adds
+  a "Private IPv4" row (the `address` the provider already publishes in
+  `status.json`) under "Public IPv4". Carriers often share the public address
+  behind NAT (both test SIMs got the same one), so only the private address
+  shows which SIM carries the data. Catalog: 1 new key in `en`, `es-ES`,
+  `zh_CN` and `zh_TW`. Verified on hardware (build 41). The AERA web demo
+  already shows more rows in that card (carrier, network, data SIM, default
+  connection), but that code is not public: on 2026-11-23 the local
+  `bootable/recovery` (`1cabc50`, 2026-11-15) was the head of `aera-16.0`
+  and has none of those strings. The patch must be redone on that version
+  once it is published.
 
-Propuesta sin parche (no se puede probar aquí): **descargas `blob:` en AERA Browser**. El botón "Download" de un archivo en GitHub, y en general cualquier `<a download href="blob:…">`, no descarga nada, porque el `decide-policy` de `aeraui/features/browser/worker.cpp` (idéntico a `aera_worker.cpp`) ignora toda navegación cuya URL no pase `Address()`, que solo acepta `http(s)://`. Las descargas `https://` sí funcionan (asset de Releases de GitHub, build 35). Cambio sugerido en la rama `NAVIGATION_ACTION`, antes del `ignore`:
+- **`0011-catalog-Spanish-review-labels.diff`** (needs `0004`): Spanish labels
+  for the Backup, Restore and Wipe buttons and confirmation sheet. "Review"
+  had been translated as the noun "reseña" (a product review): `Review
+  backup` → "Crear respaldo", `Review restore` → "Restaurar respaldo",
+  `Review wipe` → "Borrar particiones", `Review %s` → "Detalle %s" (sheet
+  title, for example "Detalle Respaldo") and `Review` → "Revisar". Only 5
+  `es-ES` values change. Verified on hardware (build 42).
+
+### Proposal without a patch: `blob:` downloads in AERA Browser
+
+The "Download" button of a file on GitHub, and in general any
+`<a download href="blob:…">`, downloads nothing. The `decide-policy` handler
+in `aeraui/features/browser/worker.cpp` (identical to `aera_worker.cpp`)
+ignores every navigation whose URL does not pass `Address()`, which only
+accepts `http(s)://`. `https://` downloads do work (a GitHub Releases asset,
+build 35). Suggested change in the `NAVIGATION_ACTION` branch, before the
+`ignore`:
 
 ```cpp
 // Same-origin blob: URLs are how pages hand a generated file to the user
@@ -71,28 +174,64 @@ if (uri && g_str_has_prefix(uri, "blob:https://")) {
 }
 ```
 
-El worker va dentro de `prebuilt/runtime.xz` (se compila con `build-worker.sh` contra WPE 2.52.6), así que hay que reconstruir y volver a firmar el runtime para probarlo. No se ha comprobado qué nombre de archivo sugiere WebKit en ese caso: puede ser el atributo `download` o el UUID del blob.
+The worker ships inside `prebuilt/runtime.xz` (built with `build-worker.sh`
+against WPE 2.52.6), so the runtime has to be rebuilt and re-signed to test
+it, which could not be done here. Untested which file name WebKit suggests in
+that case (the `download` attribute or the blob UUID).
 
-No se ha tocado el Plugin SDK.
+The Plugin SDK was not touched.
 
-Propuesta para el proveedor de datos móviles oficial (`mobile_data/` de infiniti, del que deriva el de spes): **doble SIM**. El código vive en el device tree (`mobile_data/sim_session.hpp`, nuevo, y `ProvisionSims`/`SelectDataSubscription` en `daemon.cpp`), así que no hay parche de `bootable/recovery`. Sin el *stack* de radio de Android:
-- el módem deja vacías las sesiones de aprovisionamiento que Android no activó (la SIM 2, o la SIM 1 si Android la dejó inactiva), y sin sesión primaria no se registra en ninguna red. Se rellenan con UIM 0x38 *Change Provisioning Session* (primaria → ranura 1, secundaria → ranura 2, con el AID de la aplicación SIM/USIM de UIM 0x2F);
-- los datos siguen la DDS del módem y no la vinculación de WDS, así que con la SIM 2 elegida salían por la SIM 1. Se mueve con DSD 0x4E *Switch DDS* (TLV 0x01 = suscripción) y se espera a que DSD 0x4F *Get Current DDS* la confirme, porque el cambio es asíncrono. Los IDs se sacaron de `libril-qc-hal-qmi.so` (qcril, `DSDModemEndPointModule::qmiDDSSwitchRequest` y `DSDModemEndPoint::getCurrentDDSSync`).
+### Proposal for the official mobile data provider: dual SIM
 
-Verificado en spes con dos SIM de Claro (build 40). Debería servir a cualquier árbol oficial con el mismo proveedor y doble SIM, pero solo se ha probado en el SM6225; `sim_session.hpp` no depende del dispositivo.
+The code lives in the device tree (`mobile_data/sim_session.hpp`, new, and
+`ProvisionSims` / `SelectDataSubscription` in `daemon.cpp`), so there is no
+`bootable/recovery` patch. It applies to the provider spes derives from
+(`mobile_data/` in infiniti). Without the Android radio stack:
 
-## Atribución
+- The modem leaves empty the provisioning sessions Android did not activate
+  (the second SIM, or SIM 1 if Android left it inactive), and with no primary
+  session it registers on no network at all. They are filled with UIM 0x38
+  *Change Provisioning Session* (primary → slot 1, secondary → slot 2, with
+  the AID of the SIM/USIM application read from UIM 0x2F).
+- Data follows the modem's default data subscription (DDS), not the WDS
+  binding, so with SIM 2 selected the call came up on SIM 1. The DDS is moved
+  with DSD 0x4E *Switch DDS* (TLV 0x01 = subscription), then the provider
+  waits for DSD 0x4F *Get Current DDS* to confirm it, because the switch is
+  asynchronous and a call started before it completes comes up on the
+  previous SIM. The message IDs come from qcril (`libril-qc-hal-qmi.so`,
+  `DSDModemEndPointModule::qmiDDSSwitchRequest` and
+  `DSDModemEndPoint::getCurrentDDSSync`).
 
-- `init.recovery.usb.rc` es nuevo (Apache-2.0). La primera versión se basaba en la plantilla BSD de The Linux Foundation; se reescribió para delegar en el `init.rc` de AERA y ya no contiene ese código.
-- `BoardConfig.mk`, `device.mk`, `twrp_spes.mk` y `AndroidProducts.mk` conservan el copyright de LineageOS 2021 del árbol spes original.
+Verified on spes with two SIMs (build 40). Each SIM gets its own private
+address, switching works without a reboot, and the modem DDS follows the
+selected SIM. It should help any official tree with the same provider and
+dual SIM, but it was only tested on SM6225. `sim_session.hpp` is
+device-independent. Details: [MOBILE_DATA.md](MOBILE_DATA.md) (Spanish),
+steps 6 and 6b.
 
-## Contribución oficial
+## Attribution
 
-Repositorio propuesto: `android_device_xiaomi_spes-AERA`, rama `aera-16.0`, ruta `device/xiaomi/spes`.
+- `init.recovery.usb.rc` is new (Apache-2.0). The first version was based on
+  The Linux Foundation's BSD template. It was rewritten to defer to AERA's
+  `init.rc` and no longer contains that code.
+- `BoardConfig.mk`, `device.mk`, `twrp_spes.mk` and `AndroidProducts.mk` keep
+  the 2021 LineageOS copyright of the original spes tree.
 
-Condiciones antes de proponerlo:
-1. Build reproducible con el manifest público.
-2. Kernel y blobs con procedencia documentada (`prebuilt/kernel.info` y `tools/blobs.sha256`).
-3. Matriz de `TESTING.md` en PASS para arranque, pantalla, táctil, ADB, particiones, descifrado y vuelta a Android.
+## Official contribution
 
-No se ha hecho push, PR ni release.
+Repository: https://github.com/michaaels/android_device_xiaomi_spes-AERA,
+branch `aera-16.0`, path `device/xiaomi/spes`. It is proposed for spes only.
+The tree also detects spesn, but that variant is untested.
+
+Status of the conditions:
+
+1. Reproducible build from the public manifest: done. Clean build on the
+   latest public AERA sources, commit `e038300` (see `BUILD.md`).
+2. Kernel and blobs with documented provenance: `prebuilt/kernel.info` and
+   `tools/blobs.sha256`.
+3. `TESTING.md` matrix PASS for boot, display, touch, ADB, partitions,
+   decryption and return to Android: done, plus Wi-Fi, mobile data,
+   backup/restore and permanent install.
+
+The repository is public. No pull request has been opened and no release has
+been published. The AERA team has not been contacted yet.

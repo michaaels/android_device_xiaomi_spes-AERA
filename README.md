@@ -77,9 +77,11 @@ with matching firmware; do not reuse these files on another device.
 
 ## Documentation
 
-Detailed notes are in Spanish under [docs/](docs): hardware facts, OrangeFox
-to AERA compatibility, build, test matrix, known issues, backup and recovery
-plan, mobile data internals and upstream status.
+[docs/UPSTREAM.md](docs/UPSTREAM.md) (English) covers code origin, the
+generic patches and the dual SIM proposal. The other notes under
+[docs/](docs) are in Spanish: hardware facts, OrangeFox to AERA
+compatibility, build, test matrix, known issues, backup and recovery plan
+and mobile data internals.
 
 ## Credits
 
