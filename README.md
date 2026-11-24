@@ -5,7 +5,7 @@ Device tree de [AERA Recovery](https://github.com/AERA-Recovery) (`aera-16.0`) p
 > **Estado: EXPERIMENTAL. Compila, arranca y funciona en un spes real con `fastboot boot`** (nunca se ha instalado de forma permanente).
 >
 > - **Verificado:** interfaz, táctil, botones, rotación horizontal, ADB, MTP, sideload, fastbootd, detección de particiones, **descifrado FBE con PIN**, backup por ADB y vuelta a Android. También linterna, vibración (motor y respuesta háptica), OTG, **Wi-Fi**, **datos móviles 4G con doble SIM**, PC Connection (Wi-Fi y USB), tienda de plugins y **AERA Browser**.
-> - **Pendiente:** restore, descifrado sin bloqueo o con patrón, SIM con PIN, conexión automática de datos, spesn e instalación permanente.
+> - **Pendiente:** restore, descifrado sin bloqueo o con patrón, SIM con PIN, spesn e instalación permanente.
 > - **No disponible:** Root Manager (kernel 4.19 no GKI) y descargas `blob:` en AERA Browser (upstream).
 >
 > Detalle y evidencias en [docs/TESTING.md](docs/TESTING.md). Hay diez parches genéricos para `bootable/recovery` (`patches/bootable_recovery/`), propuestos para upstream y aún no enviados ([docs/UPSTREAM.md](docs/UPSTREAM.md)).

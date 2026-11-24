@@ -101,7 +101,7 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 | Datos móviles: SIM 2 y cambio entre SIM 1 y SIM 2 | PASS (b40) · FAIL (b36) | | dos SIM de Claro con datos. b36: la SIM 2 fallaba ("no provisioning application") y, tras forzarla a mano, los datos salían por la SIM 1. b40: SIM 2 → `100.72.198.81`, SIM 1 → `10.91.199.180`, SIM 2 → `100.72.198.81`, ping en cada cambio y la DDS del módem sigue a la SIM elegida (`MOBILE_DATA.md`, pasos 6 y 6b) |
 | Datos móviles: SIM insertada en caliente | FAIL (b36) | | al meter la segunda SIM con el recovery arrancado, las dos quedaron en `initializing`; con las dos desde el arranque funciona. No corregido |
 | Datos móviles: IPv4 privada en el detalle de conexión | PASS (b41) | | parche `0010`; la fila "IPv4 privada" cambia con cada SIM aunque la IPv4 pública sea la misma |
-| Datos móviles: conexión automática al arrancar | NOT TESTED | | siempre se conectó desde la página Red |
+| Datos móviles: conexión automática al arrancar | PASS (b41) | | con "Conectar al iniciar" activado y la SIM 2 elegida: tras `fastboot boot` y descifrar con el PIN, conecta solo por la SIM 2 (`10.203.77.90`) con 1 min de uptime y ping OK. AERA lee el ajuste de `/data/media/0/AERA/preferences.conf`, así que sin descifrar no se conecta solo |
 | AERA Browser: navegación | PASS (b33) | | parche `0008` (Zink en Adreno 610); google.com carga, algo lento (sin medir) |
 | AERA Browser: navegación solo por datos móviles | PASS (b34) | | con el Wi-Fi apagado |
 | AERA Browser: Enter desde el teclado (búsqueda de Google) | PASS (b35) · FAIL (b34) | | parche `0009`: la tecla ✓ envía Enter a la página |
@@ -109,7 +109,7 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 | AERA Browser: descarga `blob:` (botón "Download" de un archivo en GitHub) | FAIL (b35) | | no descarga nada; el worker precompilado del plugin ignora `blob:` (`KNOWN_ISSUES.md`); aportación futura para upstream |
 | Root Manager | N/A | | no disponible con el kernel 4.19 no GKI (`KNOWN_ISSUES.md`) |
 
-**Nivel alcanzado:** compila ✔ · arranca ✔ · funciona ✔ en pantalla, táctil, rotación, linterna, ADB, MTP, sideload, backup por ADB, particiones, descifrado con PIN, Wi-Fi, plugins, PC Connection, fastbootd y vuelta a Android. Además: datos móviles (4G, también con doble SIM), OTG, AERA Browser y vibración (motor y respuesta háptica). **No validado aún:** restore desde AERA, descifrado sin bloqueo o con patrón, SIM con PIN, SIM insertada en caliente, conexión automática de datos, spesn y la instalación permanente. **No funciona:** descargas `blob:` en AERA Browser (upstream). El port sigue siendo EXPERIMENTAL.
+**Nivel alcanzado:** compila ✔ · arranca ✔ · funciona ✔ en pantalla, táctil, rotación, linterna, ADB, MTP, sideload, backup por ADB, particiones, descifrado con PIN, Wi-Fi, plugins, PC Connection, fastbootd y vuelta a Android. Además: datos móviles (4G, también con doble SIM), OTG, AERA Browser y vibración (motor y respuesta háptica). **No validado aún:** restore desde AERA, descifrado sin bloqueo o con patrón, SIM con PIN, SIM insertada en caliente, spesn y la instalación permanente. **No funciona:** descargas `blob:` en AERA Browser (upstream). El port sigue siendo EXPERIMENTAL.
 
 ## Registro de ejecuciones
 
@@ -132,3 +132,4 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 - 2026-11-23: `build37-ui-scale` → lienzo de la UI a 1280×2844 (`AERA_SCREEN_W/H` 960×2133): se ve más grande, pero varias pantallas de AERA tienen medidas fijas para 1440 de ancho. Descartado (`KNOWN_ISSUES.md`).
 - 2026-11-23: `build40-dds-wait` (SHA-256 `bbd335c1242f18b82702e3f596517d95dd3f10462a3e2f68afc614c44e926bef`) → dual SIM: el proveedor rellena las sesiones UIM vacías y mueve la DDS (DSD 0x4E) a la SIM elegida, esperando a DSD 0x4F. SIM 1 ↔ SIM 2 sin reiniciar, cada una con su IP privada y ping: PASS. (b38 y b39 fueron pasos intermedios: b39 no veía la confirmación de la DDS por un error de código, corregido en b40.)
 - 2026-11-23: `build41-private-ip` (SHA-256 `18817b760f53f118fc50bf40b163851054eebf46762f6800304b6dfce764bc67`) → parche `0010`: el detalle de conexión de datos móviles muestra la IPv4 privada; vista por el usuario al cambiar de SIM: PASS.
+- 2026-11-23: `build41-private-ip` → conexión automática de datos al arrancar (SIM 2, tras descifrar): PASS.
