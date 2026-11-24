@@ -44,7 +44,22 @@ sha256sum *.img > SHA256SUMS
 
 ## 4. Instalación permanente (solo cuando todo lo de TESTING.md esté en PASS)
 
-> Estado (2026-11-23): **no probada**. Hace falta la autorización del propietario, las copias del paso 3 verificadas y la comprobación de la cabecera descrita abajo.
+> Estado (2026-11-23): **probada en el teléfono de pruebas**, con autorización del propietario y las copias del paso 3 verificadas.
+
+Método usado (equivalente al de AERA y verificable antes de escribir): montar en el PC un `boot` con el kernel y la cabecera del `boot` instalado y la ramdisk de AERA.
+
+```bash
+# boot_<slot>.img es la copia del paso 3; boot.img es la build de AERA
+python3 system/tools/mkbootimg/unpack_bootimg.py --boot_img boot_<slot>.img --out st
+python3 system/tools/mkbootimg/unpack_bootimg.py --boot_img boot.img --out ae
+python3 system/tools/mkbootimg/mkbootimg.py --header_version 3 --kernel st/kernel --ramdisk ae/ramdisk \
+    --os_version <os version de st> --os_patch_level <os patch level de st> --cmdline "" --output aera_boot.img
+python3 system/tools/mkbootimg/unpack_bootimg.py --boot_img aera_boot.img --out chk   # comprobar campos y SHA-256 del kernel
+fastboot boot aera_boot.img        # el ABL lo arranca como Android normal: si Android llega a boot_completed, la ramdisk vale
+fastboot flash boot_<slot> aera_boot.img
+```
+
+Después: `adb reboot recovery` entra en AERA, y "Reiniciar → Sistema" vuelve a Android. Sigue sin probar la función de AERA que instala su ramdisk desde el propio recovery.
 
 > ⚠️ **Nunca** hagas `fastboot flash boot` del `boot.img` de AERA para arrancar Android con él. Su cabecera declara el nivel de parche 2099-12, y el Keymaster de Android podría actualizar las claves de forma irreversible (ver KNOWN_ISSUES).
 
