@@ -93,5 +93,6 @@ Hay que comprobar:
 | `lunch` | PASS |
 | `bootimage` | PASS: build limpio (13 min 40 s) e incremental |
 | Artefacto probado en hardware | `boot.img`, SHA-256 `d69b491b1c0439a19ae007adcc98688de58821284530d37b7d6c1f665bba3ba3` (build incremental sobre `out_clean`, configuración del commit `d2ff8ce`) |
-| **Build limpio final con Wi-Fi** | PASS: 15 min 58 s; `boot.img` = `AERA-R1.0-Beta-Unofficial-spes.img`, SHA-256 `b4964c11fea3d22348cb176c967fc42e00dae44adfe1702534933f2019335999`, verificado en hardware (commit `f4b7e96` y parche `0001` aplicado) |
+| **Build limpio final (2026-11-23)** | PASS: 14 min 05 s, 0 `FAILED`, `OUT_DIR=/src/out_final`; `AERA-R1.0-Beta-Unofficial-spes.img` (idéntico a `boot.img`), SHA-256 `b35012ddbe375ba5f456088c9a5170c7b9af7a3b9e7a1fc479bd2b81a62d3337`; commit `e038300` con los parches `0001`–`0010`; cabecera v3, kernel idéntico a `prebuilt/kernel`, ramdisk 36 248 615 B, `validate-tree.sh` 0 fallos y 0 avisos; regresión en hardware PASS (`TESTING.md`) |
+| Build limpio final con Wi-Fi (anterior) | PASS: 15 min 58 s; `boot.img` = `AERA-R1.0-Beta-Unofficial-spes.img`, SHA-256 `b4964c11fea3d22348cb176c967fc42e00dae44adfe1702534933f2019335999`, verificado en hardware (commit `f4b7e96` y parche `0001` aplicado) |
 | Build limpio anterior (sin Wi-Fi) | PASS: 14 min 40 s; `boot.img` = `AERA-R1.0-Beta-Unofficial-spes.img`, SHA-256 `d11af8397be8ea7f55015c0047ad81ee39e3615cebf8a68e1ce14fd8afe08da5`, verificado en hardware (commit `5b75963` y parche `0001` aplicado) |

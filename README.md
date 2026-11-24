@@ -9,7 +9,7 @@ Device tree de [AERA Recovery](https://github.com/AERA-Recovery) (`aera-16.0`) p
 > - **No disponible:** Root Manager (kernel 4.19 no GKI) y descargas `blob:` en AERA Browser (upstream).
 >
 > Detalle y evidencias en [docs/TESTING.md](docs/TESTING.md). Hay diez parches genéricos para `bootable/recovery` (`patches/bootable_recovery/`), propuestos para upstream y aún no enviados ([docs/UPSTREAM.md](docs/UPSTREAM.md)).
-> Última imagen probada: `build41-private-ip`, SHA-256 `18817b760f53f118fc50bf40b163851054eebf46762f6800304b6dfce764bc67` (build incremental; falta la build limpia final).
+> Última imagen probada: build limpia final `AERA-R1.0-Beta-Unofficial-spes.img`, SHA-256 `b35012ddbe375ba5f456088c9a5170c7b9af7a3b9e7a1fc479bd2b81a62d3337` (commit `e038300`, regresión rápida PASS el 2026-11-23).
 >
 > ⚠️ Solo para `fastboot boot`. No lo flashees como `boot` (ver [docs/RECOVERY_PLAN.md](docs/RECOVERY_PLAN.md)).
 > Kernel y blobs ya incluidos, de **EvolutionX 16.0 11.10**, el firmware de referencia instalado. La imagen solo debe usarse con ese firmware (ver [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)).
