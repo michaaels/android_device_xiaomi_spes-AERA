@@ -46,7 +46,7 @@ Hay tres niveles de validación, y cumplir uno no implica los siguientes: **comp
 
 ## Pruebas en hardware
 
-Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, EvolutionX 16.0 11.10 instalado. **Procedimiento:** solo `fastboot boot` (en RAM); no se ha escrito ninguna partición. Imagen de la última regresión (2026-11-20): `build25-flashlight`, SHA-256 `01fa83b1161485af46c9f1a451881c3fec90ce30b636b49eaf62d1a3d3075fc1` (parches 0001–0006, busybox, ajustes en `/persist`). Las filas marcadas **(b25)** se repitieron con ella; el resto viene de builds anteriores (primera: `build11-vintf`). Las funciones añadidas después se probaron en su build (**b27** a **b35**, ver el registro al final); la última imagen probada es `build35-enter` (SHA-256 `c753884c…`, parches 0001–0009), y aún no se ha repetido con ella la regresión completa. Evidencia en `docs/evidence/`.
+Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, EvolutionX 16.0 11.10 instalado. **Procedimiento:** solo `fastboot boot` (en RAM); no se ha escrito ninguna partición. Imagen de la última regresión (2026-11-20): `build25-flashlight`, SHA-256 `01fa83b1161485af46c9f1a451881c3fec90ce30b636b49eaf62d1a3d3075fc1` (parches 0001–0006, busybox, ajustes en `/persist`). Las filas marcadas **(b25)** se repitieron con ella; el resto viene de builds anteriores (primera: `build11-vintf`). Las funciones añadidas después se probaron en su build (**b27** a **b40**, ver el registro al final); la última imagen probada es `build40-dds-wait` (SHA-256 `bbd335c1…`, parches 0001–0009), y aún no se ha repetido con ella la regresión completa. Evidencia en `docs/evidence/`.
 
 | Prueba | spes | spesn | Evidencia |
 |---|---|---|---|
@@ -81,7 +81,7 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 | Rotación de pantalla (horizontal) | PASS (b24, b25) | | corregido con el parche `0006`; antes, con la resolución adaptativa, la imagen girada salía corrupta |
 | Linterna | PASS (b25) | NOT TESTED | GPIO85 del TLMM vía `/tmp/spes-torch/brightness`; enciende y apaga desde los ajustes rápidos |
 | microSD | PASS (detección) | | `/dev/block/mmcblk0p1` montado en `/external_sd`; visible por MTP |
-| OTG | NOT TESTED | | |
+| OTG | PASS (b36) | | pendrive Kingston DT microDuo 3C por USB 3.0 (xHCI en modo host): detectado como `sdg` (`sda`–`sdf` son la UFS), `sdg1` (ext2) montada por AERA en `/usb_otg` y su contenido visible. Solo se ofrece la primera partición (entrada única de `twrp.flags`) |
 | PC Connection por Wi-Fi | PASS (b27) | | `https://192.168.100.71` y `aera.local` → 200; `/api/status` sin sesión → 401 |
 | PC Connection por USB (`adb forward 8443:443`) | PASS (b25) | NOT TESTED | `https://localhost:8443` → 200; el mismo token funciona |
 | PC Connection: backup y restore hacia o desde el PC en el navegador | NOT TESTED | | requiere navegador Chromium con selector de carpetas; AERA lo marca como Beta |
@@ -95,10 +95,11 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 | Wi-Fi: sin escrituras en EFS ni persist reales | PASS | | SHA-256 de `modemst1/2`, `fsg`, `fsc` y `persist` reales idéntico antes y después de la sesión, aunque el módem escribió EFS (en las copias en RAM) |
 | Compresión oficial (`AERA_USE_EXTREME_COMPRESSION`) | PASS (b28) | | sustituye a UPX; ramdisk 36 148 800 B; "AERA runtime: unpacked successfully in 2630 ms"; servicios sin abortos; descifrado con PIN correcto |
 | Vibración: motor | PASS (b28) | | `AERA_NO_HAPTICS` quitado; el vibrador del PMIC (`/sys/class/leds/vibrator`, `duration` + `activate`) vibra al activarlo a mano |
-| Vibración: respuesta háptica de la interfaz | NOT TESTED | | viene apagada en las preferencias de AERA (`haptic_*` = 0); con ella apagada, el PIN se aceptó sin vibrar, como corresponde. Falta probarla activada en Ajustes |
+| Vibración: respuesta háptica de la interfaz | PASS (b36) | | con la opción activada en AERA, el usuario la sintió al tocar; 88 cambios del motor registrados en 10 s (pulsos de 5 a 39 ms en `/sys/class/leds/vibrator/duration`) |
 | Datos móviles: activados antes que el Wi-Fi (módem en frío) | PASS (b34) · FAIL (b33) | | b33: "QMI error 52 (request 46) [service 2]"; b34 reintenta DMS *Set Operating Mode*: 4G, "CLARO EC", APN `ba.amx` |
 | Datos móviles: SIM con PIN | NOT TESTED | | la SIM de pruebas no tiene PIN |
-| Datos móviles: cambio entre SIM 1 y SIM 2 | NOT TESTED | | solo había una SIM con datos |
+| Datos móviles: SIM 2 y cambio entre SIM 1 y SIM 2 | PASS (b40) · FAIL (b36) | | dos SIM de Claro con datos. b36: la SIM 2 fallaba ("no provisioning application") y, tras forzarla a mano, los datos salían por la SIM 1. b40: SIM 2 → `100.72.198.81`, SIM 1 → `10.91.199.180`, SIM 2 → `100.72.198.81`, ping en cada cambio y la DDS del módem sigue a la SIM elegida (`MOBILE_DATA.md`, pasos 6 y 6b) |
+| Datos móviles: SIM insertada en caliente | FAIL (b36) | | al meter la segunda SIM con el recovery arrancado, las dos quedaron en `initializing`; con las dos desde el arranque funciona. No corregido |
 | Datos móviles: conexión automática al arrancar | NOT TESTED | | siempre se conectó desde la página Red |
 | AERA Browser: navegación | PASS (b33) | | parche `0008` (Zink en Adreno 610); google.com carga, algo lento (sin medir) |
 | AERA Browser: navegación solo por datos móviles | PASS (b34) | | con el Wi-Fi apagado |
@@ -107,7 +108,7 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 | AERA Browser: descarga `blob:` (botón "Download" de un archivo en GitHub) | FAIL (b35) | | no descarga nada; el worker precompilado del plugin ignora `blob:` (`KNOWN_ISSUES.md`); aportación futura para upstream |
 | Root Manager | N/A | | no disponible con el kernel 4.19 no GKI (`KNOWN_ISSUES.md`) |
 
-**Nivel alcanzado:** compila ✔ · arranca ✔ · funciona ✔ en pantalla, táctil, rotación, linterna, ADB, MTP, sideload, backup por ADB, particiones, descifrado con PIN, Wi-Fi, plugins, PC Connection, fastbootd y vuelta a Android. Además: datos móviles (4G), AERA Browser y motor de vibración. **No validado aún:** restore desde AERA, descifrado sin bloqueo o con patrón, OTG, respuesta háptica de la interfaz, SIM con PIN y doble SIM, conexión automática de datos, spesn y la instalación permanente. **No funciona:** descargas `blob:` en AERA Browser (upstream). El port sigue siendo EXPERIMENTAL.
+**Nivel alcanzado:** compila ✔ · arranca ✔ · funciona ✔ en pantalla, táctil, rotación, linterna, ADB, MTP, sideload, backup por ADB, particiones, descifrado con PIN, Wi-Fi, plugins, PC Connection, fastbootd y vuelta a Android. Además: datos móviles (4G, también con doble SIM), OTG, AERA Browser y vibración (motor y respuesta háptica). **No validado aún:** restore desde AERA, descifrado sin bloqueo o con patrón, SIM con PIN, SIM insertada en caliente, conexión automática de datos, spesn y la instalación permanente. **No funciona:** descargas `blob:` en AERA Browser (upstream). El port sigue siendo EXPERIMENTAL.
 
 ## Registro de ejecuciones
 
@@ -126,3 +127,6 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 - 2026-11-23: `build33-browser` (SHA-256 `59c7522fd63617f595b324a1ac1271f5b247864f5e6ba8f8828d845abb103924`) → AERA Browser con el parche `0008`: PASS (carga google.com; algo lento). Datos móviles activados antes que el Wi-Fi: FAIL, "QMI error 52 (request 46) [service 2]".
 - 2026-11-23: `build34-dms-retry` (SHA-256 `4eb21d6fc3ea324f4bf23b852a40f3fd77498ef3548d3f71494a4d789b2ebb11`) → datos móviles activados con el módem en frío (sin Wi-Fi): PASS (4G, CLARO EC, APN ba.amx); AERA Browser navegando por datos móviles: PASS.
 - 2026-11-23: `build35-enter` (SHA-256 `c753884c86ff65dd4ea5123cf4d1602f78b498ff16f60cc9d311061f9c4791fc`) → AERA Browser: Enter desde el teclado en una página (búsqueda de Google) con el parche `0009`: PASS. Descarga de un asset de Releases de GitHub (`https://`): PASS. Botón "Download" de un archivo en GitHub (`blob:`): FAIL, no descarga nada (worker del runtime, ver `KNOWN_ISSUES.md`).
+- 2026-11-23: `build36-maintainer` (SHA-256 `c17ddd661ba61b92f9c7919d7b257e1c8235e8ce16c3afc41a13a32898df7bf4`) → `AERA_MAINTAINER` "Michael Xavier" visible en la UI. Respuesta háptica de la interfaz: PASS. OTG: PASS. Dual SIM: la SIM 2 no conecta (sesión de aprovisionamiento vacía) y, al forzarla con UIM 0x38 a mano, los datos salen por la SIM 1 (DDS).
+- 2026-11-23: `build37-ui-scale` → lienzo de la UI a 1280×2844 (`AERA_SCREEN_W/H` 960×2133): se ve más grande, pero varias pantallas de AERA tienen medidas fijas para 1440 de ancho. Descartado (`KNOWN_ISSUES.md`).
+- 2026-11-23: `build40-dds-wait` (SHA-256 `bbd335c1242f18b82702e3f596517d95dd3f10462a3e2f68afc614c44e926bef`) → dual SIM: el proveedor rellena las sesiones UIM vacías y mueve la DDS (DSD 0x4E) a la SIM elegida, esperando a DSD 0x4F. SIM 1 ↔ SIM 2 sin reiniciar, cada una con su IP privada y ping: PASS. (b38 y b39 fueron pasos intermedios: b39 no veía la confirmación de la DDS por un error de código, corregido en b40.)

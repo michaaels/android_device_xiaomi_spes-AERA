@@ -71,6 +71,12 @@ El worker va dentro de `prebuilt/runtime.xz` (se compila con `build-worker.sh` c
 
 No se ha tocado el Plugin SDK.
 
+Propuesta para el proveedor de datos móviles oficial (`mobile_data/` de infiniti, del que deriva el de spes): **doble SIM**. El código vive en el device tree (`mobile_data/sim_session.hpp`, nuevo, y `ProvisionSims`/`SelectDataSubscription` en `daemon.cpp`), así que no hay parche de `bootable/recovery`. Sin el *stack* de radio de Android:
+- el módem deja vacías las sesiones de aprovisionamiento que Android no activó (la SIM 2, o la SIM 1 si Android la dejó inactiva), y sin sesión primaria no se registra en ninguna red. Se rellenan con UIM 0x38 *Change Provisioning Session* (primaria → ranura 1, secundaria → ranura 2, con el AID de la aplicación SIM/USIM de UIM 0x2F);
+- los datos siguen la DDS del módem y no la vinculación de WDS, así que con la SIM 2 elegida salían por la SIM 1. Se mueve con DSD 0x4E *Switch DDS* (TLV 0x01 = suscripción) y se espera a que DSD 0x4F *Get Current DDS* la confirme, porque el cambio es asíncrono. Los IDs se sacaron de `libril-qc-hal-qmi.so` (qcril, `DSDModemEndPointModule::qmiDDSSwitchRequest` y `DSDModemEndPoint::getCurrentDDSSync`).
+
+Verificado en spes con dos SIM de Claro (build 40). Debería servir a cualquier árbol oficial con el mismo proveedor y doble SIM, pero solo se ha probado en el SM6225; `sim_session.hpp` no depende del dispositivo.
+
 ## Atribución
 
 - `init.recovery.usb.rc` es nuevo (Apache-2.0). La primera versión se basaba en la plantilla BSD de The Linux Foundation; se reescribió para delegar en el `init.rc` de AERA y ya no contiene ese código.

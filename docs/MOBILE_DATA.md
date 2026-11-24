@@ -16,6 +16,9 @@ Resumen del estado (`docs/TESTING.md:90-92`, `docs/KNOWN_ISSUES.md:69-71`):
   HTTP/HTTPS y tienda de plugins con el Wi-Fi apagado. Nombre del operador
   "CLARO EC". Tres ciclos seguidos de conectar/desconectar. Disponible tras un
   arranque limpio (builds 30, 31 y 32).
+- Dual SIM (dos SIM de Claro con datos): conecta por la SIM 1 y por la SIM 2,
+  cada una con su IP privada, y cambia entre ellas sin reiniciar (build 40,
+  pasos 6 y 6b de la sección 2).
 - Solo internet: ni llamadas ni SMS.
 
 ---
@@ -35,7 +38,7 @@ Resumen del estado (`docs/TESTING.md:90-92`, `docs/KNOWN_ISSUES.md:69-71`):
 | `cnss-daemon` | Daemon de la plataforma WLAN | Ídem (`init.recovery.wifi.rc:79-84`). Para los datos móviles no se ha comprobado si hace falta **[sin verificar]** |
 | `spes-modem-hold.sh` | Mantiene abierto `/dev/subsys_modem` (voto `subsystem_get`), lo que arranca el MPSS | `recovery/root/system/bin/spes-modem-hold.sh:8-11`, servicio en `init.recovery.wifi.rc:73-77` |
 | `rmnet_ipa0` | Netdev del driver IPA downstream (`rmnet_ipa3`), aparece al cargar `ipa_fws` | Kernel de stock |
-| `rmnet_aera` | Enlace `rmnet` (mux id 1) sobre `rmnet_ipa0`; lleva el tráfico IP | Lo crea el proveedor por netlink (`daemon.cpp:146-171`) |
+| `rmnet_aera` | Enlace `rmnet` (mux id 1) sobre `rmnet_ipa0`; lleva el tráfico IP | Lo crea el proveedor por netlink (`daemon.cpp:149-174`) |
 | `aera-cellular-provider` | Daemon de control (QMI sobre QRTR, rmnet, IP, rutas, DNS) | `mobile_data/daemon.cpp`, compilado si `AERA_ENABLE_MOBILE_DATA=1` (`vendorsetup.sh:54-56`, `device.mk:41-44`, `mobile_data/Android.bp:8-19`) |
 
 **Por qué los daemons corren desde la RAM.** AERA para todos los procesos que
@@ -67,13 +70,13 @@ el módem queda encendido hasta el reinicio. Desactivar los datos solo cierra
 la sesión (`spes_platform.hpp:5-14`).
 
 1. El proveedor arranca con el recovery. Comprueba `InRecovery()`
-   (`daemon.cpp:596`, `spes_platform.hpp:92-94`) y publica `available` según
-   `Capability()` (`daemon.cpp:608-609`). `Capability()` solo mira que exista
+   (`daemon.cpp:634`, `spes_platform.hpp:92-94`) y publica `available` según
+   `Capability()` (`daemon.cpp:646-647`). `Capability()` solo mira que exista
    el subsistema `modem` en `/sys/bus/msm_subsys/devices`, que se pueda leer
    `/dev/subsys_modem`, que el script de preparación sea ejecutable y que el
    kernel acepte un socket `AF_QIPCRTR` (42). **No** mira `rmnet_ipa0`
    (`spes_platform.hpp:100-112`).
-2. El usuario pulsa conectar: `Connect()` → `spes::Start()` (`daemon.cpp:413-418`).
+2. El usuario pulsa conectar: `Connect()` → `spes::Start()` (`daemon.cpp:450-455`).
 3. Si `spes.wlan.prep` no vale `1`, `Start()` lo vacía y pone
    `spes.modem.up=1` (`spes_platform.hpp:126-128`).
 4. init reacciona a `spes.modem.up=1`: arranca `spes-wlan-prep` y vuelve a
@@ -121,8 +124,8 @@ para los datos móviles.
   servicios del nodo local, para no confundir un ayudante WLAN que anuncie DMS
   con el módem (`qmi.hpp:92-93`).
 - `Find()` toma el servicio pedido con `instance >> 8 == 0` y, salvo NAS, en el
-  mismo nodo que NAS (`daemon.cpp:304-307`). El descubrimiento se reintenta
-  hasta 30 veces hasta que aparecen NAS, DMS y WDS (`daemon.cpp:422-427`).
+  mismo nodo que NAS (`daemon.cpp:341-344`). El descubrimiento se reintenta
+  hasta 30 veces hasta que aparecen NAS, DMS y WDS (`daemon.cpp:459-464`).
 - Trama QMI: `flags(0) txn(u16) msg(u16) len(u16) TLVs` y la respuesta se
   empareja por tipo 2, txn y mensaje. El TLV 0x02 es el resultado; si el
   código no es 0 se lanza `QmiError` (`qmi.hpp:100-130`).
@@ -138,83 +141,111 @@ para los datos móviles.
 | WDA | 26 | 0x20 Set Data Format |
 | DPM | 47 | 0x20 Open Port |
 
-(Los IDs de servicio salen de las llamadas a `Find()` en `daemon.cpp:424`,
-`:426-428`, `:445`, `:462`, `:465`.)
+(Los IDs de servicio salen de las llamadas a `Find()` en `daemon.cpp:461`,
+`:463-465`, `:482`, `:500`, `:503`.)
 
 ### 2.3 Secuencia exacta de `Connect()`
 
 1. **Lease**: bloqueo compartido sobre el lease de AERA, para no conectar
-   durante una operación de almacenamiento (`daemon.cpp:414-415`). Propio de AERA.
-2. **Módem arriba**: `spes::Start()` (sección 1.2) (`daemon.cpp:418`).
-3. **Descubrimiento QRTR** de NAS (3), DMS (2) y WDS (1) (`daemon.cpp:420-427`).
-4. **DMS 0x2E Set Operating Mode**, TLV 0x01 = `0` (online) (`daemon.cpp:428`). Un módem recién arrancado anuncia DMS antes de aceptar esta orden y responde `QMI_ERR_DEVICE_NOT_READY` (52) durante unos segundos; el proveedor la reintenta cada 0,5 s, hasta unos 20 s, solo con ese error (`daemon.cpp:428-435`).
+   durante una operación de almacenamiento (`daemon.cpp:451-452`). Propio de AERA.
+2. **Módem arriba**: `spes::Start()` (sección 1.2) (`daemon.cpp:455`).
+3. **Descubrimiento QRTR** de NAS (3), DMS (2) y WDS (1) (`daemon.cpp:457-464`).
+4. **DMS 0x2E Set Operating Mode**, TLV 0x01 = `0` (online) (`daemon.cpp:465`). Un módem recién arrancado anuncia DMS antes de aceptar esta orden y responde `QMI_ERR_DEVICE_NOT_READY` (52) durante unos segundos; el proveedor la reintenta cada 0,5 s, hasta unos 20 s, solo con ese error (`daemon.cpp:465-472`).
 5. **Selección de la SIM de datos** (solo si la UI pide la SIM 1 o 2; `0` = la
-   que ya tenga el módem) (`daemon.cpp:438-453`):
+   que ya tenga el módem) (`daemon.cpp:475-490`):
    - WDS 0xAF con TLV 0x01 = suscripción (u32);
    - WDS 0xB0 y se comprueba que el TLV 0x10 devuelva la misma suscripción;
    - NAS 0x45 con TLV 0x01 = suscripción − 1 (u8), porque la vinculación es
      por cliente y debe coincidir con la de WDS.
    - Con suscripción `0` solo se lee 0xB0 para saber cuál está activa.
-6. **Esperar a la SIM** (`WaitForSim`, `daemon.cpp:217-298`):
-   - UIM 0x47 → ICCID por ranura; se guarda solo su SHA-256 (`daemon.cpp:56-62`,
-     `:209-214`, `sim.hpp:51-64`);
+6. **Esperar a la SIM** (`WaitForSim`, `daemon.cpp:253-335`):
+   - antes, **rellenar las sesiones de aprovisionamiento vacías**
+     (`ProvisionSims`, `daemon.cpp:222-234`; `sim_session.hpp`). El módem solo
+     mete una aplicación SIM/USIM en una sesión (GW primaria o secundaria)
+     cuando el *stack* de radio de Android se lo pide con UIM 0x38 *Change
+     Provisioning Session*, y recuerda lo último que pidió Android. Sin ese
+     *stack*, la SIM 2 (o una ranura que Android dejó inactiva) queda
+     `detected` sin sesión. Si la sesión primaria está vacía, el módem no se
+     registra en **ninguna** red (las dos SIM salen sin servicio). El
+     proveedor lee UIM 0x2F (índices de sesión en los bytes 0-1 y 4-5 del TLV
+     0x10 y el AID de cada aplicación) y, si hace falta, manda UIM 0x38 con
+     TLV 0x01 = {tipo de sesión: 0 primaria, 2 secundaria; 1 = activar} y TLV
+     0x10 = {ranura, longitud del AID, AID}. La primaria va a la ranura 1 y la
+     secundaria a la 2, salvo que la otra sesión ya use esa ranura. La
+     secundaria solo se rellena si se pidió la suscripción 2. Verificado en
+     hardware (build 40). El cambio vive en la RAM del módem (EFS en RAM, sección 1).
+   - UIM 0x47 → ICCID por ranura; se guarda solo su SHA-256 (`daemon.cpp:59-65`,
+     `:212-217`, `sim.hpp:51-64`);
    - UIM 0x2F cada 500 ms → estado de tarjeta y de aplicación (`sim.hpp:14-38`),
      traducido a `ready`, `pin_required`, `puk_required`, `blocked`, `absent`
      o `initializing` (`sim.hpp:39-47`);
-   - con `pin_required`, la UI puede mandar un PIN (`daemon.cpp:622-640`) y se
+   - con `pin_required`, la UI puede mandar un PIN (`daemon.cpp:660-678`) y se
      verifica con UIM 0x26 una sola vez, sin reenviarlo nunca tras un timeout
-     (`daemon.cpp:272-295`). **[sin verificar en hardware]**
+     (`daemon.cpp:309-332`). **[sin verificar en hardware]**
+6b. **SIM de datos del módem (DDS)** (`SelectDataSubscription`,
+   `daemon.cpp:236-252`), solo si la UI pide la SIM 1 o 2. Los datos salen
+   siempre por la *default data subscription* del módem, esté WDS vinculado a
+   la suscripción que esté: sin esto, con la SIM 2 elegida, la llamada salía
+   por la SIM 1 (misma IP privada). Android la cambia con **DSD 0x4E *Switch
+   DDS***, TLV 0x01 = suscripción (u32: 1 o 2), como hace qcril para
+   `setPreferredDataModem` (`libril-qc-hal-qmi.so`,
+   `DSDModemEndPointModule::qmiDDSSwitchRequest`). El cambio es asíncrono y
+   una llamada iniciada antes de que termine sale por la SIM anterior, así
+   que se espera a que **DSD 0x4F *Get Current DDS*** (TLV 0x10, u32) dé la
+   suscripción pedida (hasta 10 s). Si el módem no tiene DSD (un solo SIM),
+   se omite. Verificado: SIM 2 → `100.72.198.81`, SIM 1 → `10.91.199.180`,
+   SIM 2 → `100.72.198.81`, con ping en cada cambio (build 40).
 7. **Registro**: NAS 0x24 Get Serving System hasta 60 veces cada 750 ms. Se da
    por registrado cuando el TLV 0x01 tiene `registration_state == 1` y
    `ps_attach_state == 1` (bytes 0 y 2). El error 74 (`INFO_UNAVAILABLE`) se
    tolera, porque NAS puede publicarse antes de tener la suscripción
-   (`daemon.cpp:455-469`).
+   (`daemon.cpp:493-507`).
 8. **IPA: endpoint y tuberías** (ioctl, sección 3.2): `GET_EPID` (3) y
-   `GET_EP_PAIR` (0x10) sobre `rmnet_ipa0` (`daemon.cpp:470`).
+   `GET_EP_PAIR` (0x10) sobre `rmnet_ipa0` (`daemon.cpp:508`).
 9. **DPM 0x20 Open Port**, TLV 0x11 (hardware data ports): cuenta 1,
    `ep_type=4` (embedded), `iface_id` = EPID, y las dos tuberías de
-   `GET_EP_PAIR` (`daemon.cpp:471-473`).
+   `GET_EP_PAIR` (`daemon.cpp:509-511`).
 10. **WDA 0x20 Set Data Format** (sección 3.3) y comprobación de lo negociado
-    (`daemon.cpp:474-484`).
+    (`daemon.cpp:512-522`).
 11. **WDS 0xA2 Bind Mux Data Port**: TLV 0x10 = `{ep_type 4, iface_id}`,
-    TLV 0x11 = mux id `1` (`daemon.cpp:485`).
-12. **WDS 0x4D Set IP Family**: `4` (IPv4) (`daemon.cpp:486`).
+    TLV 0x11 = mux id `1` (`daemon.cpp:523`).
+12. **WDS 0x4D Set IP Family**: `4` (IPv4) (`daemon.cpp:524`).
 13. **APN**: si la UI no da ninguno, WDS 0x85 Get LTE Attach Parameters y se usa
     el TLV 0x10 si solo tiene `[A-Za-z0-9.-_]` y ≤ 100 bytes. Con Claro EC
-    devuelve `ba.amx` (`daemon.cpp:487-500`, `docs/TESTING.md:92`).
+    devuelve `ba.amx` (`daemon.cpp:525-538`, `docs/TESTING.md:92`).
 14. **WDS 0x20 Start Network**: TLV 0x14 = APN, TLV 0x19 = `4` (IPv4), timeout
     45 s. El TLV 0x01 de la respuesta es el *packet data handle*
-    (`daemon.cpp:501-504`). Si falla, el error incluye el TLV 0x11
+    (`daemon.cpp:539-542`). Si falla, el error incluye el TLV 0x11
     (*call end reason*) (`qmi.hpp:123-126`).
 15. **WDS 0x2D Get Runtime Settings**, máscara `0x2310` (DNS, IP, gateway, MTU).
     TLVs leídos: 0x1E IPv4, 0x20 gateway, 0x21 máscara, 0x15/0x16 DNS 1/2,
     0x29 MTU. Faltan IP, gateway o DNS 1 → error; sin DNS 2 → se repite el
-    DNS 1; MTU por defecto 1500, válida entre 576 y 9000 (`daemon.cpp:505-511`).
-16. Plano de datos e IP (sección 3) (`daemon.cpp:512-521`).
-17. **Bucle conectado** cada ~2,5 s (`daemon.cpp:527-534`): WDS 0x22 (si el
+    DNS 1; MTU por defecto 1500, válida entre 576 y 9000 (`daemon.cpp:543-549`).
+16. Plano de datos e IP (sección 3) (`daemon.cpp:550-559`).
+17. **Bucle conectado** cada ~2,5 s (`daemon.cpp:565-572`): WDS 0x22 (si el
     TLV 0x01 no es `2` = conectado → "The mobile network disconnected") y
     `Signal()`: NAS 0x24 (registro, RAT y operador), NAS 0x4D (TLV 0x4A, NR
     disponible) y NAS 0x4F (dBm: 0x14 RSRP en LTE, 0x17 en NR, 0x13 WCDMA,
-    0x12 GSM) (`daemon.cpp:369-412`).
+    0x12 GSM) (`daemon.cpp:406-449`).
 
-### 2.4 Desconexión (`Stop()`, `daemon.cpp:536-547`)
+### 2.4 Desconexión (`Stop()`, `daemon.cpp:574-585`)
 
 1. Para el hilo de rutas/DNS.
 2. **WDS 0x21 Stop Network** con TLV 0x01 = handle.
 3. Restaura `/etc/resolv.conf` y `net.dns1/2` (solo si siguen siendo los suyos)
-   (`daemon.cpp:343-354`).
+   (`daemon.cpp:380-391`).
 4. `ip link del rmnet_aera` (al borrar el enlace se va su ruta).
 5. Cierra los clientes QMI y el lease.
 
 El módem **no** se apaga (sigue compartido con el Wi-Fi) y las tuberías IPA no
 se desmontan (sección 3.4). Si la sesión ya había llegado a conectarse y se
 cae, `Worker()` reintenta con espera exponencial de 5 a 60 s
-(`daemon.cpp:550-566`).
+(`daemon.cpp:588-604`).
 
 ### 2.5 Nombre del operador: TLV 0x12 de NAS y GSM 7 bits
 
 `Signal()` toma el TLV 0x12 (*current PLMN*) de NAS 0x24
-(`daemon.cpp:409-410`). Formato: `mcc(u16) mnc(u16) len(u8) descripción`
+(`daemon.cpp:446-447`). Formato: `mcc(u16) mnc(u16) len(u8) descripción`
 (`plmn_name.hpp:51-53`). El TLV no trae indicador de codificación: unos módems
 mandan ASCII y otros texto GSM 03.38 de 7 bits empaquetado. El SM6225 con
 Claro EC manda `43 66 50 fa 04 15 87` (`plmn_name.hpp:4-8`).
@@ -247,18 +278,18 @@ Comprobación a mano: `0x43 = 1000011` → `C`; `(0x43>>7)|(0x66<<1)&0x7f =
 
 ### 3.2 Ioctls de `rmnet_ipa0` (`RMNET_IOCTL_EXTENDED` = `0x89FD`)
 
-`Ipa()` envía un `std::array<uint32_t,6>` por `ifr_data` (`daemon.cpp:130-139`).
+`Ipa()` envía un `std::array<uint32_t,6>` por `ifr_data` (`daemon.cpp:133-142`).
 Comandos usados:
 
 | Cmd | Nombre (msm_rmnet.h) | Uso |
 |---|---|---|
-| 3 | `GET_EPID` | ID del endpoint para DPM, WDA y WDS 0xA2 (`daemon.cpp:470`) |
-| 0x10 | `GET_EP_PAIR` | Tuberías consumidor/productor para DPM (`daemon.cpp:470-473`) |
-| 6 | `SET_EGRESS_DATA_FORMAT` | `0x0e` = MAP \| AGGREGATION \| MUXING (`daemon.cpp:516`) |
-| 7 | `SET_INGRESS_DATA_FORMAT` | `0x2e` = MAP \| DEAGGREGATION \| DEMUXING \| AGG_DATA, con 16384 bytes y 32 datagramas (`daemon.cpp:516`) |
-| 5 | `ADD_MUX_CHANNEL` | mux id 1 → `rmnet_aera` (`daemon.cpp:519`) |
+| 3 | `GET_EPID` | ID del endpoint para DPM, WDA y WDS 0xA2 (`daemon.cpp:508`) |
+| 0x10 | `GET_EP_PAIR` | Tuberías consumidor/productor para DPM (`daemon.cpp:508-511`) |
+| 6 | `SET_EGRESS_DATA_FORMAT` | `0x0e` = MAP \| AGGREGATION \| MUXING (`daemon.cpp:554`) |
+| 7 | `SET_INGRESS_DATA_FORMAT` | `0x2e` = MAP \| DEAGGREGATION \| DEMUXING \| AGG_DATA, con 16384 bytes y 32 datagramas (`daemon.cpp:554`) |
+| 5 | `ADD_MUX_CHANNEL` | mux id 1 → `rmnet_aera` (`daemon.cpp:557`) |
 
-Los errores nombran el comando y el `errno` (`daemon.cpp:135-137`).
+Los errores nombran el comando y el `errno` (`daemon.cpp:138-140`).
 
 ### 3.3 Formato de datos (WDA) y `DataFormat{5, 0x1, 0x0e, 0x2e}`
 
@@ -267,11 +298,11 @@ Los errores nombran el comando y el `errno` (`daemon.cpp:135-137`).
 | Campo | Valor | Dónde se usa |
 |---|---|---|
 | `aggregation` | `5` = QMAP | TLV 0x12 (UL) y 0x13 (DL) de WDA 0x20 |
-| `rmnet_flags` | `0x00000001` = `RMNET_FLAGS_INGRESS_DEAGGREGATION` | `IFLA_RMNET_FLAGS` del enlace (`daemon.cpp:153`) |
+| `rmnet_flags` | `0x00000001` = `RMNET_FLAGS_INGRESS_DEAGGREGATION` | `IFLA_RMNET_FLAGS` del enlace (`daemon.cpp:156`) |
 | `ipa_egress` | `0x0e` | ioctl 6 |
 | `ipa_ingress` | `0x2e` | ioctl 7 |
 
-Petición WDA 0x20 (`daemon.cpp:475-478`):
+Petición WDA 0x20 (`daemon.cpp:513-516`):
 
 | TLV | Valor | Significado |
 |---|---|---|
@@ -287,7 +318,7 @@ Petición WDA 0x20 (`daemon.cpp:475-478`):
 
 Después se exige que la respuesta repita 0x11 = 2, 0x12 = 5 y 0x13 = 5; si no,
 falla con `Unsupported modem data format (field N=valor)`, donde N va en
-decimal (18 = TLV 0x12, UL) (`daemon.cpp:479-484`).
+decimal (18 = TLV 0x12, UL) (`daemon.cpp:517-522`).
 
 **Por qué no QMAPv5.** El proveedor oficial (SM8850) usa QMAPv5 (agregación
 `9`) con offload de checksum. El módem del SM6225 solo negocia QMAP v1: si se
@@ -308,30 +339,30 @@ commit `8732bc8`).
 
 Solución: los ioctls 6 y 7 solo se envían si no existe
 `/tmp/aera-cellular/ipa-format-configured`, y después se crea esa marca
-(`daemon.cpp:515-518`, `spes_platform.hpp:53-58`). Está en RAM, así que
+(`daemon.cpp:553-556`, `spes_platform.hpp:53-58`). Está en RAM, así que
 desaparece al reiniciar, igual que las tuberías. `ADD_MUX_CHANNEL` (5) sí se
-envía en cada conexión (`daemon.cpp:519`). Verificado: tres ciclos seguidos
+envía en cada conexión (`daemon.cpp:557`). Verificado: tres ciclos seguidos
 (`docs/TESTING.md:91`).
 
-### 3.5 Enlace rmnet, IP, rutas y DNS (`daemon.cpp:512-521`)
+### 3.5 Enlace rmnet, IP, rutas y DNS (`daemon.cpp:550-559`)
 
 1. `CreateLink()`: `RTM_NEWLINK` con `IFLA_LINK = rmnet_ipa0`,
    `IFLA_IFNAME = rmnet_aera`, `IFLA_LINKINFO{kind "rmnet", data{IFLA_RMNET_MUX_ID=1,
-   IFLA_RMNET_FLAGS={0x1, 0xffffffff}}}` (`daemon.cpp:146-171`). Equivale a
+   IFLA_RMNET_FLAGS={0x1, 0xffffffff}}}` (`daemon.cpp:149-174`). Equivale a
    `ip link add link rmnet_ipa0 name rmnet_aera type rmnet mux_id 1`.
 2. `ip link set rmnet_ipa0 up`; `ip link set rmnet_aera mtu <MTU> up`.
-3. `ip addr add <IP>/<prefijo de la máscara> dev rmnet_aera` (`daemon.cpp:177-182`).
+3. `ip addr add <IP>/<prefijo de la máscara> dev rmnet_aera` (`daemon.cpp:180-185`).
 4. Ioctls 6/7 (solo la primera vez) y 5 (sección 3.4).
 5. `ip route add default via <gateway> dev rmnet_aera metric 900`
-   (`daemon.cpp:520`). La métrica alta deja preferida la ruta del Wi-Fi.
-6. DNS (`daemon.cpp:308-342`): si `wlan0` tiene portadora, IP y ruta por
+   (`daemon.cpp:558`). La métrica alta deja preferida la ruta del Wi-Fi.
+6. DNS (`daemon.cpp:345-379`): si `wlan0` tiene portadora, IP y ruta por
    defecto, se usan los DNS del Wi-Fi. Si no, se borra cualquier ruta por
    defecto de un `wlan0` sin portadora, se escribe `/etc/resolv.conf` con los
    DNS del operador (solo si está en tmpfs/ramfs) y `net.dns1/2`. Un hilo lo
-   vuelve a evaluar cada 250 ms (`daemon.cpp:355-368`).
+   vuelve a evaluar cada 250 ms (`daemon.cpp:392-405`).
 
 Todo es IPv4: la familia es 4 en WDS 0x4D y en Start Network
-(`daemon.cpp:486`, `:493`). **No hay IPv6.**
+(`daemon.cpp:524`, `:531`). **No hay IPv6.**
 
 ---
 
@@ -343,14 +374,16 @@ Todo es IPv4: la familia es 4 en WDS 0x4D y en Start Network
 | 2 | El oficial arranca el módem con remoteproc y sus propios ayudantes de RAM | En spes el MPSS ya lo levanta la pila Wi-Fi (el firmware WLAN corre en el módem) | Reutilizar esa preparación con `spes.modem.up`; el módem queda compartido | `spes_platform.hpp:5-14`, `init.recovery.wifi.rc:21-25` |
 | 3 | `Unsupported modem data format (field 18=…)` | El SM6225 solo negocia QMAP v1 | `kDataFormat{5, 0x1, 0x0e, 0x2e}` | `spes_platform.hpp:37-47` |
 | 4 | Nombre del operador ilegible ("CFP◆◆") | El TLV 0x12 de NAS viene en GSM 7 bits empaquetado | `plmn_name.hpp` | commit `8732bc8`, `docs/KNOWN_ISSUES.md:70` |
-| 5 | La segunda conexión fallaba (ioctl 6, EINVAL) | `rmnet_ipa3` acepta los formatos IPA una sola vez por arranque | Marca en RAM `ipa-format-configured` | `spes_platform.hpp:49-58`, `daemon.cpp:515-518` |
+| 5 | La segunda conexión fallaba (ioctl 6, EINVAL) | `rmnet_ipa3` acepta los formatos IPA una sola vez por arranque | Marca en RAM `ipa-format-configured` | `spes_platform.hpp:49-58`, `daemon.cpp:553-556` |
 | 6 | "No disponible" tras cada reinicio | `Capability()` exigía `rmnet_ipa0`, que solo aparece al cargar `ipa_fws`, después de arrancar el proveedor | El chequeo de `rmnet_ipa0` pasa a `Start()`, tras preparar el módem | `spes_platform.hpp:100-103`, `:135-136`, commit `123f8d7` |
 | 7 | Textos sin traducir | La pantalla de datos no estaba en el catálogo de AERA | Parche `0007` (57 entradas en/es/zh) | commit `123f8d7` |
 | 8 | Daemons parados por AERA tras sideload/flasheo → "Root PD crashed" | Corrían desde el `vendor` montado (partición dinámica) | Copia en RAM `/tmp/spes_vendor` | `spes-wlan-up.sh:10-12`, `docs/KNOWN_ISSUES.md:46` |
 | 9 | El WLAN no probaba (`-EFAULT`, `ipa3_uc_reg_rdyCB bad parm`) | IPA sin firmware | Cargar `ipa_fws` con `echo 1 > /dev/ipa` | `spes-wlan-up.sh:63-76` |
 | 10 | `pm-service` no se registra en recovery | No hay contextos de servicio del vendor en el `vndservicemanager` | Mantener abierto `/dev/subsys_modem` | `spes-modem-hold.sh`, `docs/KNOWN_ISSUES.md:40` |
 | 11 | No se puede mostrar el número de teléfono | DMS Get MSISDN responde error 16 `NOT_PROVISIONED`; la SIM de Claro no lo guarda | Ninguna (es la SIM) | `docs/KNOWN_ISSUES.md:71` |
-| 12 | Con los datos activados antes que el Wi-Fi: "QMI error 52 (request 46) [service 2]" | El módem lo arranca el proveedor y DMS aún no acepta *Set Operating Mode* (`DEVICE_NOT_READY`); con el Wi-Fi antes, el módem ya estaba listo | Reintento de DMS 0x2E solo con el error 52 | `daemon.cpp:428-435`, commit `978f985` |
+| 12 | Con los datos activados antes que el Wi-Fi: "QMI error 52 (request 46) [service 2]" | El módem lo arranca el proveedor y DMS aún no acepta *Set Operating Mode* (`DEVICE_NOT_READY`); con el Wi-Fi antes, el módem ya estaba listo | Reintento de DMS 0x2E solo con el error 52 | `daemon.cpp:465-472`, commit `978f985` |
+| 13 | SIM 2: "The selected data SIM has no provisioning application"; luego, sin red en ninguna SIM | Sin el *stack* de radio de Android nadie rellena las sesiones de aprovisionamiento del módem | UIM 0x38 en las sesiones vacías (`ProvisionSims`) | `daemon.cpp:222-234`, `sim_session.hpp` |
+| 14 | Con la SIM 2 elegida, los datos salían por la SIM 1 (misma IP privada) | Los datos siguen la DDS del módem, no la vinculación de WDS | DSD 0x4E *Switch DDS* y espera a DSD 0x4F (`SelectDataSubscription`) | `daemon.cpp:236-252` |
 
 ---
 
@@ -389,6 +422,7 @@ medido sirve para validar · **No aplica**.
 | `daemon.cpp` como programa | No aplica tal cual: depende de AERA (`aera_mobile/client.hpp`, propiedades de Android, `/sbin/busybox ip`, lease). La lógica sí se puede portar | No aplica (ModemManager) |
 | Decodificación GSM 7 bits (`plmn_name.hpp`) | Referencia: ModemManager/libqmi deberían decodificar el TLV 0x12. Si `mmcli -m 0` muestra el operador como basura, este es el caso y la solución | Igual. El fichero es genérico y sin dependencias |
 | `sim.hpp` (estados UIM, PIN) | Referencia; MM lo resuelve | Referencia |
+| Dual SIM: sesiones UIM y DDS (`sim_session.hpp`, pasos 6 y 6b) | Útil sin el *stack* de radio de Android: con dos SIM, la segunda (o la que Android dejó inactiva) queda sin sesión y los datos siguen la DDS. Las sesiones se activan con `qmicli -d qrtr://0 --uim-change-provisioning-session=...`; el cambio de DDS es DSD 0x4E/0x4F, que libqmi no expone **[sin verificar en pmOS]** | Igual: depende del módem, no del kernel |
 
 ### 5.3 Plano de datos
 
@@ -425,7 +459,6 @@ medido sirve para validar · **No aplica**.
 
 - SIM con PIN (el código existe; no se probó con una SIM bloqueada).
 - PUK, SIM bloqueada, ausencia de SIM.
-- Cambio entre las dos SIM (`subscription` 1/2) y la SIM 2 en general.
 - Conexión automática al arrancar (siempre se conectó desde la interfaz).
 - IPv6 (no está implementado: solo IPv4).
 - Roaming, otros operadores, 3G/2G y 5G (el SM6225 no tiene 5G; el código de
