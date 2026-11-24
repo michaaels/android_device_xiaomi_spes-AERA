@@ -63,8 +63,8 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 | Servicios (logd, keystore2, qseecomd, keymaster 4.1, gatekeeper 1.0, boot 1.2, health 2.1) | PASS, 0 aborts | NOT TESTED | `hw-aera-services-decrypt.txt` |
 | Detección de particiones | PASS | NOT TESTED | todas las de `twrp.flags` y las lógicas `_a` (`recovery.log`) |
 | Descifrado con PIN | PASS (b25) | NOT TESTED | "User 0 Decrypted Successfully", `/data` en dm-default-key y `/data/media/0` legible (`hw-aera-recovery-log-decrypt.txt`) |
-| Descifrado sin contraseña | NOT TESTED | NOT TESTED | requiere un dispositivo sin bloqueo |
-| Descifrado con patrón | NOT TESTED | NOT TESTED | el dispositivo de pruebas usa PIN |
+| Descifrado sin contraseña | PASS (b41) | NOT TESTED | bloqueo "Ninguno" en Android (`CredentialType: NONE`): AERA descifra solo, sin pedir nada; "User 0 Decrypted Successfully" y `/data/media/0` legible |
+| Descifrado con patrón | PASS (b41) | NOT TESTED | bloqueo con patrón en Android: "password type: pattern", el usuario dibujó el patrón y "User 0 Decrypted Successfully"; `/data` montado (dm-default-key) y `/data/media/0` legible |
 | Credencial incorrecta | PASS | NOT TESTED | la interfaz muestra "That credential did not unlock data. Please try again."; en el log, `GateKeeper response error` → `Failed to decrypt user 0`, y `/data/media/0` sigue con nombres cifrados |
 | Cancelar el desbloqueo (Omitir) | PASS (con `AERA_UI_ADAPTIVE_RESOLUTION`) | NOT TESTED | sin él, el teclado tapaba el botón; con él, entra al menú y los datos siguen cifrados |
 | Claves de Android intactas tras descifrar en AERA | PASS | | el usuario desbloqueó Android con su PIN tras la sesión de AERA y confirmó que apps y fotos están bien (2026-11-20); por código, las claves actualizadas se escriben solo en `/tmp` |
@@ -109,7 +109,7 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 | AERA Browser: descarga `blob:` (botón "Download" de un archivo en GitHub) | FAIL (b35) | | no descarga nada; el worker precompilado del plugin ignora `blob:` (`KNOWN_ISSUES.md`); aportación futura para upstream |
 | Root Manager | N/A | | no disponible con el kernel 4.19 no GKI (`KNOWN_ISSUES.md`) |
 
-**Nivel alcanzado:** compila ✔ · arranca ✔ · funciona ✔ en pantalla, táctil, rotación, linterna, ADB, MTP, sideload, backup por ADB, particiones, descifrado con PIN, Wi-Fi, plugins, PC Connection, fastbootd y vuelta a Android. Además: datos móviles (4G, también con doble SIM), OTG, AERA Browser y vibración (motor y respuesta háptica). **No validado aún:** restore desde AERA, descifrado sin bloqueo o con patrón, SIM con PIN, SIM insertada en caliente, spesn y la instalación permanente. **No funciona:** descargas `blob:` en AERA Browser (upstream). El port sigue siendo EXPERIMENTAL.
+**Nivel alcanzado:** compila ✔ · arranca ✔ · funciona ✔ en pantalla, táctil, rotación, linterna, ADB, MTP, sideload, backup por ADB, particiones, descifrado con PIN, patrón y sin bloqueo, Wi-Fi, plugins, PC Connection, fastbootd y vuelta a Android. Además: datos móviles (4G, también con doble SIM), OTG, AERA Browser y vibración (motor y respuesta háptica). **No validado aún:** restore desde AERA, SIM con PIN, SIM insertada en caliente, spesn y la instalación permanente. **No funciona:** descargas `blob:` en AERA Browser (upstream). El port sigue siendo EXPERIMENTAL.
 
 ## Registro de ejecuciones
 
@@ -133,3 +133,4 @@ Dispositivo: spes, SKU `k7t` (2201117TG), bootloader desbloqueado, slot `a`, Evo
 - 2026-11-23: `build40-dds-wait` (SHA-256 `bbd335c1242f18b82702e3f596517d95dd3f10462a3e2f68afc614c44e926bef`) → dual SIM: el proveedor rellena las sesiones UIM vacías y mueve la DDS (DSD 0x4E) a la SIM elegida, esperando a DSD 0x4F. SIM 1 ↔ SIM 2 sin reiniciar, cada una con su IP privada y ping: PASS. (b38 y b39 fueron pasos intermedios: b39 no veía la confirmación de la DDS por un error de código, corregido en b40.)
 - 2026-11-23: `build41-private-ip` (SHA-256 `18817b760f53f118fc50bf40b163851054eebf46762f6800304b6dfce764bc67`) → parche `0010`: el detalle de conexión de datos móviles muestra la IPv4 privada; vista por el usuario al cambiar de SIM: PASS.
 - 2026-11-23: `build41-private-ip` → conexión automática de datos al arrancar (SIM 2, tras descifrar): PASS.
+- 2026-11-23: `build41-private-ip` → descifrado con patrón: PASS. Descifrado sin bloqueo (descifra solo): PASS. El usuario cambió el bloqueo en Android para cada prueba y luego volvió a su PIN.
