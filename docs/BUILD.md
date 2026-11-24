@@ -13,11 +13,11 @@ En este equipo el único Linux nativo es `/`, con 38 GB libres. Por eso las fuen
 
 ```bash
 # 1. Imagen ext4 (asignada escribiendo ceros con dd; fallocate falla en ntfs3)
-dd if=/dev/zero of=/mnt/2E6421A46421702F/aera_source/aera_src.ext4 bs=64M count=2240 status=progress conv=fsync
-mkfs.ext4 -L aera_src -m 0 /mnt/2E6421A46421702F/aera_source/aera_src.ext4
+dd if=/dev/zero of="$AERA_STORE"/aera_src.ext4 bs=64M count=2240 status=progress conv=fsync
+mkfs.ext4 -L aera_src -m 0 "$AERA_STORE"/aera_src.ext4
 
 # 2. Contenedor (Ubuntu 24.04). --privileged solo se usa para el losetup de esa imagen
-tools/docker/run.sh
+AERA_STORE=/ruta/con/espacio tools/docker/run.sh
 
 # 3. Shell de build
 docker exec -it -u builder -w /src aera-spes bash

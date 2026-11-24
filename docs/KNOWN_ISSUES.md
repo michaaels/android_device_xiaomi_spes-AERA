@@ -75,7 +75,3 @@
 - Audio: fuera de alcance.
 - Plugins (SSH/SFTP, MCP Bridge, AI Diagnostics): etapa 2, no se implementan.
 
-## Entorno de build
-
-- El volumen NTFS `/mnt/2E6421A46421702F` tiene una entrada corrupta (`aera_source/aera.ext4`) que dejó un `fallocate` fallido de ntfs3. Se repara con `chkdsk /f` desde Windows.
-- Ethernet `enp129s0` (host): a veces NetworkManager no instala las rutas IPv4 aunque el DHCP sí entrega la puerta de enlace (`routers = 192.168.100.1`). Ocurre cuando la concesión llega después de que la conexión ya figura como activada (`acd pending`). Sin ruta por defecto ni ruta `/24` en `enp129s0`, el IPv4 sale por Wi-Fi; el IPv6 no se ve afectado. Se comprueba con `ip route get 1.1.1.1`. `nmcli device reapply` no basta; se corrige reactivando la conexión con `nmcli con up "Conexión cableada 1"`. Puede repetirse tras reiniciar o reconectar el cable (verificado el 2026-11-20).

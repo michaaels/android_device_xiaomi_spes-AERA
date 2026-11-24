@@ -6,8 +6,9 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TREE="$(cd "$HERE/../.." && pwd)"
-STORE="${AERA_STORE:-/mnt/2E6421A46421702F/aera_source}"
 IMAGE_FILE="${AERA_IMAGE_FILE:-aera_src.ext4}"
+# AERA_STORE: host directory that holds the ext4 source image (see docs/BUILD.md).
+STORE="${AERA_STORE:?set AERA_STORE to the directory that holds $IMAGE_FILE}"
 
 docker build -t aera-spes-build:24.04 \
     --build-arg USER_UID="$(id -u)" --build-arg USER_GID="$(id -g)" "$HERE"
