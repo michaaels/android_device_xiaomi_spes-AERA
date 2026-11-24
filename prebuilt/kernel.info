@@ -9,3 +9,4 @@ header: os version: 16.0.0
 header: os patch level: 2026-08
 header: boot image header version: 3
 header: command line args: 
+kernel_source=https://github.com/Evolution-X-Devices/kernel_xiaomi_sm6225/commit/cfe9fb687febaf32b2e237518604edd9867a0cee
