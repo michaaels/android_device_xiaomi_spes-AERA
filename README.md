@@ -1,14 +1,17 @@
-# AERA Recovery Project device tree for Xiaomi Redmi Note 11 / 11 NFC
+# AERA Recovery Project device tree for Xiaomi Redmi Note 11
 
-Device codename: `spes` / `spesn` (one image; the variant is detected from
-`ro.boot.product.hardware.sku`)
+Device codename: `spes`
+
+The image also detects the Redmi Note 11 NFC (`spesn`), which shares the
+board, from `ro.boot.product.hardware.sku`, but that variant is untested and
+not claimed as supported.
 
 Platform: Qualcomm SM6225 (`bengal`, Snapdragon 680), Adreno 610
 Boot layout: A/B with Virtual A/B, boot header v3 + `vendor_boot`, recovery
 inside `boot` (no recovery partition)
 
 Maintainer: Michael Xavier. Status: **beta, unofficial**: tested on one
-`spes` (2201117TG); `spesn` is untested.
+`spes` (2201117TG).
 
 ## Hardware support
 
@@ -25,8 +28,7 @@ Verified on hardware (details and evidence in [docs/TESTING.md](docs/TESTING.md)
 - PC Connection, plugin store and AERA Browser (Zink on Adreno 610)
 - Permanent installation into `boot` with the installed kernel kept
 
-Not available: Root Manager (non-GKI 4.19 kernel). Untested: SIM PIN entry,
-`spesn`.
+Not available: Root Manager (non-GKI 4.19 kernel). Untested: SIM PIN entry.
 
 ## Build
 
