@@ -11,9 +11,12 @@
 // the IPA pipe formats are set once per boot (rmnet_ipa3 rejects a second set).
 // The operator name is decoded by plmn_name.hpp (ASCII or GSM 7-bit packed).
 // DMS Set Operating Mode is retried while a freshly booted modem is not ready.
+// Dual SIM: empty provisioning sessions are filled and the default data
+// subscription follows the selected SIM (sim_session.hpp).
 #include "aera_mobile/client.hpp"
 #include "qmi.hpp"
 #include "sim.hpp"
+#include "sim_session.hpp"
 #include "spes_platform.hpp"
 #include "plmn_name.hpp"
 #include <openssl/sha.h>
@@ -214,12 +217,46 @@ struct Session {
       out[entry.first]=SimIdentity(entry.second);
     return out;
   }
+  // The primary session is needed for any registration, the secondary one for
+  // subscription 2 (sim_session.hpp). Sessions already in use are kept.
+  void ProvisionSims(QmiClient &uim,int subscription) {
+    auto sessions=ParseSimSessions(Field(uim.Call(0x2f,{},5,&cancel),0x10));
+    for(const uint8_t session:{kPrimaryGwSession,kSecondaryGwSession}) {
+      if(session==kSecondaryGwSession&&subscription!=2)break;
+      if((session==kPrimaryGwSession?sessions.primary:sessions.secondary)!=kNoSession)continue;
+      // No usable slot: WaitForSim reports the selected SIM as missing.
+      const unsigned slot=SlotForSession(sessions,session);
+      if(!slot)continue;
+      uim.Call(0x38,ProvisionRequest(session,*GwApplication(sessions,slot)),10,&cancel);
+      sessions=ParseSimSessions(Field(uim.Call(0x2f,{},5,&cancel),0x10));
+    }
+  }
+  // Data comes up on the modem's default data subscription whatever WDS is
+  // bound to (sim_session.hpp). Modems without DSD have a single subscription.
+  void SelectDataSubscription(const std::vector<Endpoint> &endpoints,uint32_t node,int subscription) {
+    Endpoint dsd;
+    try{dsd=Find(endpoints,42,node);}catch(const std::exception &){return;}
+    Bytes request;Tlv(request,1,Words({static_cast<uint32_t>(subscription)}));
+    QmiClient client(dsd);
+    try {
+      client.Call(0x4e,request,10,&cancel);
+      // The switch completes asynchronously, and a call started before it does
+      // comes up on the previous SIM (observed on spes): wait for Get Current DDS.
+      for(int attempt=0;attempt<40;++attempt) {
+        const auto reply=client.Call(0x4f,{},5,&cancel);const auto &current=Field(reply,0x10);
+        if(current.size()==4&&U32(current.data())==static_cast<uint32_t>(subscription))return;
+        CheckModem();Delay(250);
+      }
+    }catch(const QmiError &){}
+    throw std::runtime_error("The modem did not move mobile data to the selected SIM");
+  }
   void WaitForSim(const Endpoint &endpoint,int subscription) {
     QmiClient uim(endpoint);
     std::map<unsigned,std::string> identities;
     try {
       identities=SimIdentities(uim);
     }catch(const std::exception &){CheckCancelled();}
+    ProvisionSims(uim,subscription);
     unsigned initializing=0,polls=0;
     const std::string request=std::to_string(getpid())+"-"+std::to_string(++pin_request_sequence);
     while(true) {
@@ -452,6 +489,7 @@ struct Session {
       if(value.size()==4)selected_subscription=static_cast<int>(U32(value.data()));
     }
     WaitForSim(Find(endpoints,11,nase.node),selected_subscription);
+    if(subscription)SelectDataSubscription(endpoints,nase.node,subscription);
     Phase("registering","Waiting for mobile network registration");
     bool attached=false;
     for(int attempt=0;attempt<60&&!attached;++attempt) {
