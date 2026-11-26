@@ -6,8 +6,8 @@
 #
 # Xiaomi Redmi Note 11 / Redmi Note 11 NFC (spes / spesn) - SM6225 "bengal".
 # Board values cross-checked against the stock MIUI 14 V816.0.8.0.TGCMIXM
-# vendor image and the OrangeFox fox-12.1 spes tree. See docs/HARDWARE.md for
-# the evidence behind each value and which ones still need hardware checks.
+# vendor image and the OrangeFox fox-12.1 spes tree, and verified on a spes
+# (2201117TG) running EvolutionX 16.0 11.10.
 #
 
 DEVICE_PATH := device/xiaomi/spes
@@ -66,19 +66,18 @@ BOARD_MKBOOTIMG_ARGS += --pagesize $(BOARD_KERNEL_PAGESIZE)
 # AERA's repack of the installed boot keeps the stock (empty) cmdline.
 BOARD_MKBOOTIMG_ARGS += --cmdline "twrpfastboot=1"
 
-# Ramdisk constraints, both measured on hardware (docs/evidence/hw-abl-ramdisk-limit.txt):
+# Ramdisk constraints, both measured on hardware:
 # 1. LZ4 is mandatory: the bootloader concatenates the installed vendor_boot
 #    ramdisk (LZ4 legacy) with this one, and the kernel's LZ4 legacy decoder
 #    has no end marker, so a gzip boot ramdisk fails with "rootfs image is not
 #    initramfs (Decoding failed)" and init never runs.
 # 2. Size: the bootloader accepts `fastboot boot` but never starts the kernel
 #    when the ramdisk is >= 42.4 MB; 41.5 MB boots with either kernel, so the
-#    limit is on the ramdisk alone (consistent with 40 MiB). Keep it <= 40 MB;
-#    tools/validate-tree.sh enforces this.
+#    limit is on the ramdisk alone (consistent with 40 MiB). Keep it <= 40 MB.
 BOARD_RAMDISK_USE_LZ4 := true
 
 ifeq ($(wildcard $(TARGET_PREBUILT_KERNEL)),)
-  $(error spes: $(TARGET_PREBUILT_KERNEL) is missing. Extract it from the stock boot.img of the installed firmware with tools/extract-stock-kernel.sh (see docs/BUILD.md))
+  $(error spes: $(TARGET_PREBUILT_KERNEL) is missing. Extract it from the stock boot.img of the installed firmware with tools/extract-stock-kernel.sh)
 endif
 
 # Recovery-in-boot (no dedicated recovery partition on spes)
@@ -195,7 +194,7 @@ AERA_EXTRA_LANGUAGES := true
 AERA_DEFAULT_LANGUAGE := en
 
 # Ramdisk size: the spes bootloader does not start a ramdisk larger than
-# ~41.5 MB (docs/evidence/hw-abl-ramdisk-limit.txt). Use AERA's own mechanism
+# ~41.5 MB (see above). Use AERA's own mechanism
 # (also used by official trees with 4.19 kernels): XZ-pack the recovery runtime
 # inside the ramdisk; early init unpacks it into RAM.
 AERA_USE_EXTREME_COMPRESSION := 1

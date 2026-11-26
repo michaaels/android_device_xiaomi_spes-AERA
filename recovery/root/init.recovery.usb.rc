@@ -8,8 +8,8 @@
 # the UDC for sys.usb.config=adb|sideload|fastboot. This file must NOT handle
 # those states again: a second handler unlinking/relinking functions and
 # rewriting UDC made both handlers re-fire on every adbd restart, leaving the
-# gadget unbound (UDC empty) and init busy (observed on hardware,
-# docs/evidence/pstore-aera-diag). Here we only:
+# gadget unbound (UDC empty) and init busy (observed on hardware in the
+# pstore console log). Here we only:
 #   - select the configfs path, and
 #   - add the MTP function, which the base init.rc does not provide.
 
